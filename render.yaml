@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: midnight-zombies
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev --cache /tmp/midnight-npm --no-audit --no-fund
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
