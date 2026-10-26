@@ -4,7 +4,7 @@ const E = require("../engine");
 const { awardLevel } = require("../public/progression");
 test("levels add variety while shortening timers and improving rivals", () => {
   const counts = E.LEVELS.map((l) => new Set(l.kinds).size);
-  assert.deepEqual(counts, [3, 4, 5, 6]);
+  assert.deepEqual(counts, [4, 8, 10, 12]);
   for (let i = 0; i < 4; i++) {
     const level = E.LEVELS[i];
     for (let r = 0; r < 18; r++) {

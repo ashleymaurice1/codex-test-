@@ -39,8 +39,8 @@ test("wrong, repeated and stale answers cannot advance the player", () => {
     null,
   );
 });
-test("all six challenge types have valid targets and candle rejects an early tap", () => {
-  for (let i = 0; i < 6; i++) {
+test("all twelve challenge types have valid targets and candle rejects an early tap", () => {
+  for (let i = 0; i < 12; i++) {
     const { p, r } = setup(i);
     assert.ok(r.challenge.answer.length);
     assert.ok(r.challenge.answer.every((n) => n < r.challenge.choices.length));
@@ -128,7 +128,7 @@ test("Sunrise blinds the leader while Arm Toss hits the racer immediately ahead"
 });
 test("rival bots use boosts and save targeted attacks until a racer is ahead", () => {
   const { p, r } = setup();
-  const bot = E.player("Pumpkin Pete", 3, "Ember", true);
+  const bot = E.player("Ember", 2, "Ember", true);
   bot.progress = 50;
   r.players.push(bot);
   bot.item = "Sugar Rush";
@@ -141,4 +141,22 @@ test("rival bots use boosts and save targeted attacks until a racer is ahead", (
   assert.equal(E.botWantsItem(r, bot), true);
   bot.finish = 1500;
   assert.equal(E.botWantsItem(r, bot), false);
+});
+test("first level finishes in five easy correct taps and introduces items later", () => {
+  const p = E.player("Learner", 0, "Mach"),
+    r = { phase: "race", players: [p], level: 0 };
+  for (let i = 0; i < 5; i++) {
+    r.challenge = E.challenge(i, 1000 + i * 3000, () => 0.5, 0);
+    E.answer(
+      r,
+      p,
+      r.challenge.id,
+      r.challenge.answer[0],
+      r.challenge.opens + 800,
+    );
+    if (i < 4) assert.ok(p.progress < 100);
+    assert.equal(p.item, null);
+  }
+  assert.equal(p.progress, 100);
+  assert.ok(p.finish);
 });

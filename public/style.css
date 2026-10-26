@@ -1301,7 +1301,7 @@ body {
   box-shadow: 0 15px 60px #0003;
 }
 .cinematic-landscape {
-  background-image: url("/assets/midnight-village.webp");
+  background-image: url("/assets/moonlit-woodland.webp");
   background-size: cover;
   background-position: center 38%;
   pointer-events: none;
@@ -1994,5 +1994,188 @@ input {
 @media (max-width: 700px) {
   .bottom-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+.chosen-spirit {
+  border: 1px solid #b8d4ff22;
+  border-radius: 12px;
+  background: #111d2c;
+  padding: 18px 21px;
+}
+.chosen-spirit-preview {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.chosen-spirit-preview .racer-art {
+  width: 180px;
+  height: 135px;
+  max-width: 45%;
+}
+.chosen-spirit-preview h3 {
+  font:
+    32px "Grenze Gotisch",
+    serif;
+  color: var(--team);
+}
+.chosen-spirit-preview p {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #a1afc2;
+}
+.chosen-spirit-preview .text-btn {
+  padding-left: 0;
+}
+.cup-total {
+  font:
+    42px "Grenze Gotisch",
+    serif;
+  color: #efb66c;
+  margin: 25px 0;
+}
+.cup-total small {
+  font:
+    9px "DM Sans",
+    sans-serif;
+  letter-spacing: 2px;
+  display: block;
+  margin-top: 7px;
+  color: #9cafc5;
+}
+.runner .playable-ghost {
+  width: 92px;
+  height: 63px;
+  filter: drop-shadow(0 0 7px #b8d4ff66);
+}
+.runner .playable-ghost.ghost-ember {
+  filter: drop-shadow(0 0 7px #f2a04e66);
+}
+.runner .racer-art.delivering {
+  animation: delivery 0.7s ease-in-out;
+}
+.playable-ghost .ghost-costume {
+  left: 73%;
+  top: 10%;
+}
+.playable-ghost.ghost-misty .ghost-costume {
+  left: 43%;
+  top: 18%;
+}
+.playable-ghost.ghost-ember .ghost-costume {
+  left: 72%;
+  top: 1%;
+}
+.playable-ghost.broken {
+  opacity: 0.7;
+}
+.podium-place .playable-ghost {
+  height: 125px;
+  width: 100%;
+}
+.lobby-player .playable-ghost {
+  width: 75px;
+  height: 60px;
+}
+@media (max-width: 700px) {
+  .runner .playable-ghost {
+    width: 70px;
+    height: 52px;
+  }
+  .chosen-spirit {
+    padding: 18px 16px;
+  }
+  .chosen-spirit-preview {
+    gap: 10px;
+  }
+  .chosen-spirit-preview .racer-art {
+    height: 110px;
+    width: 150px;
+  }
+  .chosen-spirit-preview p {
+    font-size: 10px;
+  }
+  .chosen-spirit-preview h3 {
+    font-size: 30px;
+  }
+  .chosen-spirit-preview .text-btn {
+    font-size: 10px;
+  }
+  .podium-place .playable-ghost {
+    height: 90px;
+  }
+}
+
+.response-feedback {
+  min-height: 25px;
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b8d4ff;
+}
+.encouraging {
+  color: #b3e9b1 !important;
+}
+.gentle-nudge {
+  color: #e9c291 !important;
+}
+.candle-label {
+  display: block;
+  font:
+    700 11px "DM Sans",
+    sans-serif;
+  letter-spacing: 0.6px;
+  margin-top: 3px;
+  color: #c2cfe0;
+  white-space: nowrap;
+}
+.candle-ready {
+  color: #b3e9b1;
+}
+.level-1 .bat-target {
+  animation-duration: 3.5s;
+}
+.level-2 .bat-target {
+  animation-duration: 2.5s;
+}
+.level-3 .bat-target {
+  animation-duration: 1.8s;
+}
+.single .choice:has(.candle-label) {
+  width: 230px;
+  height: 140px;
+}
+.level-0 .choice {
+  min-height: 110px;
+}
+.level-0 .spooky-icon {
+  width: 80px;
+  height: 80px;
+}
+.level-0 .choices {
+  margin-top: 25px;
+}
+.race-panel .overlay p {
+  max-width: 350px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #c7d6e7;
+}
+@media (max-width: 700px) {
+  .race-panel {
+    padding-bottom: 12px;
+  }
+  .response-feedback {
+    font-size: 11px;
+    margin-top: 7px;
+  }
+  .level-0 .choice {
+    min-height: 96px;
+  }
+  .level-0 .spooky-icon {
+    width: 65px;
+    height: 65px;
+  }
+  .candle-label {
+    font-size: 10px;
   }
 }

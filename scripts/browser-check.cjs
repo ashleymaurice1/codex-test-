@@ -81,7 +81,18 @@ const assert = require("node:assert/strict");
               ? data.choices.indexOf(6)
               : data.kind === 5
                 ? data.choices.indexOf("ghost-odd")
-                : 0;
+                : data.kind >= 6
+                  ? data.choices.indexOf(
+                      {
+                        6: "moon",
+                        7: "potion-blue",
+                        8: "spider",
+                        9: "ghost",
+                        10: "lantern-lit",
+                        11: "candy-corn",
+                      }[data.kind],
+                    )
+                  : 0;
       const b = page.locator(`[data-action=answer][data-value="${index}"]`);
       if (await b.isEnabled()) {
         await b.click({ force: true, timeout: 1500 });
@@ -96,7 +107,7 @@ const assert = require("node:assert/strict");
   await page.screenshot({ path: "/tmp/midnight-finish.png", fullPage: true });
   const coins = await page.evaluate(() => profile.coins);
   assert.ok(coins > 200);
-  assert.equal(seen.size, 6);
+  assert.ok(seen.size >= 6, "A full race should show a varied challenge set");
   assert.equal(errors.length, 0);
   await page.reload();
   await page.waitForSelector(".result");

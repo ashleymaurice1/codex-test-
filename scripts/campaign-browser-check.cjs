@@ -63,7 +63,16 @@ const assert = require("node:assert/strict");
         await p.waitForTimeout(100);
         continue;
       }
-      const index = d.kind === 0 ? d.choices.indexOf("pumpkin") : 0;
+      const index =
+        d.kind === 0
+          ? d.choices.indexOf("pumpkin")
+          : d.kind === 6
+            ? d.choices.indexOf("moon")
+            : d.kind === 7
+              ? d.choices.indexOf("potion-blue")
+              : d.kind === 9
+                ? d.choices.indexOf("ghost")
+                : 0;
       const button = p.locator(`[data-action=answer][data-value="${index}"]`);
       if (await button.isEnabled()) {
         await button.click({ force: true });
@@ -73,7 +82,10 @@ const assert = require("node:assert/strict");
     await p.waitForTimeout(100);
   }
   await p.waitForSelector(".result");
-  assert.deepEqual([...seen].sort(), [0, 1, 2]);
+  assert.deepEqual(
+    [...seen].sort((a, b) => a - b),
+    [0, 6, 7, 9],
+  );
   assert.equal(await p.evaluate(() => profile.unlockedLevel), 1);
   assert.ok(await p.evaluate(() => profile.levelStars[0] > 0));
   await p.reload();

@@ -60,6 +60,7 @@ function snapshot(r) {
     phase: r.phase,
     bots: r.bots,
     started: r.started,
+    nextChallengeAt: r.advanceAt,
     now: Date.now(),
     challenge: c
       ? {
@@ -78,6 +79,9 @@ function snapshot(r) {
       token: undefined,
       ws: undefined,
       planned: undefined,
+      botChallenge: undefined,
+      botRound: undefined,
+      botNextAt: undefined,
     })),
     events: r.events.slice(-5),
   };
@@ -137,9 +141,7 @@ function start(r) {
       const used = r.players.map((p) => p.team);
       const team =
         E.TEAMS.find((t) => !used.includes(t)) || E.TEAMS[r.players.length % 4];
-      const racerId =
-        [0, 1, 2, 3].find((id) => !r.players.some((p) => p.racer === id)) ??
-        r.players.length % 4;
+      const racerId = E.TEAMS.indexOf(team);
       const p = E.player(E.RACERS[racerId], racerId, team, true);
       p.personality = ["fast", "steady", "average"][(r.players.length - 1) % 3];
       r.players.push(p);
@@ -148,25 +150,56 @@ function start(r) {
   r.phase = "countdown";
   r.started = Date.now() + 3000;
   r.round = -1;
+  r.advanceAt = null;
+  r.challengeOrder = [...E.LEVELS[r.level].kinds];
+  if (r.level > 0) {
+    for (let i = r.challengeOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [r.challengeOrder[i], r.challengeOrder[j]] = [
+        r.challengeOrder[j],
+        r.challengeOrder[i],
+      ];
+    }
+  }
   r.events = [];
   broadcast(r);
 }
+function planBot(r, p, now) {
+  p.planned =
+    now +
+    (p.personality === "fast"
+      ? 350 + Math.random() * 1500
+      : p.personality === "steady"
+        ? 1700 + Math.random() * 900
+        : 900 + Math.random() * 1500) *
+      E.LEVELS[r.level].botDelay;
+  p.sloppy = p.personality === "fast";
+}
 function newChallenge(r, now) {
   r.round++;
-  r.challenge = E.challenge(r.round, now, Math.random, r.level);
+  r.advanceAt = null;
+  r.challenge = E.challenge(
+    r.round,
+    now,
+    Math.random,
+    r.level,
+    r.challengeOrder,
+  );
   for (const p of r.players) {
     if (p.bot) {
-      p.planned =
-        now +
-        (p.personality === "fast"
-          ? 350 + Math.random() * 1500
-          : p.personality === "steady"
-            ? 1700 + Math.random() * 900
-            : 900 + Math.random() * 1500);
-      p.planned = now + (p.planned - now) * E.LEVELS[r.level].botDelay;
-      p.sloppy = p.personality === "fast";
-    } else if (r.round > 0 && !p.finish && p.answered !== r.previous) {
-      p.blockedUntil = Math.max(p.blockedUntil, now + 100);
+      if (r.solo) {
+        if (!p.botChallenge) {
+          p.botRound = 0;
+          p.botChallenge = E.challenge(
+            0,
+            now,
+            Math.random,
+            r.level,
+            r.challengeOrder,
+          );
+          planBot(r, p, now);
+        }
+      } else planBot(r, p, now);
     }
   }
   r.previous = r.challenge.id;
@@ -190,13 +223,44 @@ let tick = setInterval(() => {
       for (const p of r.players) {
         if (p.bot && !p.finish) {
           if (p.stones) p.stones--;
-          if (p.planned <= now && p.answered !== r.challenge.id) {
+          if (
+            r.solo &&
+            ((p.answered === p.botChallenge.id && now >= (p.botNextAt || 0)) ||
+              now > p.botChallenge.closes + 500)
+          ) {
+            p.botRound++;
+            p.botChallenge = E.challenge(
+              p.botRound,
+              now,
+              Math.random,
+              r.level,
+              r.challengeOrder,
+            );
+            planBot(r, p, now);
+          }
+          const c = r.solo ? p.botChallenge : r.challenge;
+          if (p.planned <= now && p.answered !== c.id) {
             const index =
               Math.random() < E.LEVELS[r.level].botMiss + (p.sloppy ? 0.16 : 0)
                 ? -1
-                : r.challenge.answer[0];
-            if (r.challenge.kind !== 2 || now >= r.challenge.extinguish)
-              E.answer(r, p, r.challenge.id, index, now);
+                : c.answer[0];
+            if (c.kind !== 2 || now >= c.extinguish) {
+              const ok = E.answer(
+                r.solo
+                  ? {
+                      phase: r.phase,
+                      players: r.players,
+                      challenge: c,
+                      level: r.level,
+                    }
+                  : r,
+                p,
+                c.id,
+                index,
+                now,
+              );
+              if (ok !== null && r.solo) p.botNextAt = now + 1000;
+            }
           }
           if (E.botWantsItem(r, p) && Math.random() < 0.008 + r.level * 0.006) {
             const event = E.useItem(r, p, now);
@@ -212,11 +276,16 @@ let tick = setInterval(() => {
       }
       if (now > r.challenge.closes) {
         for (const p of r.players) {
-          if (!p.finish && p.answered !== r.challenge.id) {
+          if (
+            !p.finish &&
+            !(r.solo && p.bot) &&
+            p.answered !== r.challenge.id
+          ) {
             p.answered = r.challenge.id;
             p.effect = "Stumble";
             p.blockedUntil = Math.max(p.blockedUntil, now + 1000);
-            if (!p.bot) send(p.ws, { type: "answer", ok: false });
+            if (!p.bot)
+              send(p.ws, { type: "answer", ok: false, reason: "timeout" });
           }
         }
       }
@@ -224,7 +293,21 @@ let tick = setInterval(() => {
         r.phase = "finished";
         r.ended = now;
         for (const p of r.players) p.place = E.rank(r).indexOf(p) + 1;
-      } else if (now > r.challenge.closes + 700) newChallenge(r, now);
+      } else {
+        if (
+          !r.solo &&
+          !r.advanceAt &&
+          r.players
+            .filter((p) => p.online && !p.finish)
+            .every((p) => p.answered === r.challenge.id)
+        )
+          r.advanceAt = now + 850;
+        if (
+          (r.advanceAt && now >= r.advanceAt) ||
+          now > r.challenge.closes + 700
+        )
+          newChallenge(r, now);
+      }
     }
     broadcast(r);
   }
@@ -321,7 +404,17 @@ wss.on("connection", (ws) => {
       }
       if (m.type === "answer") {
         const ok = E.answer(r, p, m.id, m.index, now);
-        if (ok !== null) send(ws, { type: "answer", ok });
+        if (ok !== null && r.solo) r.advanceAt = now + (ok ? 1000 : 1200);
+        if (ok !== null)
+          send(ws, {
+            type: "answer",
+            ok,
+            reason: ok
+              ? null
+              : r.challenge.kind === 2 && now < r.challenge.extinguish
+                ? "early"
+                : "wrong",
+          });
       }
       if (m.type === "smash" && r.phase === "race" && p.stones > 0) p.stones--;
       if (m.type === "item") {

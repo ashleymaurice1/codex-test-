@@ -47,6 +47,13 @@ test("room codes, synchronized countdown and challenges, reconnect and host tran
   assert.equal(sa.challenge.answer, undefined);
   const r = rooms.get(join.code);
   const p = r.players.find((x) => x.id === join.id);
+  if (r.challenge.kind === 2)
+    await new Promise((resolve) =>
+      setTimeout(
+        resolve,
+        Math.max(0, r.challenge.extinguish - Date.now() + 30),
+      ),
+    );
   a.sendData({
     type: "answer",
     id: r.challenge.id,
@@ -83,4 +90,45 @@ test("invalid codes, full rooms and invalid answers produce no shared-state corr
   assert.match((await extra.next((m) => m.type === "error")).message, /full/);
   extra.close();
   for (const c of clients) c.close();
+});
+test("solo answers advance promptly while rival challenge clocks remain independent", async () => {
+  const a = await client();
+  a.sendData({
+    type: "create",
+    solo: true,
+    level: 0,
+    name: "Beginner",
+    team: "Mach",
+  });
+  const join = await a.next((m) => m.type === "joined");
+  const state = await a.next((m) => m.phase === "race");
+  const room = rooms.get(join.code);
+  const original = room.challenge.id;
+  const botIds = room.players
+    .filter((p) => p.bot)
+    .map((p) => p.botChallenge.id);
+  const answeredAt = Date.now();
+  a.sendData({ type: "answer", id: original, index: room.challenge.answer[0] });
+  assert.equal((await a.next((m) => m.type === "answer")).ok, true);
+  const next = await a.next(
+    (m) => m.phase === "race" && m.challenge.id !== original,
+  );
+  assert.ok(
+    Date.now() - answeredAt < 2000,
+    "A correct tap should not wait for the full round timer",
+  );
+  assert.equal(next.challenge.kind, 6);
+  assert.deepEqual(
+    room.players.filter((p) => p.bot).map((p) => p.botChallenge.id),
+    botIds,
+  );
+  assert.ok(next.players.every((p) => !p.botChallenge));
+  assert.deepEqual(
+    next.players
+      .filter((p) => p.bot)
+      .map((p) => p.name)
+      .sort(),
+    ["Ember", "Misty", "Slink"],
+  );
+  a.close();
 });
