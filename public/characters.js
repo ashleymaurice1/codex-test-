@@ -45,7 +45,7 @@
   }
   function scan() {
     document.querySelectorAll(".ghost-animation").forEach((el) => {
-      if (nodes.has(el)) return;
+      if (nodes.has(el) || el.closest(".home-shell")) return;
       nodes.add(el);
       load(el.dataset.character)
         .then((img) => {

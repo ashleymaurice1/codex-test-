@@ -3357,3 +3357,24 @@ body.arcade-active {
     min-height: 55px;
   }
 }
+/* Home portraits keep one registered silhouette: no mismatched pose crossfades. */
+.home-shell .ghost-animation {
+  display: none !important;
+}
+.home-shell .ghost-art > img,
+.home-shell .racer-art > img {
+  opacity: 1;
+  animation: home-spirit-breath 6s ease-in-out infinite;
+  transform-origin: 50% 70%;
+}
+.home-shell .ghost-card:nth-child(2) img { animation-delay: -1.5s; }
+.home-shell .ghost-card:nth-child(3) img { animation-delay: -3s; }
+.home-shell .ghost-card:nth-child(4) img { animation-delay: -4.5s; }
+@keyframes home-spirit-breath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.008); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-shell .ghost-art > img,
+  .home-shell .racer-art > img { animation: none; }
+}
