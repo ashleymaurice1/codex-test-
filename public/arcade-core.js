@@ -1,5 +1,9 @@
 /* Original solo bonus games; pure state transitions shared with the test suite. */
 (function (root) {
+  const SCORE =
+    typeof module !== "undefined" && module.exports
+      ? require("./score")
+      : root.MidnightScore;
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   function random(seed) {
     let n = seed >>> 0;
@@ -130,16 +134,19 @@
     s.grid = makeGrid(s.stage);
     s.width = s.grid[0].length;
     s.height = s.grid.length;
-    s.player = { x: 1, y: 1 };
+    s.player = { x: 1, y: 1, px: 1, py: 1, motion: null };
     s.exit = { x: s.width - 2, y: s.height - 2 };
     s.direction = null;
     s.queuedDirection = null;
     s.moveClock = 0;
     s.enemyClock = 0;
-    s.moveInterval = 0.21;
+    s.moveInterval = Math.max(
+      0.25,
+      0.34 - s.stage * 0.018 - s.difficulty * 0.02,
+    );
     s.enemyInterval = Math.max(
       0.32,
-      0.95 - s.stage * 0.12 - s.difficulty * 0.13,
+      1.25 - s.stage * 0.15 - s.difficulty * 0.14,
     );
     s.rng = random(331 + s.stage * 71);
     const route = path(s.grid, [1, 1], [s.exit.x, s.exit.y]).slice(1, -1);
@@ -186,6 +193,10 @@
           y: cell[1],
           spawnX: cell[0],
           spawnY: cell[1],
+          px: cell[0],
+          py: cell[1],
+          fromX: cell[0],
+          fromY: cell[1],
           lastX: -1,
           lastY: -1,
           team: teams[i],
@@ -196,7 +207,34 @@
     return s;
   }
   function turnMaze(s, direction) {
-    if (DIRS[direction]) s.queuedDirection = direction;
+    const d = DIRS[direction];
+    if (!d) return;
+    s.queuedDirection = direction;
+    const m = s.player.motion;
+    if (!m) return;
+    const old = DIRS[s.direction];
+    if (old && d[0] === -old[0] && d[1] === -old[1]) {
+      s.player.motion = {
+        fromX: m.toX,
+        fromY: m.toY,
+        toX: m.fromX,
+        toY: m.fromY,
+        elapsed: s.moveInterval - m.elapsed,
+      };
+      s.direction = direction;
+    } else if (
+      m.elapsed / s.moveInterval < 0.15 &&
+      open(s, s.player.x + d[0], s.player.y + d[1])
+    ) {
+      s.player.motion = {
+        fromX: s.player.px,
+        fromY: s.player.py,
+        toX: s.player.x + d[0],
+        toY: s.player.y + d[1],
+        elapsed: 0,
+      };
+      s.direction = direction;
+    }
   }
   function open(s, x, y) {
     return s.grid[y]?.[x] === 0;
@@ -217,37 +255,65 @@
   }
   function collideMaze(s) {
     if (
-      s.enemies.some((e) => e.x === s.player.x && e.y === s.player.y) &&
+      s.enemies.some(
+        (e) =>
+          Math.hypot((e.px ?? e.x) - s.player.px, (e.py ?? e.y) - s.player.py) <
+          0.58,
+      ) &&
       hit(s)
     ) {
-      s.player.x = 1;
-      s.player.y = 1;
+      Object.assign(s.player, { x: 1, y: 1, px: 1, py: 1, motion: null });
       s.direction = null;
       s.queuedDirection = null;
-      for (const e of s.enemies) {
-        e.x = e.spawnX;
-        e.y = e.spawnY;
-      }
+      s.enemyClock = 0;
+      for (const e of s.enemies)
+        Object.assign(e, {
+          x: e.spawnX,
+          y: e.spawnY,
+          px: e.spawnX,
+          py: e.spawnY,
+          fromX: e.spawnX,
+          fromY: e.spawnY,
+        });
     }
   }
   function mazeSlice(s, dt) {
     s.elapsed += dt;
     s.invulnerable = Math.max(0, s.invulnerable - dt);
-    s.moveClock += dt;
-    s.enemyClock += dt;
-    while (s.moveClock >= s.moveInterval && s.status === "playing") {
-      s.moveClock -= s.moveInterval;
-      const q = DIRS[s.queuedDirection];
-      if (q && open(s, s.player.x + q[0], s.player.y + q[1]))
-        s.direction = s.queuedDirection;
-      const d = DIRS[s.direction];
-      if (d && open(s, s.player.x + d[0], s.player.y + d[1])) {
-        s.player.x += d[0];
-        s.player.y += d[1];
-        collect(s);
-        collideMaze(s);
+    let left = dt;
+    while (left > 0 && s.status === "playing") {
+      if (!s.player.motion) {
+        const q = DIRS[s.queuedDirection];
+        if (q && open(s, s.player.x + q[0], s.player.y + q[1]))
+          s.direction = s.queuedDirection;
+        const d = DIRS[s.direction];
+        if (!d || !open(s, s.player.x + d[0], s.player.y + d[1])) break;
+        s.player.motion = {
+          fromX: s.player.x,
+          fromY: s.player.y,
+          toX: s.player.x + d[0],
+          toY: s.player.y + d[1],
+          elapsed: 0,
+        };
       }
+      const m = s.player.motion,
+        n = Math.min(left, s.moveInterval - m.elapsed);
+      m.elapsed += n;
+      left -= n;
+      const t = Math.min(1, m.elapsed / s.moveInterval);
+      s.player.px = m.fromX + (m.toX - m.fromX) * t;
+      s.player.py = m.fromY + (m.toY - m.fromY) * t;
+      if (t >= 1 - 1e-9) {
+        s.player.x = m.toX;
+        s.player.y = m.toY;
+        s.player.px = m.toX;
+        s.player.py = m.toY;
+        s.player.motion = null;
+        collect(s);
+      }
+      collideMaze(s);
     }
+    s.enemyClock += dt;
     if (s.enemyClock >= s.enemyInterval && s.status === "playing") {
       s.enemyClock %= s.enemyInterval;
       for (const e of s.enemies) {
@@ -266,13 +332,20 @@
           )[0];
         else to = options[Math.floor(s.rng() * options.length)];
         if (to) {
+          e.fromX = e.x;
+          e.fromY = e.y;
           e.lastX = e.x;
           e.lastY = e.y;
           [e.x, e.y] = to;
         }
       }
-      collideMaze(s);
     }
+    for (const e of s.enemies) {
+      const t = Math.min(1, s.enemyClock / s.enemyInterval);
+      e.px = e.fromX + (e.x - e.fromX) * t;
+      e.py = e.fromY + (e.y - e.fromY) * t;
+    }
+    collideMaze(s);
   }
   function stepMaze(s, dt) {
     if (s.paused || s.status !== "playing") return;
@@ -293,41 +366,59 @@
     s.target = 6 + s.stage * 2;
     s.passed = 0;
     s.distance = 0;
+    s.startX = s.player.x;
+    s.cameraX = 0;
+    s.cameraPan = null;
+    s.finishX = null;
     s.spawned = 0;
-    s.nextSpawn = 1050;
+    s.nextSpawn = 760;
     s.obstacles = [];
     s.rng = random(712 + s.stage * 131);
     return s;
   }
   function jump(s) {
     if (s.status !== "playing" || s.paused || s.player.y > 1) return false;
-    s.player.vy = 530;
+    s.player.vy = 640;
     s.events.push({ type: "jump" });
     return true;
   }
   function jumpSlice(s, dt) {
     s.elapsed += dt;
-    s.distance += s.speed * dt;
+    s.player.x += s.speed * dt;
+    s.distance = s.player.x - s.startX;
+    if (!s.cameraPan && s.player.x - s.cameraX > s.width * 0.66)
+      s.cameraPan = {
+        from: s.cameraX,
+        to: s.player.x - s.width * 0.24,
+        elapsed: 0,
+      };
+    if (s.cameraPan) {
+      s.cameraPan.elapsed += dt;
+      const t = Math.min(1, s.cameraPan.elapsed / 1.0),
+        ease = (1 - Math.cos(Math.PI * t)) / 2;
+      s.cameraX = s.cameraPan.from + (s.cameraPan.to - s.cameraPan.from) * ease;
+      if (t === 1) s.cameraPan = null;
+    }
     s.invulnerable = Math.max(0, s.invulnerable - dt);
     if (s.player.y > 0 || s.player.vy > 0) {
       s.player.vy -= 1180 * dt;
       s.player.y = Math.max(0, s.player.y + s.player.vy * dt);
       if (s.player.y === 0) s.player.vy = 0;
     }
-    if (s.spawned < s.target && s.distance + s.width >= s.nextSpawn) {
+    if (s.spawned < s.target && s.player.x + s.width >= s.nextSpawn) {
       s.obstacles.push({
         id: s.spawned++,
-        x: s.nextSpawn - s.distance,
+        x: s.nextSpawn,
         width: 34 + s.stage * 2,
         height: 53 + Math.floor(s.rng() * (14 + s.stage * 5)),
         hit: false,
         passed: false,
         kind: ["root", "pumpkin", "tombstone"][s.spawned % 3],
       });
-      s.nextSpawn += Math.max(370 - s.stage * 18, s.speed * 1.1) + s.rng() * 70;
+      if (s.spawned === s.target) s.finishX = s.nextSpawn + 80;
+      s.nextSpawn += Math.max(370 - s.stage * 18, s.speed * 1.5) + s.rng() * 70;
     }
     for (const o of s.obstacles) {
-      o.x -= s.speed * dt;
       const overlap =
         o.x < s.player.x + s.player.width - 14 &&
         o.x + o.width > s.player.x + 14;
@@ -345,7 +436,7 @@
         if (s.passed >= s.target) win(s);
       }
     }
-    s.obstacles = s.obstacles.filter((o) => o.x + o.width > -40);
+    s.obstacles = s.obstacles.filter((o) => o.x + o.width > s.cameraX - 100);
   }
   function stepJump(s, dt) {
     if (s.paused || s.status !== "playing") return;
@@ -356,10 +447,101 @@
       remaining -= n;
     }
   }
+  function createRhythm(stage = 0, profile = {}, difficulty = 0) {
+    const s = base("rhythm", stage, profile, difficulty);
+    s.width = 900;
+    s.height = 540;
+    s.target = 12 + s.stage * 4;
+    s.hits = 0;
+    s.misses = 0;
+    s.combo = 0;
+    s.laneCount = s.stage + s.difficulty === 0 ? 2 : 3;
+    s.hitWindow = Math.max(0.12, 0.25 - s.stage * 0.018 - s.difficulty * 0.035);
+    s.notes = [];
+    s.ready = false;
+    s.lastAudio = 0;
+    s.lastHitTime = -1;
+    s.lastHitLane = -1;
+    return s;
+  }
+  function prepareRhythm(s, clock) {
+    let beat = Math.ceil((clock.time - clock.origin) / SCORE.beat) + 4;
+    while (s.notes.length < s.target) {
+      const midi = SCORE.noteAtBeat(beat);
+      if (midi !== null)
+        s.notes.push({
+          beat,
+          midi,
+          lane: midi % s.laneCount,
+          time: clock.origin + beat * SCORE.beat,
+          status: "pending",
+        });
+      beat++;
+    }
+    s.startedAudio = clock.time;
+    s.lastAudio = clock.time;
+    s.endAudio = s.notes.at(-1).time + s.hitWindow + 0.3;
+    s.ready = true;
+  }
+  function missNote(s, n) {
+    if (n.status !== "pending") return;
+    n.status = "miss";
+    s.misses++;
+    s.combo = 0;
+    hit(s);
+    s.events.push({ type: "miss" });
+  }
+  function hitRhythm(s, lane, time) {
+    if (s.paused || s.status !== "playing" || !s.ready) return false;
+    const options = s.notes
+        .filter((n) => n.status === "pending" && n.lane === lane)
+        .sort((a, b) => Math.abs(a.time - time) - Math.abs(b.time - time)),
+      n = options[0];
+    if (n && Math.abs(n.time - time) <= s.hitWindow) {
+      n.status = "hit";
+      s.hits++;
+      s.combo++;
+      s.lastHitTime = time;
+      s.lastHitLane = lane;
+      score(s, Math.abs(n.time - time) < 0.09 ? 75 : 50);
+      s.events.push({
+        type: Math.abs(n.time - time) < 0.09 ? "perfect" : "note",
+      });
+      return true;
+    }
+    const nearby = s.notes.find(
+      (n) => n.status === "pending" && Math.abs(n.time - time) <= s.hitWindow,
+    );
+    if (nearby) missNote(s, nearby);
+    return false;
+  }
+  function stepRhythm(s, time) {
+    if (s.paused || s.status !== "playing" || !s.ready) return;
+    s.invulnerable = Math.max(
+      0,
+      s.invulnerable - Math.max(0, time - s.lastAudio),
+    );
+    s.lastAudio = time;
+    s.elapsed = Math.max(0, time - s.startedAudio);
+    for (const n of s.notes)
+      if (n.status === "pending" && time > n.time + s.hitWindow) missNote(s, n);
+    if (time >= s.endAudio && s.status === "playing") {
+      if (s.hits >= Math.ceil(s.target * 0.65)) win(s);
+      else {
+        s.status = "lost";
+        s.reason = "accuracy";
+        s.events.push({ type: "lost" });
+      }
+    }
+  }
   const api = {
     createMaze,
     turnMaze,
     stepMaze,
+    createRhythm,
+    prepareRhythm,
+    hitRhythm,
+    stepRhythm,
     createJump,
     jump,
     stepJump,

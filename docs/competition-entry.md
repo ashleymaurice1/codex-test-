@@ -40,3 +40,5 @@ This is an entry draft and rules summary, not a submission or a confirmation of 
 ## Hosting notes for a demo
 
 The Render free instance can take about a minute to wake after inactivity. Rooms are in memory and are lost on a server restart; personal rewards and level progress remain in that browser. Open the game before demonstrating it. Global weekly team standings are not implemented; the game shows personal team points.
+
+Current arcade update: Adventure offers a series of progressively harder Jump, Maze, Rhythm and Tap Race games; Quick Play clearly offers one standalone game. The rhythm style uses the audio clock of an original mellow 32-bar Halloween score. Saved personal high scores, a confirmed player reset with optional score retention, mobile countdowns, smoother maze movement and higher forward-moving jumps are included. Character pose atlases add blinking and distinct happy/disappointed expressions while retaining Mach, Slink, Ember and Misty.

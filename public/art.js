@@ -24,13 +24,13 @@ function costume(hat, ghost = false) {
 function ghost(team = "Mach", cls = "") {
   const dressed =
     typeof profile !== "undefined" && profile.ghostHat && team === profile.team;
-  return `<span class="ghost-art rendered-ghost ghost-${team.toLowerCase()} ${cls}" role="img" aria-label="${team} ghost"><img src="/assets/characters/${team.toLowerCase()}.webp" alt="" width="1536" height="1024" decoding="async" draggable="false">${dressed ? costume("Witch hat", true) : ""}</span>`;
+  return `<span class="ghost-art rendered-ghost ghost-${team.toLowerCase()} ${cls}" role="img" aria-label="${team} ghost"><img src="/assets/characters/${team.toLowerCase()}.webp" alt="" width="1536" height="1024" decoding="async" draggable="false">${MidnightCharacters.markup(team)}${dressed ? costume("Witch hat", true) : ""}</span>`;
 }
 function racer(i, team = "Mach", hat = "") {
   const tinted =
     typeof profile !== "undefined" && profile.tint && team === profile.team;
   const chosen = colors[team] ? team : racerNames[i] || "Mach";
-  return `<span class="racer-art rendered-racer playable-ghost ghost-${chosen.toLowerCase()} ${tinted ? "moonlit-tint" : ""}" role="img" aria-label="${chosen}, the ghost ${{ Mach: "falcon", Slink: "serpent", Ember: "wolf", Misty: "bat" }[chosen]}"><img src="/assets/characters/${chosen.toLowerCase()}.webp" alt="" decoding="async" draggable="false">${costume(hat, true)}</span>`;
+  return `<span class="racer-art rendered-racer playable-ghost ghost-${chosen.toLowerCase()} ${tinted ? "moonlit-tint" : ""}" role="img" aria-label="${chosen}, the ghost ${{ Mach: "falcon", Slink: "serpent", Ember: "wolf", Misty: "bat" }[chosen]}"><img src="/assets/characters/${chosen.toLowerCase()}.webp" alt="" decoding="async" draggable="false">${MidnightCharacters.markup(chosen)}${costume(hat, true)}</span>`;
 }
 function landscape() {
   return '<div class="landscape cinematic-landscape" aria-hidden="true"></div>';

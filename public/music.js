@@ -1,116 +1,141 @@
-/* Keep the creator's supplied audio as the soundtrack; overlap its loop boundaries. */
+/* A long, mellow original Halloween lounge theme; the rhythm game shares this audio clock. */
 (function (root) {
   let ctx,
     master,
-    buffer,
-    loading = null,
+    bus,
+    echo,
+    echoGain,
+    compressor,
     timer = null,
-    nextStart = 0,
+    origin = 0,
+    nextBeat = 0,
     muted = false,
-    totalLoops = 0,
     scene = "menu",
-    crossfade = 1.15;
-  const active = new Set();
+    transportPaused = false,
+    totalNotes = 0;
+  const score = root.MidnightScore;
+  function hz(m) {
+    return 440 * Math.pow(2, (m - 69) / 12);
+  }
   function updateVolume() {
     if (master)
       master.gain.setTargetAtTime(
         muted || document.hidden
           ? 0
           : scene === "maze"
-            ? 0.27
-            : scene === "jump"
-              ? 0.36
-              : 0.34,
+            ? 0.42
+            : scene === "rhythm"
+              ? 0.64
+              : 0.5,
         ctx.currentTime,
-        0.12,
+        0.45,
       );
   }
-  function queueLoop(when) {
-    const source = ctx.createBufferSource(),
-      gain = ctx.createGain();
-    source.buffer = buffer;
-    const fade = Math.min(crossfade, buffer.duration / 4),
-      end = when + buffer.duration;
-    const rise = new Float32Array(40),
-      fall = new Float32Array(40);
-    for (let i = 0; i < 40; i++) {
-      rise[i] = Math.sin(((i / 39) * Math.PI) / 2);
-      fall[i] = Math.cos(((i / 39) * Math.PI) / 2);
-    }
-    gain.gain.setValueAtTime(0, when);
-    gain.gain.setValueCurveAtTime(rise, when, fade);
-    gain.gain.setValueAtTime(1, end - fade);
-    gain.gain.setValueCurveAtTime(fall, end - fade, fade);
-    source.connect(gain).connect(master);
-    source.start(when);
-    source.stop(end + 0.02);
-    active.add(source);
-    source.onended = () => {
-      active.delete(source);
-      source.disconnect();
-      gain.disconnect();
-    };
-    totalLoops++;
-    return end - fade;
+  function tone(midi, time, duration, volume, type = "sine") {
+    const o = ctx.createOscillator(),
+      g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = hz(midi);
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(volume, time + 0.025);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    o.connect(g).connect(bus);
+    o.start(time);
+    o.stop(time + duration + 0.03);
   }
   function schedule() {
-    if (!buffer) return;
-    if (nextStart < ctx.currentTime - 0.15) nextStart = ctx.currentTime + 0.04;
-    while (nextStart < ctx.currentTime + 0.6) nextStart = queueLoop(nextStart);
+    if (!ctx) return;
+    while (origin + nextBeat * score.beat < ctx.currentTime + 0.35) {
+      const t = origin + nextBeat * score.beat;
+      if (t >= ctx.currentTime - 0.04) {
+        const p = score.noteAtBeat(nextBeat);
+        if (p !== null) {
+          tone(p, t, score.beat * 1.45, 0.11);
+          tone(p + 12, t, score.beat * 0.55, 0.009, "triangle");
+          totalNotes++;
+        }
+        if (nextBeat % 4 === 0) {
+          const chord = score.chords[Math.floor(nextBeat / 4) % 8];
+          chord.forEach((n) =>
+            tone(n + 12, t, score.beat * 4.2, 0.012, "triangle"),
+          );
+          tone(chord[0] - 12, t, score.beat * 2.5, 0.035);
+        }
+      }
+      nextBeat++;
+    }
+  }
+  function ensure() {
+    if (ctx) return;
+    const AC = root.AudioContext || root.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0;
+    bus = ctx.createBiquadFilter();
+    bus.type = "lowpass";
+    bus.frequency.value = 4400;
+    echo = ctx.createDelay(1);
+    echo.delayTime.value = score.beat * 0.75;
+    echoGain = ctx.createGain();
+    echoGain.gain.value = 0.13;
+    compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -20;
+    compressor.ratio.value = 2.5;
+    bus.connect(master);
+    bus.connect(echo);
+    echo.connect(echoGain).connect(master);
+    master.connect(compressor).connect(ctx.destination);
+    origin = ctx.currentTime + 0.08;
+    timer = setInterval(schedule, 80);
+    schedule();
+    document.addEventListener("visibilitychange", updateVolume);
   }
   function start() {
-    if (!ctx) {
-      const AC = root.AudioContext || root.webkitAudioContext;
-      if (!AC) return;
-      ctx = new AC();
-      master = ctx.createGain();
-      master.gain.value = 0;
-      master.connect(ctx.destination);
-      document.addEventListener("visibilitychange", updateVolume);
-    }
-    ctx.resume().catch(() => {});
+    ensure();
     muted = false;
+    if (ctx && !transportPaused) ctx.resume().catch(() => {});
     updateVolume();
-    if (!loading) {
-      loading = fetch("/assets/opening.m4a")
-        .then((r) => {
-          if (!r.ok) throw Error("Original soundtrack could not load");
-          return r.arrayBuffer();
-        })
-        .then((data) => ctx.decodeAudioData(data))
-        .then((decoded) => {
-          buffer = decoded;
-          nextStart = ctx.currentTime + 0.05;
-          schedule();
-          timer = setInterval(schedule, 100);
-        })
-        .catch(() => {
-          loading = null;
-        });
-    }
   }
   function setMuted(value) {
     muted = value;
-    if (!value && ctx) ctx.resume().catch(() => {});
+    if (ctx && !value && !transportPaused) ctx.resume().catch(() => {});
     updateVolume();
   }
   root.MidnightMusic = {
     start,
     setMuted,
+    ensureClock(value = false) {
+      ensure();
+      muted = value;
+      if (ctx && !transportPaused) ctx.resume().catch(() => {});
+      updateVolume();
+    },
     setScene(value) {
       scene = value;
       updateVolume();
     },
+    setPaused(value) {
+      transportPaused = value;
+      if (!ctx) return;
+      if (value) ctx.suspend().catch(() => {});
+      else ctx.resume().catch(() => {});
+    },
+    clock: () => ({
+      time: ctx?.currentTime || 0,
+      origin,
+      beat: score.beat,
+      running: ctx?.state === "running",
+    }),
     status: () => ({
-      source: "original-opening.m4a",
+      source: "Moonlit Lounge — original 32-bar composition",
       state: ctx?.state || "not-started",
       muted,
-      loaded: !!buffer,
-      clipDuration: buffer?.duration || 0,
-      totalLoops,
-      crossfadeSeconds: buffer ? Math.min(crossfade, buffer.duration / 4) : 0,
-      activeSources: active.size,
+      totalNotes,
+      tempo: score.tempo,
+      themeSeconds: score.duration,
       hasScheduler: !!timer,
+      transportPaused,
     }),
   };
-})(typeof globalThis !== "undefined" ? globalThis : this);
+})(globalThis);

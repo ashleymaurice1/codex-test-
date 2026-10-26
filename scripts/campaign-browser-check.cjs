@@ -24,12 +24,12 @@ const assert = require("node:assert/strict");
     errors = [];
   p.on("pageerror", (e) => errors.push(e.message));
   await p.goto(process.env.GAME_URL || "http://127.0.0.1:3000");
-  assert.equal(await p.locator(".journey-stop:disabled").count(), 3);
   assert.equal(
     await p.evaluate(() => document.documentElement.scrollWidth > innerWidth),
     false,
   );
   await p.locator("[data-action=race-solo]").first().click();
+  assert.equal(await p.locator(".level-row:disabled").count(), 3);
   await p.locator('dialog [data-action=level][data-value="0"]').click();
   await p.locator("#play-form button[type=submit]").click();
   await p.waitForSelector(".choices");
@@ -96,6 +96,7 @@ const assert = require("node:assert/strict");
   assert.equal(await p.evaluate(() => profile.totalScore), 500);
   assert.equal(await p.evaluate(() => profile.extraLives), 1);
   await p.locator("[data-action=next-level]").click();
+  await p.locator("dialog [data-action=hub-race]").click();
   await p.locator("#play-form button[type=submit]").click();
   await p.waitForSelector(".choices");
   assert.equal(await p.evaluate(() => state.level), 1);

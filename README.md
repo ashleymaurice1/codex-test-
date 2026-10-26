@@ -81,3 +81,15 @@ Each correct solo answer earns 100 persistent score points. Every 500 points ear
 - Winners perform one slow 2.45-second victory loop with a team-color trail, then settle still. Non-winning podium ghosts remain stationary with slumped poses and little disappointed thoughts. Reduced-motion preferences skip the victory flight.
 
 `npm run test:arcade-browser` plays a complete jumping win using Space and a maze win using arrow keys, checks difficulty increases and next-style progression, verifies the nickname is not requested again, and confirms the victory animation stops. `test/arcade.test.js` checks maze connectivity, achievable jumps, difficulty scaling, pause behavior, collision lives and win rewards.
+
+## Arcade polish and player controls
+
+The homepage separates **Adventure** (a series with level unlocks), **Quick Play** (one standalone game), and live **Friends** rooms. Jump and maze games wait for their art to load and show a 3–2–1–GO countdown, with the board and controls fitted into the phone viewport. Jumping now has a higher arc and forward world movement; the maze uses slower, interpolated movement and buffered turns.
+
+**Moonlight Melody** adds a two- or three-lane rhythm game controlled by A/S/D or phone pads. Its notes share the audio clock and melody of the original 32-bar, 88 BPM *Moonlit Lounge* composition. Soft celesta, organ-like chords, and bass replace the busy short repeat. The composition runs about 87 seconds before cycling. Pause freezes the rhythm transport as well as the game.
+
+Character atlases animate blinking, wings, breathing and expressions. Winners settle into a happy pose after their one victory flight, and other podium characters show disappointed expressions.
+
+**High scores** saves personal run records by game style in this browser. **Player settings → Reset Player…** requires confirmation and offers a checked-by-default option to keep high scores. Reset clears the nickname, character choice, coins, spare lives, score and level unlocks for this browser; it preserves the audio preference.
+
+`node scripts/profile-rhythm-browser-check.cjs` verifies rhythm gameplay with actual key presses, countdown and mobile viewport, Quick Play progression isolation, and reset cancel/keep/clear behavior. `test/records-rhythm.test.js` checks soundtrack synchronization, rhythm failure/pause, high-score ordering/deduplication and forward jump physics.
