@@ -29,9 +29,9 @@ const assert = require("node:assert/strict");
     await p.evaluate(() => document.documentElement.scrollWidth > innerWidth),
     false,
   );
-  await p.locator("[data-action=solo]").first().click();
+  await p.locator("[data-action=race-solo]").first().click();
   await p.locator('dialog [data-action=level][data-value="0"]').click();
-  await p.locator("#play-form button").click();
+  await p.locator("#play-form button[type=submit]").click();
   await p.waitForSelector(".choices");
   const seen = new Set();
   let answered = null;
@@ -96,7 +96,7 @@ const assert = require("node:assert/strict");
   assert.equal(await p.evaluate(() => profile.totalScore), 500);
   assert.equal(await p.evaluate(() => profile.extraLives), 1);
   await p.locator("[data-action=next-level]").click();
-  await p.locator("#play-form button").click();
+  await p.locator("#play-form button[type=submit]").click();
   await p.waitForSelector(".choices");
   assert.equal(await p.evaluate(() => state.level), 1);
   assert.equal(errors.length, 0);

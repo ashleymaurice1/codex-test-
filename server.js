@@ -388,7 +388,7 @@ wss.on("connection", (ws) => {
           );
           p.totalScore = Math.max(
             0,
-            Math.min(1e9, Math.floor((Number(m.score) || 0) / 100) * 100),
+            Math.min(1e9, Math.floor(Number(m.score) || 0)),
           );
         }
         p.token = crypto.randomUUID();
@@ -429,13 +429,14 @@ wss.on("connection", (ws) => {
         start(r);
       }
       if (m.type === "answer") {
+        const bonusBefore = p.bonusLivesEarned;
         const ok = E.answer(r, p, m.id, m.index, now);
         if (ok !== null && r.solo) r.advanceAt = now + (ok ? 1000 : 1200);
         if (ok !== null)
           send(ws, {
             type: "answer",
             ok,
-            lifeBonus: !!(ok && r.solo && p.totalScore % 500 === 0),
+            lifeBonus: !!(ok && r.solo && p.bonusLivesEarned > bonusBefore),
             lifeSaved: p.lifeSaved,
             reason: ok
               ? null

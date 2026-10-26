@@ -26,13 +26,13 @@ const assert = require("node:assert/strict");
   );
   await a.locator("[data-action=create]").click();
   await a.locator("#nickname").fill("Host");
-  await a.locator("#play-form button").click();
+  await a.locator("#play-form button[type=submit]").click();
   await a.waitForSelector(".room-code");
   const code = await a.locator(".room-code").textContent();
   await z.locator("[data-action=join]").click();
   await z.locator("#nickname").fill("Phone friend");
   await z.locator("#room-code").fill(code);
-  await z.locator("#play-form button").click();
+  await z.locator("#play-form button[type=submit]").click();
   await z.waitForSelector("[data-action=ready]");
   await z.locator("[data-action=ready]").click();
   await a.waitForFunction(() =>

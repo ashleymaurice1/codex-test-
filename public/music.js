@@ -8,12 +8,19 @@
     nextStart = 0,
     muted = false,
     totalLoops = 0,
+    scene = "menu",
     crossfade = 1.15;
   const active = new Set();
   function updateVolume() {
     if (master)
       master.gain.setTargetAtTime(
-        muted || document.hidden ? 0 : 0.34,
+        muted || document.hidden
+          ? 0
+          : scene === "maze"
+            ? 0.27
+            : scene === "jump"
+              ? 0.36
+              : 0.34,
         ctx.currentTime,
         0.12,
       );
@@ -90,6 +97,10 @@
   root.MidnightMusic = {
     start,
     setMuted,
+    setScene(value) {
+      scene = value;
+      updateVolume();
+    },
     status: () => ({
       source: "original-opening.m4a",
       state: ctx?.state || "not-started",

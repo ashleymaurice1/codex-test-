@@ -1,6 +1,6 @@
 # Midnight Zombies
 
-A browser party racer: one-tap spooky challenges, four original flowing ghost characters. Solo runs against three bots; private rooms support up to six humans, with optional bots filling to four racers.
+A moonlit Halloween arcade with three play styles and four original flowing ghost characters. Play Solo starts with the one-button Moonlit Leap course. Ghostlight Maze adds candy collection and roaming creatures. The original tap races support solo rivals and private multiplayer rooms with up to six humans.
 
 ## Run
 
@@ -23,7 +23,7 @@ Tests exercise progression, all six challenge types, timing penalties, item effe
 
 ## Play
 
-Choose Mach the ghost falcon, Slink the ghost serpent, Ember the ghost wolf, or Misty the tiny ghost bat; choosing a character selects its team. You can also answer the pumpkin's three questions. Play solo, or create a room and share its four-letter code with friends. Guests mark themselves ready and the host starts the race. Everyone receives the same timed challenges. Answer in one tap, earn an item every three successes, and tap the item slot to use it. Tombstones require three taps to clear. Level 1 takes five correct taps; later levels increase to eight, twelve, and fifteen. Each solo answer advances to a new challenge after about one second. The final race takes roughly fifteen successful challenges; after two minutes the leader wins if nobody has finished.
+Choose Mach the ghost falcon, Slink the ghost serpent, Ember the ghost wolf, or Misty the tiny ghost bat; choosing a character selects its team. You can also answer the pumpkin's three questions. Play Solo begins with jumping; choose Ghostlight Maze for a candy-collecting maze, or Original Tap-Race Courses for the original solo races. Create a room and share its four-letter code with friends for synchronized tap racing. Guests mark themselves ready and the host starts the race. Everyone receives the same timed challenges. Answer in one tap, earn an item every three successes, and tap the item slot to use it. Tombstones require three taps to clear. Level 1 takes five correct taps; later levels increase to eight, twelve, and fifteen. Each solo answer advances to a new challenge after about one second. The final race takes roughly fifteen successful challenges; after two minutes the leader wins if nobody has finished.
 
 The server owns challenge validation, distance, item assignment/effects, placements, and bot decisions. Rooms and reconnect sessions are in memory. Refresh the same browser tab to rejoin. A disconnected racer sleeps while the race continues; another online racer inherits hosting. Server restarts end existing rooms. Coins, cosmetic purchases, personal team points and solo winning best times are saved in local browser storage. Points are personal, not global standings. No cross-device account sync is provided.
 
@@ -49,7 +49,7 @@ No public deployment is created by running the local server or publishing a Code
 
 ## Validation performed
 
-Eighteen engine, progression and real-WebSocket tests passed. Desktop (1440px) and portrait phone (390px) browser checks found no script errors or horizontal overflow. A complete solo browser race encountered all twelve challenge types, reached the podium, earned rewards, and rejoined after refresh without awarding duplicate coins. `npm run test:rooms-browser` runs a separate two-context browser check that verified room creation/joining, ready/start, a shared challenge, refresh/rejoin, and host transfer. The public HTTPS site and secure WebSocket solo/multiplayer connections have also been exercised. A 50% casual-player win rate has not been measured.
+Twenty-four engine, arcade, progression and real-WebSocket tests passed. Desktop (1440px) and portrait phone (390px) browser checks found no script errors or horizontal overflow. A complete solo browser race encountered all twelve challenge types, reached the podium, earned rewards, and rejoined after refresh without awarding duplicate coins. `npm run test:rooms-browser` runs a separate two-context browser check that verified room creation/joining, ready/start, a shared challenge, refresh/rejoin, and host transfer. The public HTTPS site and secure WebSocket solo/multiplayer connections have also been exercised. A 50% casual-player win rate has not been measured.
 
 ## Clear feedback and continuous music
 
@@ -70,3 +70,14 @@ Each solo race starts with three hearts. An incorrect or timed-out challenge cos
 Each correct solo answer earns 100 persistent score points. Every 500 points earns one spare life; rewards do not repeat after refresh. The ghost shop sells a spare life for 80 coins, up to a stash of 99. Score and unused spare lives persist in the same browser. No cash purchases or accounts are involved.
 
 `npm run test:characters-browser` verifies character choice for solo/create/join, remembered choices, sticky live race positions, life purchases, balance protection, and saved inventory. The mobile full track is expandable; a compact live leaderboard stays visible above the challenge while scrolling.
+
+## Jumping, mazes, and style progression
+
+- **Moonlit Leap** is the default Level 1 solo style. The ghost runs automatically; jump with Space, Arrow Up, the canvas, or the large phone Jump button. Clear roots, pumpkins and tombstones. A witch and sleepy zombie inhabit the woodland.
+- **Ghostlight Maze** uses arrows/WASD, phone direction buttons, or swipes. Collect every candy, then enter the glowing house. Mischievous witches, zombies and spiders roam the maze.
+- Both solo adventures have five levels and three selectable difficulties: Chill, Spooky, and Fiendish. After a win, replay the same style at a higher difficulty or advance and choose any style. Unlocking an adventure level also opens the corresponding original tap-race course, capped at its final fourth course.
+- New solo adventures run locally in the browser; room multiplayer remains the server-synchronized tap race. Original room and race functionality is retained.
+- Score, bonus lives, coin rewards, medals and unlocked levels share the browser profile. Nicknames are requested once and reused across all styles, with an explicit Change nickname control.
+- Winners perform one slow 2.45-second victory loop with a team-color trail, then settle still. Non-winning podium ghosts remain stationary with slumped poses and little disappointed thoughts. Reduced-motion preferences skip the victory flight.
+
+`npm run test:arcade-browser` plays a complete jumping win using Space and a maze win using arrow keys, checks difficulty increases and next-style progression, verifies the nickname is not requested again, and confirms the victory animation stops. `test/arcade.test.js` checks maze connectivity, achievable jumps, difficulty scaling, pause behavior, collision lives and win rewards.

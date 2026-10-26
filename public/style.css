@@ -2558,3 +2558,424 @@ dialog {
     margin-top: 17px;
   }
 }
+/* Solo adventures share the established moonlit world and ghost artwork. */
+.arcade-preview {
+  margin: 30px 0;
+}
+.arcade-mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.arcade-mode-card {
+  position: relative;
+  text-align: left;
+  border: 1px solid #b8d4ff33;
+  border-radius: 12px;
+  padding: 24px;
+  background: linear-gradient(130deg, #23364a, #101d2e);
+  overflow: hidden;
+}
+.arcade-mode-card:after {
+  content: "";
+  position: absolute;
+  right: -20px;
+  top: -40px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: #b8d4ff09;
+  box-shadow: 0 0 70px #b8d4ff12;
+}
+.arcade-mode-symbol {
+  font-size: 35px;
+  color: #efb66c;
+  display: block;
+  margin-bottom: 13px;
+}
+.arcade-mode-card h3 {
+  font:
+    32px "Grenze Gotisch",
+    Georgia,
+    serif;
+  color: #dbe9f7;
+}
+.arcade-mode-card p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a7bdd4;
+  max-width: 300px;
+  margin: 9px 0 21px;
+}
+.arcade-mode-card small {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #efb66c;
+}
+.arcade-options {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+.arcade-options label {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+.arcade-options select {
+  display: block;
+  width: 100%;
+  border: 1px solid #b8d4ff44;
+  border-radius: 7px;
+  background: #101e30;
+  color: #d7e5f7;
+  padding: 12px 8px;
+  margin-top: 8px;
+  font:
+    12px "DM Sans",
+    sans-serif;
+}
+.style-hub {
+  display: grid;
+  gap: 12px;
+  margin-top: 23px;
+}
+.nickname-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+  font-size: 10px;
+  color: #a4bad1;
+}
+.nickname-summary strong {
+  color: #e5eaf0;
+  margin-left: 6px;
+  font-weight: 600;
+}
+.nickname-summary .text-btn {
+  font-size: 10px;
+  padding-right: 0;
+}
+.arcade-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.arcade-heading h1 {
+  font-size: 56px;
+  line-height: 1;
+  margin: 12px 0;
+  color: #e2ebf1;
+}
+.arcade-heading > .ghost-art {
+  width: 135px;
+  height: 100px;
+  animation: none;
+}
+.arcade-heading .eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+.arcade-instruction {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #bccfe2;
+  margin: 8px 0 17px;
+  max-width: 650px;
+}
+.arcade-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  background: #142238;
+  border: 1px solid #b8d4ff33;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.arcade-stats .hearts {
+  font-size: 23px;
+  color: #f1a17f;
+  letter-spacing: 2px;
+}
+.arcade-stats .hearts i {
+  font-style: normal;
+  color: #6c809a;
+}
+.arcade-stats small {
+  font-size: 9px;
+  line-height: 1.7;
+  display: block;
+  color: #9ab1cc;
+  margin-top: 3px;
+}
+.arcade-board-wrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #b8d4ff44;
+  border-radius: 14px;
+  background: #0b1828;
+  box-shadow: 0 5px 30px #0004;
+}
+.arcade-board {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  outline: none;
+}
+.arcade-board:focus-visible {
+  outline: 2px solid #efb66c;
+  outline-offset: -4px;
+}
+.maze-board {
+  max-height: 65vh;
+  object-fit: contain;
+  background: #091525;
+}
+.arcade-pause {
+  position: absolute;
+  inset: 0;
+  background: #081426e8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  z-index: 2;
+}
+.arcade-pause h2 {
+  font:
+    35px "Grenze Gotisch",
+    serif;
+  color: #d2e5fc;
+}
+.arcade-pause p {
+  max-width: 320px;
+  color: #a7bdd4;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 15px;
+}
+.arcade-hint {
+  min-height: 37px;
+  text-align: center;
+  color: #b9ddb7;
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 11px 5px;
+}
+.maze-controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  max-width: 340px;
+  margin: 4px auto 12px;
+  padding: 8px;
+  background: #101e30ee;
+  border: 1px solid #b8d4ff33;
+  border-radius: 11px;
+  position: sticky;
+  bottom: 8px;
+  backdrop-filter: blur(10px);
+  z-index: 12;
+}
+.maze-controls button {
+  min-height: 51px;
+  border: 1px solid #9bb9dd55;
+  border-radius: 7px;
+  background: #21344b;
+  font-size: 25px;
+  color: #d2e4f9;
+  touch-action: manipulation;
+}
+.maze-controls button:active {
+  background: #4b6686;
+}
+.jump-control {
+  display: block;
+  position: sticky;
+  bottom: 8px;
+  z-index: 12;
+  min-height: 68px;
+  width: 100%;
+  max-width: 500px;
+  margin: 3px auto 12px;
+  border: 1px solid #ffdf9d88;
+  border-radius: 12px;
+  background: linear-gradient(#efbd7a, #d8974a);
+  color: #211a23;
+  font:
+    700 22px "DM Sans",
+    sans-serif;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 0 #81572e;
+  touch-action: manipulation;
+}
+.jump-control small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+.jump-control:active {
+  translate: 0 3px;
+  box-shadow: 0 1px 0 #81572e;
+}
+.arcade-footer-note {
+  text-align: center;
+  color: #7f9bb9;
+  font-size: 10px;
+  line-height: 1.7;
+  margin-bottom: 25px;
+}
+.arcade-result-actions {
+  display: grid;
+  gap: 12px;
+  max-width: 430px;
+  margin: 25px auto;
+}
+.arcade-result > p {
+  line-height: 1.7;
+  font-size: 12px;
+  margin-top: 10px;
+}
+.victory-trail {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 65;
+  width: 100%;
+  height: 100%;
+}
+.result .ghost-art {
+  animation: none !important;
+}
+.winner-proud {
+  filter: drop-shadow(0 0 13px #b8d4ff55);
+}
+.podium-place {
+  position: relative;
+}
+.podium-disappointed .racer-art {
+  animation: none !important;
+  rotate: -6deg;
+  opacity: 0.76;
+  filter: saturate(0.68) brightness(0.9);
+}
+.podium-disappointed:nth-child(3) .racer-art {
+  rotate: 5deg;
+}
+.podium-thought {
+  position: absolute;
+  top: -13px;
+  right: 0;
+  display: block;
+  border: 1px solid #b8d4ff33;
+  border-radius: 9px 9px 9px 2px;
+  padding: 5px 8px;
+  background: #17283b;
+  color: #a9bed4;
+  font-size: 9px;
+  line-height: 1.5;
+  font-style: italic;
+  white-space: nowrap;
+}
+.podium-proud:before {
+  content: "♕";
+  position: absolute;
+  top: -25px;
+  left: calc(50% - 13px);
+  color: #efb66c;
+  font-size: 26px;
+}
+.podium-proud .racer-art {
+  animation: none !important;
+  filter: drop-shadow(0 0 9px #efb66c33);
+}
+@media (max-width: 700px) {
+  .arcade-mode-cards {
+    gap: 10px;
+  }
+  .arcade-mode-card {
+    padding: 18px 14px;
+  }
+  .arcade-mode-card h3 {
+    font-size: 27px;
+  }
+  .arcade-mode-card p {
+    font-size: 10px;
+    margin-bottom: 17px;
+  }
+  .arcade-mode-card small {
+    font-size: 7px;
+    letter-spacing: 0.7px;
+  }
+  .arcade-mode-symbol {
+    font-size: 28px;
+    margin-bottom: 9px;
+  }
+  .arcade-heading h1 {
+    font-size: 40px;
+  }
+  .arcade-heading > .ghost-art {
+    width: 96px;
+    height: 80px;
+  }
+  .arcade-heading .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .arcade-instruction {
+    font-size: 11px;
+    margin: 5px 0 13px;
+  }
+  .arcade-stats {
+    padding: 10px 11px;
+    font-size: 10px;
+  }
+  .arcade-stats .hearts {
+    font-size: 21px;
+  }
+  .arcade-stats small {
+    font-size: 8px;
+  }
+  .arcade-hint {
+    font-size: 11px;
+    min-height: 35px;
+    padding: 9px 3px;
+  }
+  .arcade-footer-note {
+    font-size: 8px;
+  }
+  .arcade-pause h2 {
+    font-size: 29px;
+  }
+  .arcade-options {
+    gap: 9px;
+  }
+  .arcade-options select {
+    font-size: 10px;
+  }
+  .nickname-summary {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .nickname-summary .text-btn {
+    font-size: 9px;
+  }
+  .podium-thought {
+    font-size: 8px;
+    padding: 4px 6px;
+  }
+  .arcade-result h1 {
+    font-size: 49px;
+  }
+}

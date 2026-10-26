@@ -97,12 +97,16 @@ test("solo answers advance promptly while rival challenge clocks remain independ
     type: "create",
     solo: true,
     level: 0,
+    score: 425,
+    extraLives: 1,
     name: "Beginner",
     team: "Mach",
   });
   const join = await a.next((m) => m.type === "joined");
   const state = await a.next((m) => m.phase === "race");
   const room = rooms.get(join.code);
+  const self = room.players.find((p) => p.id === join.id);
+  assert.equal(self.totalScore, 425);
   const original = room.challenge.id;
   const botIds = room.players
     .filter((p) => p.bot)
@@ -113,6 +117,8 @@ test("solo answers advance promptly while rival challenge clocks remain independ
   const next = await a.next(
     (m) => m.phase === "race" && m.challenge.id !== original,
   );
+  assert.equal(self.totalScore, 525);
+  assert.equal(self.reserveLives, 2);
   assert.ok(
     Date.now() - answeredAt < 2000,
     "A correct tap should not wait for the full round timer",

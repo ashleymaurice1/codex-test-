@@ -29,7 +29,7 @@ const assert = require("node:assert/strict");
   const p = await page(),
     errors = [];
   p.on("pageerror", (e) => errors.push(e.message));
-  await p.locator("[data-action=solo]").first().click();
+  await p.locator("[data-action=race-solo]").first().click();
   await p.locator('dialog [data-action=level][data-value="0"]').click();
   assert.equal(await p.locator("input[name=character]").count(), 4);
   await p.locator("input[name=character][value=Ember]").check();
@@ -94,7 +94,7 @@ const assert = require("node:assert/strict");
   assert.equal(await p.evaluate(() => profile.coins), 40);
   await p.reload();
   assert.equal(await p.evaluate(() => profile.extraLives), 2);
-  await p.locator("[data-action=solo]").first().click();
+  await p.locator("[data-action=race-solo]").first().click();
   await p.locator('dialog [data-action=level][data-value="0"]').click();
   await p.locator("#play-form button[type=submit]").click();
   await p.waitForSelector(".choices");

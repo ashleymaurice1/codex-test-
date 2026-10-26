@@ -10,7 +10,8 @@
     "test:browser": "node scripts/browser-check.cjs",
     "test:rooms-browser": "node scripts/rooms-browser-check.cjs",
     "test:campaign-browser": "node scripts/campaign-browser-check.cjs",
-    "test:characters-browser": "node scripts/character-browser-check.cjs"
+    "test:characters-browser": "node scripts/character-browser-check.cjs",
+    "test:arcade-browser": "node scripts/arcade-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"
