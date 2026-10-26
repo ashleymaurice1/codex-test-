@@ -160,3 +160,61 @@ test("first level finishes in five easy correct taps and introduces items later"
   assert.equal(p.progress, 100);
   assert.ok(p.finish);
 });
+test("solo mistakes spend hearts and spare lives protect a player before elimination", () => {
+  const p = E.player("Mach", 0, "Mach"),
+    bot = E.player("Slink", 1, "Slink", true),
+    r = { solo: true, phase: "race", level: 0, players: [p, bot] };
+  p.lives = 1;
+  p.reserveLives = 1;
+  p.progress = 80;
+  r.challenge = E.challenge(0, 1000, () => 0.5, 0);
+  assert.equal(E.answer(r, p, r.challenge.id, -1, 1200), false);
+  assert.equal(p.lives, 1);
+  assert.equal(p.reserveLives, 0);
+  assert.equal(p.lifeSaved, true);
+  assert.equal(p.eliminated, false);
+  r.challenge = E.challenge(1, 3000, () => 0.5, 0);
+  E.answer(r, p, r.challenge.id, -1, 3200);
+  assert.equal(p.eliminated, true);
+  assert.equal(p.lives, 0);
+  assert.equal(E.rank(r).at(-1).id, p.id);
+  r.challenge = E.challenge(2, 5000, () => 0.5, 0);
+  assert.equal(
+    E.answer(r, p, r.challenge.id, r.challenge.answer[0], 5200),
+    null,
+  );
+});
+test("every 500 total solo score awards one spare life without duplicate rewards", () => {
+  const p = E.player("Ember", 2, "Ember"),
+    r = {
+      solo: true,
+      phase: "race",
+      level: 0,
+      players: [p],
+      challenge: E.challenge(0, 1000, () => 0.5, 0),
+    };
+  p.totalScore = 400;
+  E.answer(r, p, r.challenge.id, r.challenge.answer[0], 1200);
+  assert.equal(p.totalScore, 500);
+  assert.equal(p.runScore, 100);
+  assert.equal(p.reserveLives, 1);
+  assert.equal(p.bonusLivesEarned, 1);
+  E.answer(r, p, r.challenge.id, r.challenge.answer[0], 1500);
+  assert.equal(p.reserveLives, 1);
+  r.challenge = E.challenge(1, 3000, () => 0.5, 0);
+  E.answer(r, p, r.challenge.id, r.challenge.answer[0], 3200);
+  assert.equal(p.totalScore, 600);
+  assert.equal(p.reserveLives, 1);
+});
+test("multiplayer and computer racers are not eliminated by solo heart rules", () => {
+  const { p, r } = setup();
+  E.answer(r, p, r.challenge.id, -1, 1500);
+  assert.equal(p.lives, 3);
+  const bot = E.player("Slink", 1, "Slink", true);
+  r.solo = true;
+  r.players = [bot];
+  r.challenge = E.challenge(0, 3000);
+  E.answer(r, bot, r.challenge.id, -1, 3200);
+  assert.equal(bot.lives, 3);
+  assert.equal(bot.eliminated, false);
+});

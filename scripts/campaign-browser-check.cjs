@@ -87,10 +87,14 @@ const assert = require("node:assert/strict");
     [0, 6, 7, 9],
   );
   assert.equal(await p.evaluate(() => profile.unlockedLevel), 1);
+  assert.equal(await p.evaluate(() => profile.totalScore), 500);
+  assert.equal(await p.evaluate(() => profile.extraLives), 1);
   assert.ok(await p.evaluate(() => profile.levelStars[0] > 0));
   await p.reload();
   await p.waitForSelector(".result");
   assert.equal(await p.evaluate(() => profile.unlockedLevel), 1);
+  assert.equal(await p.evaluate(() => profile.totalScore), 500);
+  assert.equal(await p.evaluate(() => profile.extraLives), 1);
   await p.locator("[data-action=next-level]").click();
   await p.locator("#play-form button").click();
   await p.waitForSelector(".choices");

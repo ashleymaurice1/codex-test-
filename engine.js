@@ -113,11 +113,19 @@ function player(name, racer, team, bot = false) {
     stones: 0,
     answered: null,
     finish: null,
+    lives: 3,
+    reserveLives: 0,
+    totalScore: 0,
+    runScore: 0,
+    bonusLivesEarned: 0,
+    eliminated: false,
+    lifeSaved: false,
   };
 }
 function rank(room) {
   return [...room.players].sort(
     (a, b) =>
+      Number(a.eliminated) - Number(b.eliminated) ||
       (a.finish ?? Infinity) - (b.finish ?? Infinity) ||
       b.progress - a.progress,
   );
@@ -132,6 +140,18 @@ function awardItem(p, room, random = Math.random) {
         : ITEMS.slice(0, 4);
   return pool[Math.floor(random() * pool.length)];
 }
+function loseLife(room, p) {
+  if (!room.solo || p.bot || p.eliminated) return;
+  p.lifeSaved = false;
+  p.lives = Math.max(0, p.lives - 1);
+  if (p.lives === 0) {
+    if (p.reserveLives > 0) {
+      p.reserveLives--;
+      p.lives = 1;
+      p.lifeSaved = true;
+    } else p.eliminated = true;
+  }
+}
 function answer(room, p, id, index, now = Date.now()) {
   const c = room.challenge;
   if (
@@ -140,6 +160,7 @@ function answer(room, p, id, index, now = Date.now()) {
     id !== c.id ||
     p.answered === id ||
     p.finish ||
+    p.eliminated ||
     !p.online ||
     p.blockedUntil > now ||
     p.stones ||
@@ -148,9 +169,20 @@ function answer(room, p, id, index, now = Date.now()) {
   )
     return null;
   p.answered = id;
+  p.lifeSaved = false;
   const ok = c.answer.includes(index) && (c.kind !== 2 || now >= c.extinguish);
   if (ok) {
     p.correct++;
+    if (room.solo && !p.bot) {
+      const before = Math.floor(p.totalScore / 500);
+      p.totalScore += 100;
+      p.runScore += 100;
+      const bonus = Math.floor(p.totalScore / 500) - before;
+      if (bonus) {
+        p.reserveLives = Math.min(99, p.reserveLives + bonus);
+        p.bonusLivesEarned += bonus;
+      }
+    }
     p.progress = Math.min(
       100,
       p.progress +
@@ -163,6 +195,7 @@ function answer(room, p, id, index, now = Date.now()) {
   } else {
     p.blockedUntil = now + 1000;
     p.effect = "Stumble";
+    loseLife(room, p);
   }
   return ok;
 }
@@ -223,4 +256,5 @@ module.exports = {
   useItem,
   awardItem,
   botWantsItem,
+  loseLife,
 };

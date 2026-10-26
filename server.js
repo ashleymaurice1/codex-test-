@@ -60,6 +60,7 @@ function snapshot(r) {
     phase: r.phase,
     bots: r.bots,
     started: r.started,
+    finishedAt: r.ended,
     nextChallengeAt: r.advanceAt,
     now: Date.now(),
     challenge: c
@@ -129,6 +130,11 @@ function reset(r) {
       stones: 0,
       answered: null,
       finish: null,
+      lives: 3,
+      eliminated: false,
+      runScore: 0,
+      lifeSaved: false,
+      bonusLivesEarned: 0,
       ready: false,
     });
   }
@@ -283,13 +289,23 @@ let tick = setInterval(() => {
           ) {
             p.answered = r.challenge.id;
             p.effect = "Stumble";
+            E.loseLife(r, p);
             p.blockedUntil = Math.max(p.blockedUntil, now + 1000);
             if (!p.bot)
-              send(p.ws, { type: "answer", ok: false, reason: "timeout" });
+              send(p.ws, {
+                type: "answer",
+                ok: false,
+                reason: "timeout",
+                lifeSaved: p.lifeSaved,
+              });
           }
         }
       }
-      if (r.players.some((p) => p.finish) || now - r.started > 120000) {
+      if (
+        r.players.some((p) => p.finish) ||
+        (r.solo && r.players.some((p) => !p.bot && p.eliminated)) ||
+        now - r.started > 120000
+      ) {
         r.phase = "finished";
         r.ended = now;
         for (const p of r.players) p.place = E.rank(r).indexOf(p) + 1;
@@ -365,6 +381,16 @@ wss.on("connection", (ws) => {
             throw Error("That race has already started.");
         }
         const p = E.player(m.name, m.racer, m.team);
+        if (r.solo) {
+          p.reserveLives = Math.max(
+            0,
+            Math.min(99, Math.floor(Number(m.extraLives) || 0)),
+          );
+          p.totalScore = Math.max(
+            0,
+            Math.min(1e9, Math.floor((Number(m.score) || 0) / 100) * 100),
+          );
+        }
         p.token = crypto.randomUUID();
         r.players.push(p);
         r.host ??= p.id;
@@ -409,6 +435,8 @@ wss.on("connection", (ws) => {
           send(ws, {
             type: "answer",
             ok,
+            lifeBonus: !!(ok && r.solo && p.totalScore % 500 === 0),
+            lifeSaved: p.lifeSaved,
             reason: ok
               ? null
               : r.challenge.kind === 2 && now < r.challenge.extinguish

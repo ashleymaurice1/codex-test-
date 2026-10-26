@@ -11,7 +11,7 @@ npm ci --cache /tmp/midnight-npm --no-audit --no-fund
 npm start
 ```
 
-Open the server on port 3000. `PORT` overrides it. `npm run dev` enables Node's file watcher. No accounts, API keys, external databases, or third-party services are needed. Fonts and media are bundled locally. Sound starts after a user gesture; the music button always toggles it. The supplied opening audio plays once over an original continuous eight-bar synthesized arcade theme in `public/music.js`; the melody carries across menus, races, and results instead of repeating the short opening clip.
+Open the server on port 3000. `PORT` overrides it. `npm run dev` enables Node's file watcher. No accounts, API keys, external databases, or third-party services are needed. Fonts and media are bundled locally. Sound starts after a user gesture; the music button always toggles it. The creator’s original audio remains the soundtrack. `public/music.js` overlaps the ends of the supplied clip with equal-power crossfades so it continues across menus and races without silent gaps; no replacement melody is layered over it.
 
 ```sh
 npm test
@@ -49,7 +49,7 @@ No public deployment is created by running the local server or publishing a Code
 
 ## Validation performed
 
-Fifteen engine, progression and real-WebSocket tests passed. Desktop (1440px) and portrait phone (390px) browser checks found no script errors or horizontal overflow. A complete solo browser race encountered all twelve challenge types, reached the podium, earned rewards, and rejoined after refresh without awarding duplicate coins. `npm run test:rooms-browser` runs a separate two-context browser check that verified room creation/joining, ready/start, a shared challenge, refresh/rejoin, and host transfer. Public hosting and tuning a 50% casual-player win rate have not been validated.
+Eighteen engine, progression and real-WebSocket tests passed. Desktop (1440px) and portrait phone (390px) browser checks found no script errors or horizontal overflow. A complete solo browser race encountered all twelve challenge types, reached the podium, earned rewards, and rejoined after refresh without awarding duplicate coins. `npm run test:rooms-browser` runs a separate two-context browser check that verified room creation/joining, ready/start, a shared challenge, refresh/rejoin, and host transfer. The public HTTPS site and secure WebSocket solo/multiplayer connections have also been exercised. A 50% casual-player win rate has not been measured.
 
 ## Clear feedback and continuous music
 
@@ -57,4 +57,16 @@ Every challenge explicitly requires one tap except Tombstone Drop, which shows t
 
 The server advances a solo player to the next challenge after a one-second celebration rather than leaving a completed grid on screen. Solo rivals keep independent challenge clocks, so answering faster does not prevent bots from taking their turns. Multiplayer retains shared challenge order and timing, and moves on early once all active racers have answered.
 
-The opening sound plays once. An original continuous 112 BPM eight-bar synthesized theme then continues across menus and races. The mute control fades the music without resetting its musical phase.
+The original supplied audio continues across menus and races using overlapping crossfaded loops. No additional melody replaces or masks it. The mute control fades the music without resetting its musical phase.
+
+## Character choice
+
+Solo, Create Room, and Join Room each include an illustrated **Choose your character** radio selector before entry. Mach, Slink, Ember, and Misty are available immediately; the chosen character also selects the matching team. The form remembers the last submitted choice. The homepage gallery also changes the selected character.
+
+## Solo hearts and score rewards
+
+Each solo race starts with three hearts. An incorrect or timed-out challenge costs one heart; when the last heart is lost, one owned spare life is consumed automatically to keep the player in the race with one heart. Without a spare, the run ends and can be retried with three fresh hearts. Multiplayer races retain their shared racing rules without solo elimination.
+
+Each correct solo answer earns 100 persistent score points. Every 500 points earns one spare life; rewards do not repeat after refresh. The ghost shop sells a spare life for 80 coins, up to a stash of 99. Score and unused spare lives persist in the same browser. No cash purchases or accounts are involved.
+
+`npm run test:characters-browser` verifies character choice for solo/create/join, remembered choices, sticky live race positions, life purchases, balance protection, and saved inventory. The mobile full track is expandable; a compact live leaderboard stays visible above the challenge while scrolling.

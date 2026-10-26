@@ -17,6 +17,8 @@ const defaults = {
   level: 0,
   unlockedLevel: 0,
   levelStars: [],
+  extraLives: 0,
+  totalScore: 0,
 };
 let profile;
 try {
@@ -49,6 +51,8 @@ let state = null,
   renderKey = "",
   lastReward = "",
   pending = null,
+  fullTrackOpen = window.innerWidth > 700,
+  hudKey = "",
   lastEvent = "",
   heldItem = null,
   feedbackTimer,
@@ -118,10 +122,6 @@ const titles = [
   "Lantern Glow",
   "Candy Corn Hunt",
 ];
-const opening = new Audio("/assets/opening.m4a");
-opening.volume = 0.32;
-opening.loop = false;
-let openingStarted = false;
 let audioContext = null;
 let lastFeedback = null,
   successStreak = 0,
@@ -198,20 +198,12 @@ function sound(ok = true) {
   } catch {}
 }
 function music() {
-  if (profile.mute) return;
-  MidnightMusic.start();
-  if (!openingStarted) {
-    openingStarted = true;
-    opening.volume = 0.22;
-    opening.play().catch(() => {});
-  } else if (opening.paused && !opening.ended && opening.currentTime > 0)
-    opening.play().catch(() => {});
+  if (!profile.mute) MidnightMusic.start();
 }
 function mute() {
   profile.mute = !profile.mute;
   save();
   if (profile.mute) {
-    opening.pause();
     MidnightMusic.setMuted(true);
   } else music();
   document.querySelectorAll('[data-action="mute"]').forEach((b) => {
@@ -234,12 +226,12 @@ function journeyPreview() {
   return `<section class="journey-preview"><div><span class="eyebrow">YOUR ROAD TO THE MONSTER BASH</span><h2>Every midnight, a little braver.</h2><p>Finish the race to open the next gate. Level 1 takes just 5 easy taps.</p></div><button class="btn secondary" data-action="solo">${profile.unlockedLevel === 0 ? "Start your journey" : "Continue your journey"} →</button><div class="journey-path">${levels.map((l, i) => `<button class="journey-stop ${i <= profile.unlockedLevel ? "open" : "locked"} ${i === profile.level ? "current" : ""}" data-action="level" data-value="${i}" ${i > profile.unlockedLevel ? "disabled" : ""}><b>${i > profile.unlockedLevel ? "⌑" : l.symbol}</b><span>LEVEL ${i + 1}</span><strong>${l.short}</strong><small>${"★".repeat(profile.levelStars[i] || 0)}${"☆".repeat(3 - (profile.levelStars[i] || 0))}</small></button>`).join("")}</div></section>`;
 }
 function teamGallery() {
-  return `<section class="ghost-gallery"><div class="section-top"><div><h2>Your ghost. Your team. Your midnight.</h2><p>Four original spirits. One brilliantly bad idea.</p></div></div><div class="ghost-cards">${Object.keys(
+  return `<section class="ghost-gallery"><div class="section-top"><div><h2>Choose your character.</h2><p>Tap a ghost to race as them. Your character also selects your team.</p></div></div><div class="ghost-cards">${Object.keys(
     colors,
   )
     .map(
       (t) =>
-        `<button class="ghost-card ${profile.team === t ? "selected" : ""}" data-action="choose-team" data-value="${t}" style="--spirit:${colors[t]}"><span class="spirit-halo"></span>${ghost(t)}<h3>${t}</h3><span class="ghost-species">${{ Mach: "THE GHOST FALCON", Slink: "THE GHOST SERPENT", Ember: "THE GHOST WOLF", Misty: "THE GHOST BAT" }[t]}</span><p>${traits[t]}</p><small>${profile.team === t ? "YOUR TEAM ✓" : "Choose Team " + t + " →"}</small></button>`,
+        `<button class="ghost-card ${profile.team === t ? "selected" : ""}" aria-pressed="${profile.team === t}" data-action="choose-team" data-value="${t}" style="--spirit:${colors[t]}"><span class="spirit-halo"></span>${ghost(t)}<h3>${t}</h3><span class="ghost-species">${{ Mach: "THE GHOST FALCON", Slink: "THE GHOST SERPENT", Ember: "THE GHOST WOLF", Misty: "THE GHOST BAT" }[t]}</span><p>${traits[t]}</p><small>${profile.team === t ? "PLAYING AS " + t.toUpperCase() + " ✓" : "Choose " + t + " →"}</small></button>`,
     )
     .join("")}</div></section>`;
 }
@@ -262,7 +254,7 @@ function modal(content) {
 }
 function help(first = false) {
   modal(
-    `<div style="font-size:35px;margin-bottom:13px">☾ ✦</div><h2>Dead simple.</h2><p>Tap the right thing, fast. Every correct tap moves your ghost forward. Grab items to mess with your friends. First to the party wins!</p><p>Each challenge has one instruction. Miss one? Pull yourself together and try the next. Earn an item every 3 correct taps.</p><div class="actions"><button class="btn" data-action="help-done">Let’s make some mischief →</button>${first ? '<button class="btn secondary" data-action="help-done">Skip</button>' : ""}</div>`,
+    `<div style="font-size:35px;margin-bottom:13px">☾ ✦</div><h2>Dead simple.</h2><p>Tap the right thing, fast. Every correct tap moves your ghost forward. Grab items to mess with your friends. First to the party wins!</p><p>Each challenge has one instruction. Miss one? Pull yourself together and try the next. Earn an item every 3 correct taps from Level 2.</p><p>Solo starts with 3 hearts. A missed challenge costs a heart. Spare lives save you when your hearts run out; earn one every 500 score points or buy one for 80 coins.</p><div class="actions"><button class="btn" data-action="help-done">Let’s make some mischief →</button>${first ? '<button class="btn secondary" data-action="help-done">Skip</button>' : ""}</div>`,
   );
 }
 function teamMenu() {
@@ -311,7 +303,7 @@ function quiz() {
 }
 function shop() {
   modal(
-    `<h2>The costume cupboard.</h2><p>Looking dead good. ◈ ${profile.coins} coins<br>Everything here is cosmetic.</p><div class="shop-list">${[
+    `<h2>The costume cupboard.</h2><p>Looking dead good. ◈ ${profile.coins} coins<br>Dress your ghost or stock up on extra lives.</p><div class="life-shop"><div><strong>♥ Extra life</strong><small>You have ${profile.extraLives} spare lives. One is used automatically when your hearts run out.</small></div><button class="btn" data-action="buy-life" ${profile.extraLives >= 99 ? "disabled" : ""}>◈ 80 · Buy</button></div><p class="life-shop-hint">Earn a free spare life every 500 score points. ${500 - (profile.totalScore % 500)} points until your next one.</p><div class="shop-list">${[
       "Witch hat",
       "Party hat",
       "Propeller beanie",
@@ -332,6 +324,9 @@ function shop() {
       .join("")}</div>`,
   );
 }
+function characterPicker() {
+  return `<fieldset class="character-picker"><legend>CHOOSE YOUR CHARACTER</legend><div class="character-options">${names.map((t) => `<label class="character-option" style="--spirit:${colors[t]}"><input type="radio" name="character" value="${t}" ${profile.team === t ? "checked" : ""} required><span class="character-preview">${ghost(t)}</span><strong>${t}</strong><small>${species[t]}</small><span class="character-selected" aria-hidden="true">Selected ✓</span></label>`).join("")}</div></fieldset>`;
+}
 function playForm(mode, level = profile.level) {
   if (mode === "solo") {
     profile.level = Math.max(0, Math.min(profile.unlockedLevel, level));
@@ -339,11 +334,21 @@ function playForm(mode, level = profile.level) {
   }
   music();
   modal(
-    `<h2>${{ solo: "Your midnight awaits.", create: "Invite your favorite ghouls.", join: "Secret knock?" }[mode]}</h2><p>${mode === "solo" ? `Level ${profile.level + 1} · ${levels[profile.level].name}. You and three delightfully unreliable rivals.` : mode === "create" ? "Create a room, share its four-letter code, then race together." : "Enter the four-letter code from your host."}</p><form id="play-form"><label for="nickname">YOUR NICKNAME</label><input id="nickname" name="name" maxlength="18" value="${esc(profile.name)}" placeholder="Grave guest" autocomplete="nickname">${mode === "join" ? '<label for="room-code">ROOM CODE</label><input id="room-code" name="code" pattern="[A-Za-z]{4}" maxlength="4" required placeholder="ABCD" style="text-transform:uppercase;letter-spacing:6px" autocomplete="off">' : ""}<p style="margin:17px 0 0">${profile.team} · ${species[profile.team]}</p><div class="actions"><button class="btn" type="submit">${mode === "solo" ? "Let’s race →" : mode === "create" ? "Create room →" : "Join the party →"}</button></div></form>`,
+    `<h2>${{ solo: "Your midnight awaits.", create: "Invite your favorite ghouls.", join: "Secret knock?" }[mode]}</h2><p>${mode === "solo" ? `Level ${profile.level + 1} · ${levels[profile.level].name}. You and three delightfully unreliable rivals.` : mode === "create" ? "Create a room, share its four-letter code, then race together." : "Enter the four-letter code from your host."}</p><form id="play-form">${characterPicker()}<label for="nickname">YOUR NICKNAME</label><input id="nickname" name="name" maxlength="18" value="${esc(profile.name)}" placeholder="Grave guest" autocomplete="nickname">${mode === "join" ? '<label for="room-code">ROOM CODE</label><input id="room-code" name="code" pattern="[A-Za-z]{4}" maxlength="4" required placeholder="ABCD" style="text-transform:uppercase;letter-spacing:6px" autocomplete="off">' : ""}<p id="character-choice-summary" class="character-choice-summary" role="status" aria-live="polite">${profile.team} selected · ${species[profile.team]}</p><div class="actions"><button class="btn" type="submit">${mode === "solo" ? "Let’s race →" : mode === "create" ? "Create room →" : "Join the party →"}</button></div></form>`,
   );
+  $("#play-form").onchange = (e) => {
+    if (e.target.name === "character")
+      $("#character-choice-summary").textContent =
+        `${e.target.value} selected · ${species[e.target.value]}`;
+  };
   $("#play-form").onsubmit = (e) => {
     e.preventDefault();
     const form = new FormData(e.target);
+    const character = form.get("character");
+    if (!names.includes(character)) return;
+    profile.team = character;
+    profile.racer = names.indexOf(character);
+    profile.chosen = true;
     profile.name =
       String(form.get("name") || "Grave guest")
         .trim()
@@ -357,6 +362,8 @@ function playForm(mode, level = profile.level) {
       racer: profile.racer,
       team: profile.team,
       code: form.get("code"),
+      extraLives: profile.extraLives,
+      score: profile.totalScore,
     };
     e.target.querySelector("button").disabled = true;
     connect();
@@ -421,15 +428,19 @@ function connect() {
         );
       }
       successStreak = m.ok ? successStreak + 1 : 0;
-      const text = m.ok
-        ? successStreak >= 3 && successStreak % 3 === 0
-          ? `${successStreak} in a row—spellbinding!`
-          : goodWords[goodCursor++ % goodWords.length]
-        : m.reason === "early"
-          ? "Not yet! Wait for the flame to go out, then tap once."
-          : m.reason === "timeout"
-            ? timeoutWords[missCursor++ % timeoutWords.length]
-            : missWords[missCursor++ % missWords.length];
+      const text = m.lifeBonus
+        ? "500 points—bonus life! Spooktacular!"
+        : m.lifeSaved
+          ? "A spare life saved your glow! Keep going."
+          : m.ok
+            ? successStreak >= 3 && successStreak % 3 === 0
+              ? `${successStreak} in a row—spellbinding!`
+              : goodWords[goodCursor++ % goodWords.length]
+            : m.reason === "early"
+              ? "Not yet! Wait for the flame to go out, then tap once."
+              : m.reason === "timeout"
+                ? timeoutWords[missCursor++ % timeoutWords.length]
+                : missWords[missCursor++ % missWords.length];
       lastFeedback = { id: state?.challenge?.id, ok: m.ok, text };
       if ($("#race-status")) {
         $("#race-status").textContent = text;
@@ -440,6 +451,19 @@ function connect() {
     }
     if (m.type === "state") {
       state = m;
+      const self = m.players.find((p) => p.id === myId);
+      if (
+        m.solo &&
+        self &&
+        Number.isFinite(self.totalScore) &&
+        Number.isFinite(self.reserveLives) &&
+        (profile.totalScore !== self.totalScore ||
+          profile.extraLives !== self.reserveLives)
+      ) {
+        profile.totalScore = self.totalScore;
+        profile.extraLives = self.reserveLives;
+        save();
+      }
       if (m.started && m.started !== raceFeedbackId) {
         raceFeedbackId = m.started;
         successStreak = 0;
@@ -530,13 +554,14 @@ function lobby() {
 }
 function raceView() {
   view = "race";
+  hudKey = "";
   const c = state.challenge;
   const behind = state.players[0].progress - me().progress > 16;
   roundHint = behind
     ? catchupWords[catchupCursor++ % catchupWords.length]
     : "One tap per round. You’ve got this!";
   gameFrame(
-    `<div class="race-top"><span>${state.solo ? `LEVEL ${state.level + 1} · ${levels[state.level].short.toUpperCase()}` : `ROOM ${state.code}`} · TEAM ${me().team.toUpperCase()}</span><button class="text-btn" data-action="leave">Leave race →</button></div><div class="track course-${state.level}">${landscape()}<div class="track-lanes">${[
+    `<div class="race-top"><span>${state.solo ? `LEVEL ${state.level + 1} · ${levels[state.level].short.toUpperCase()}` : `ROOM ${state.code}`} · TEAM ${me().team.toUpperCase()}</span><button class="text-btn" data-action="leave">Leave race →</button></div><aside id="live-race-hud" class="live-race-hud" aria-label="Live race positions"></aside>${state.solo ? '<div id="life-bar" class="life-bar" aria-live="polite"></div>' : ""}<details class="full-track" ${fullTrackOpen ? "open" : ""}><summary>Full race track <span>Show / hide</span></summary><div class="track course-${state.level}">${landscape()}<div class="track-lanes">${[
       ...state.players,
     ]
       .sort((a, b) => a.id.localeCompare(b.id))
@@ -546,11 +571,33 @@ function raceView() {
       )
       .join(
         "",
-      )}</div></div><section class="race-panel level-${state.level}">${state.phase === "countdown" ? `<div style="display:flex;justify-content:center">${ghost(me().team)}</div><div class="countdown" id="countdown">3</div><p class="instruction">Tap the right thing. First to the party wins.</p>` : `<div class="round-meta"><span>ROUND ${c.round + 1} · ${levels[state.level].finishHits} CORRECT TAPS TO FINISH</span><span id="race-time"></span></div><h2>${titles[c.kind]}</h2><p class="instruction">${instructions[c.kind]}</p><div class="timer"><div id="timer-fill"></div></div><div class="choices ${c.kind === 1 || c.kind === 2 ? "single" : ""}">${c.choices.map((v, i) => `<button class="choice ${c.kind === 1 ? "bat-target" : ""} ${c.kind === 3 && c.still !== i ? "rattle" : ""} ${v === "ghost-odd" ? "odd" : ""}" data-action="answer" data-value="${i}" aria-label="${c.kind === 4 ? v + " pieces of candy" : v === "ghost-odd" ? "Tilted ghost" : v}">${c.kind === 4 ? `<span style="display:flex;flex-wrap:wrap;justify-content:center;max-width:110px;margin:auto">${spookyIcon("candy").repeat(v)}</span>` : spookyIcon(v)}</button>`).join("")}</div><div id="response-feedback" class="response-feedback" aria-live="polite"></div><div id="obstacle"></div>`}</section><div class="item-bar"><div><span id="position">4th place</span><small id="item-hint">Every 3 correct taps earns an item.</small></div><button class="item-button" data-action="item" disabled>✧ Empty item slot</button></div><div class="status-line" id="race-status">${roundHint}</div>`,
+      )}</div></div></details><section class="race-panel level-${state.level}">${state.phase === "countdown" ? `<div style="display:flex;justify-content:center">${ghost(me().team)}</div><div class="countdown" id="countdown">3</div><p class="instruction">Tap the right thing. First to the party wins.</p>` : `<div class="round-meta"><span>ROUND ${c.round + 1} · ${levels[state.level].finishHits} CORRECT TAPS TO FINISH</span><span id="race-time"></span></div><h2>${titles[c.kind]}</h2><p class="instruction">${instructions[c.kind]}</p><div class="timer"><div id="timer-fill"></div></div><div class="choices ${c.kind === 1 || c.kind === 2 ? "single" : ""}">${c.choices.map((v, i) => `<button class="choice ${c.kind === 1 ? "bat-target" : ""} ${c.kind === 3 && c.still !== i ? "rattle" : ""} ${v === "ghost-odd" ? "odd" : ""}" data-action="answer" data-value="${i}" aria-label="${c.kind === 4 ? v + " pieces of candy" : v === "ghost-odd" ? "Tilted ghost" : v}">${c.kind === 4 ? `<span style="display:flex;flex-wrap:wrap;justify-content:center;max-width:110px;margin:auto">${spookyIcon("candy").repeat(v)}</span>` : spookyIcon(v)}</button>`).join("")}</div><div id="response-feedback" class="response-feedback" aria-live="polite"></div><div id="obstacle"></div>`}</section><div class="item-bar"><div><span id="position">4th place</span><small id="item-hint">Every 3 correct taps earns an item.</small></div><button class="item-button" data-action="item" disabled>✧ Empty item slot</button></div><div class="status-line" id="race-status">${roundHint}</div>`,
   );
   lastChallenge = c?.id;
 }
+function updateLiveHud() {
+  const hud = $("#live-race-hud");
+  if (!hud) return;
+  const key =
+    state.phase +
+    state.players
+      .map((p) => p.id + Math.floor(p.progress) + p.online + p.eliminated)
+      .join("|");
+  if (key === hudKey) return;
+  hudKey = key;
+  const leader = state.players[0],
+    place = state.players.findIndex((p) => p.id === myId) + 1;
+  hud.innerHTML = `<div class="hud-heading"><strong>${leader.progress === 0 ? "Ready to race!" : leader.id === myId ? "You’re in the lead!" : "Leading: " + esc(leader.name)}</strong><span>You: ${ordinal(place)}</span></div><ol class="hud-order" style="--racers:${state.players.length}">${state.players.map((p, i) => `<li class="hud-player ${p.id === myId ? "hud-you" : ""}" title="${esc(p.name)} · Team ${p.team}"><div><b>${i + 1}</b>${ghost(p.team)}</div><strong>${p.id === myId ? "YOU" : esc(p.name)}</strong><span class="hud-progress"><i style="width:${p.progress}%;background:${colors[p.team]}"></i></span><small>${p.eliminated ? "Out" : Math.round(p.progress) + "%"}</small></li>`).join("")}</ol>`;
+}
+document.addEventListener(
+  "toggle",
+  (e) => {
+    if (e.target.matches?.(".full-track")) fullTrackOpen = e.target.open;
+  },
+  true,
+);
 function updateTrack() {
+  updateLiveHud();
   for (const p of state.players) {
     const el = $(`#runner-${p.id}`);
     if (el) {
@@ -570,6 +617,12 @@ function updateControls() {
     setTimeout(() => bird?.classList.remove("delivering"), 750);
   }
   heldItem = p.item;
+  const hearts = $("#life-bar");
+  const lifeKey = [p.lives, p.totalScore, p.reserveLives].join("/");
+  if (hearts && hearts.dataset.key !== lifeKey) {
+    hearts.dataset.key = lifeKey;
+    hearts.innerHTML = `<span class="hearts" aria-label="${p.lives} hearts remaining">${"♥".repeat(p.lives)}<span>${"♡".repeat(3 - p.lives)}</span></span><span>Score <b>${p.totalScore}</b><small>${500 - (p.totalScore % 500)} to a bonus life</small></span><span>♥ ${p.reserveLives}<small>spare lives</small></span>`;
+  }
   $("#position").textContent =
     `${ordinal(state.players.indexOf(p) + 1)} place · ${Math.round(p.progress)}%`;
   const b = $('[data-action="item"]');
@@ -632,9 +685,9 @@ function finish() {
   const p = me(),
     place = state.players.indexOf(p) + 1,
     winner = state.players[0],
-    elapsed = (winner.finish - state.started) / 1000,
+    elapsed = ((winner.finish || state.finishedAt) - state.started) / 1000,
     won = place === 1;
-  let coins = [80, 55, 40, 30, 25, 20][place - 1] || 20;
+  let coins = p.eliminated ? 10 : [80, 55, 40, 30, 25, 20][place - 1] || 20;
   const rewardKey = state.code + state.started;
   if (lastReward !== rewardKey && !profile.awarded.includes(rewardKey)) {
     lastReward = rewardKey;
@@ -650,7 +703,7 @@ function finish() {
   const top = state.players.slice(0, 3);
   const order = [top[1], top[0], top[2]].filter(Boolean);
   gameFrame(
-    `<main class="result"><div class="eyebrow" style="justify-content:center">${won ? "Fashionably dead. Right on time." : "The party waits for no ghost."}</div>${ghost(winner.team)}<h1>${won ? "You made an entrance!" : `${esc(winner.name)} wins!`}</h1><p class="muted" style="font-size:13px;margin-top:12px">${won ? "Team " + p.team + " is raising the roof." : `You finished ${ordinal(place)}. There’s always another midnight.`}</p>${!won && winner.progress - p.progress < 7 ? '<p style="color:#f2a04e;margin-top:10px">SO CLOSE!</p>' : ""}<div class="podium">${order.map((x) => `<div class="podium-place">${racer(x.racer, x.team, x.id === myId ? profile.hat : "")}<strong>${ordinal(state.players.indexOf(x) + 1)}</strong><span>${esc(x.name)}</span></div>`).join("")}</div><div class="result-rewards"><div>◈ +${coins}<small>COINS EARNED</small></div><div>✦ +${Math.max(5, 50 - (place - 1) * 10)}<small>TEAM POINTS</small></div><div>${Number.isFinite(elapsed) && elapsed > 0 ? elapsed.toFixed(1) + "s" : "2:00"}<small>WINNING TIME</small></div></div>${state.solo ? `<div class="level-result"><span>${"★".repeat(profile.levelStars[state.level] || 0)}${"☆".repeat(3 - (profile.levelStars[state.level] || 0))}</span><p>${profile.levelStars[state.level] ? (state.level === 3 ? "You made it through every gate. The Monster Bash is yours!" : `Next gate open: ${levels[state.level + 1].name}`) : "Place in the top three with 5 correct taps to open the next gate."}</p></div>` : ""}<div class="actions" style="max-width:580px;margin:15px auto">${state.solo && state.level < 3 && profile.unlockedLevel > state.level ? '<button class="btn" data-action="next-level">Next level →</button>' : ""}${state.host === myId ? '<button class="btn" data-action="rematch">One more midnight →</button>' : '<p class="muted">Waiting for the host to rematch…</p>'}<button class="btn secondary" data-action="leave">Back home</button></div></main>`,
+    `<main class="result"><div class="eyebrow" style="justify-content:center">${won ? "Fashionably dead. Right on time." : "The party waits for no ghost."}</div>${ghost(p.eliminated ? p.team : winner.team)}<h1>${p.eliminated ? "Out of glow!" : won ? "You made an entrance!" : `${esc(winner.name)} wins!`}</h1><p class="muted" style="font-size:13px;margin-top:12px">${p.eliminated ? "Your hearts ran out. Retry with three fresh hearts, or stock up on spare lives in the shop." : won ? "Team " + p.team + " is raising the roof." : `You finished ${ordinal(place)}. There’s always another midnight.`}</p>${!won && winner.progress - p.progress < 7 ? '<p style="color:#f2a04e;margin-top:10px">SO CLOSE!</p>' : ""}<div class="podium">${order.map((x) => `<div class="podium-place">${racer(x.racer, x.team, x.id === myId ? profile.hat : "")}<strong>${ordinal(state.players.indexOf(x) + 1)}</strong><span>${esc(x.name)}</span></div>`).join("")}</div><div class="result-rewards"><div>◈ +${coins}<small>COINS EARNED</small></div><div>✦ +${Math.max(5, 50 - (place - 1) * 10)}<small>TEAM POINTS</small></div><div>${Number.isFinite(elapsed) && elapsed > 0 ? elapsed.toFixed(1) + "s" : "2:00"}<small>${p.eliminated ? "RUN TIME" : "WINNING TIME"}</small></div></div>${state.solo ? `<div class="level-result"><span>${"★".repeat(profile.levelStars[state.level] || 0)}${"☆".repeat(3 - (profile.levelStars[state.level] || 0))}</span><p>${profile.levelStars[state.level] ? (state.level === 3 ? "You made it through every gate. The Monster Bash is yours!" : `Next gate open: ${levels[state.level + 1].name}`) : "Place in the top three with 5 correct taps to open the next gate."}</p></div>` : ""}<div class="actions" style="max-width:580px;margin:15px auto">${state.solo && state.level < 3 && profile.unlockedLevel > state.level ? '<button class="btn" data-action="next-level">Next level →</button>' : ""}${state.host === myId ? '<button class="btn" data-action="rematch">One more midnight →</button>' : '<p class="muted">Waiting for the host to rematch…</p>'}<button class="btn secondary" data-action="leave">Back home</button></div></main>`,
   );
   sound(true);
   confetti();
@@ -740,6 +793,18 @@ document.addEventListener("click", (e) => {
     return toast(`The pumpkin has spoken. Team ${profile.team}!`);
   }
   if (action === "shop") return shop();
+  if (action === "buy-life") {
+    if (profile.extraLives >= 99) return;
+    if (profile.coins < 80)
+      return toast("An extra life costs 80 coins. Earn more by racing!");
+    profile.coins -= 80;
+    profile.extraLives++;
+    save();
+    home();
+    shop();
+    toast("One extra life added to your stash!");
+    return;
+  }
   if (action === "buy") {
     const owned = profile.unlocks.includes(value),
       price = ["Ghost witch hat", "Moonlit tint"].includes(value) ? 90 : 60;
