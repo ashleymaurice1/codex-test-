@@ -8,7 +8,8 @@
     "dev": "node --watch server.js",
     "test": "node --test",
     "test:browser": "node scripts/browser-check.cjs",
-    "test:rooms-browser": "node scripts/rooms-browser-check.cjs"
+    "test:rooms-browser": "node scripts/rooms-browser-check.cjs",
+    "test:campaign-browser": "node scripts/campaign-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

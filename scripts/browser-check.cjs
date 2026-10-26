@@ -20,6 +20,8 @@ const assert = require("node:assert/strict");
           team: "Mach",
           name: "Test ghoul",
           coins: 200,
+          level: 3,
+          unlockedLevel: 3,
         }),
       ),
   );
@@ -27,7 +29,8 @@ const assert = require("node:assert/strict");
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(process.env.GAME_URL || "http://127.0.0.1:3000");
-  await page.locator("[data-action=solo]").click();
+  await page.locator("[data-action=solo]").first().click();
+  await page.locator('[data-action=level][data-value="3"]').last().click();
   await page.locator("#play-form button").click();
   await page.waitForSelector(".choices");
   const seen = new Set();

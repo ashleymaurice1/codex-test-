@@ -126,3 +126,19 @@ test("Sunrise blinds the leader while Arm Toss hits the racer immediately ahead"
   assert.equal(leader.blockedUntil, 4500);
   assert.equal(leader.effect, "Sunrise");
 });
+test("rival bots use boosts and save targeted attacks until a racer is ahead", () => {
+  const { p, r } = setup();
+  const bot = E.player("Pumpkin Pete", 3, "Ember", true);
+  bot.progress = 50;
+  r.players.push(bot);
+  bot.item = "Sugar Rush";
+  assert.equal(E.botWantsItem(r, bot), true);
+  bot.item = "Arm Toss";
+  assert.equal(E.botWantsItem(r, bot), false);
+  p.progress = 60;
+  assert.equal(E.botWantsItem(r, bot), true);
+  bot.item = "Sunrise";
+  assert.equal(E.botWantsItem(r, bot), true);
+  bot.finish = 1500;
+  assert.equal(E.botWantsItem(r, bot), false);
+});

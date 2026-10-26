@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const LEVELS = require("./public/levels");
 const TEAMS = ["Mach", "Slink", "Ember", "Misty"];
 const RACERS = ["Stumbles", "Tutu Tina", "Barkley", "Pumpkin Pete"];
 const ITEMS = [
@@ -8,9 +9,12 @@ const ITEMS = [
   "Brain Freeze",
   "Sunrise",
 ];
-function challenge(round, now, random = Math.random) {
-  const kind = round % 6;
-  const duration = Math.max(2500, 3400 - round * 20);
+function challenge(round, now, random = Math.random, levelId = null) {
+  const level = Number.isInteger(levelId) ? LEVELS[levelId] : null;
+  const kind = level ? level.kinds[round % level.kinds.length] : round % 6;
+  const duration = level
+    ? Math.max(level.floor, level.pace - round * 18)
+    : Math.max(2500, 3400 - round * 20);
   let choices, answer;
   const pick = (n) => Math.floor(random() * n);
   if (kind === 0) {
@@ -126,6 +130,13 @@ function answer(room, p, id, index, now = Date.now()) {
   }
   return ok;
 }
+function botWantsItem(room, p) {
+  if (!p.item || p.finish || !p.online) return false;
+  if (p.item === "Sugar Rush") return true;
+  if (p.item === "Tombstone Drop")
+    return room.players.some((x) => x !== p && !x.finish && x.online);
+  return rank(room).indexOf(p) > 0;
+}
 function useItem(room, p, now = Date.now()) {
   if (
     room.phase !== "race" ||
@@ -162,6 +173,7 @@ function useItem(room, p, now = Date.now()) {
 }
 module.exports = {
   TEAMS,
+  LEVELS,
   RACERS,
   ITEMS,
   challenge,
@@ -170,4 +182,5 @@ module.exports = {
   answer,
   useItem,
   awardItem,
+  botWantsItem,
 };

@@ -1252,3 +1252,747 @@ input {
   box-shadow: inset 0 0 40px #b8d4ff77;
   border: 3px solid #b8d4ff;
 }
+/* Cinematic character art: rendered assets retain their transparent silhouettes. */
+:root {
+  --ink: #0b111d;
+  --panel: #152131;
+  --line: #b8d4ff22;
+  --muted: #a1afc2;
+  --orange: #f0ad5b;
+}
+body {
+  background:
+    radial-gradient(ellipse at 50% 10%, #17273e55, transparent 50%), var(--ink);
+}
+.ghost-art,
+.racer-art {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.ghost-art {
+  width: 160px;
+  height: 130px;
+}
+.ghost-art > img,
+.racer-art > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+.racer-art {
+  width: 120px;
+  height: 150px;
+  filter: drop-shadow(0 7px 8px #0005);
+}
+.ghost-art {
+  filter: drop-shadow(0 0 8px #b8d4ff40);
+}
+.ghost-ember {
+  filter: drop-shadow(0 0 8px #f2a04e30);
+}
+.hero {
+  height: 510px;
+  border-color: #b8d4ff27;
+  box-shadow: 0 15px 60px #0003;
+}
+.cinematic-landscape {
+  background-image: url("/assets/midnight-village.webp");
+  background-size: cover;
+  background-position: center 38%;
+  pointer-events: none;
+}
+.hero:after {
+  background:
+    linear-gradient(90deg, #080e1ad9 0%, #080e1a77 40%, #080e1a08 68%),
+    linear-gradient(0deg, #080e1a55, transparent 35%);
+}
+.hero-copy {
+  padding-top: 63px;
+}
+.hero h1 {
+  font-size: 89px;
+  color: #ecf1ec;
+  text-shadow:
+    0 0 25px #b8d4ff33,
+    0 4px 15px #0008;
+}
+.hero h1 span {
+  color: #f2b565;
+  text-shadow: 0 0 23px #eaa34b33;
+}
+.hero-mach {
+  width: 390px !important;
+  height: 285px !important;
+  right: 6%;
+  top: 174px;
+  filter: drop-shadow(0 0 14px #b8d4ff44);
+}
+.hero-caption {
+  bottom: 24px;
+  right: 30px;
+  color: #d1e4ff;
+}
+.hero-badge {
+  color: #c2d2e4;
+}
+.hero-badge b {
+  color: #f2b565;
+}
+.play-card {
+  background: linear-gradient(130deg, #1b2a3d, #111c2a);
+  border-color: #b8d4ff22;
+  box-shadow: inset 0 1px #d9e7ff08;
+}
+.play-card.primary {
+  background: linear-gradient(110deg, #57402c, #292b2e);
+  border-color: #edb46d70;
+  box-shadow:
+    inset 0 1px #ffe0af22,
+    0 0 25px #edb46d09;
+}
+.card-icon {
+  color: #b8d4ff;
+}
+.btn {
+  background: linear-gradient(#f7c17e, #e7a14f);
+  box-shadow:
+    0 3px 0 #815629,
+    0 5px 18px #f2a04e14;
+  border-color: #ffe3ab55;
+}
+.btn.secondary {
+  background: #192a3c;
+  border-color: #b8d4ff44;
+  color: #d2e4fa;
+  box-shadow: none;
+}
+.ghost-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.ghost-card {
+  border: 1px solid #b8d4ff22;
+  border-radius: 12px;
+  background: linear-gradient(150deg, #1b2a3c, #101927);
+  position: relative;
+  overflow: hidden;
+  padding: 16px 12px 19px;
+  isolation: isolate;
+}
+.ghost-card:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    var(--spirit),
+    transparent 65%
+  );
+  opacity: 0.1;
+  z-index: -1;
+}
+.ghost-card.selected {
+  border-color: var(--spirit);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--spirit) 12%, transparent);
+}
+.ghost-card .ghost-art {
+  height: 165px;
+  width: 100%;
+  animation: float 6s ease-in-out infinite;
+}
+.ghost-card:nth-child(2) .ghost-art {
+  animation-delay: -1s;
+}
+.ghost-card:nth-child(3) .ghost-art {
+  animation-delay: -2s;
+}
+.ghost-card:nth-child(4) .ghost-art {
+  animation-delay: -3s;
+}
+.ghost-card h3 {
+  font:
+    33px "Grenze Gotisch",
+    Georgia,
+    serif;
+  color: var(--spirit);
+  margin-top: 2px;
+}
+.ghost-species {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #d4dfed;
+  display: block;
+  margin-top: 6px;
+}
+.ghost-card p {
+  font-size: 11px;
+  color: #a1afc2;
+  margin: 10px 0 16px;
+}
+.ghost-card small {
+  color: var(--spirit);
+  font-size: 10px;
+}
+.ghost-gallery {
+  margin: 25px 0 32px;
+}
+.ghost-gallery .section-top p {
+  line-height: 1.6;
+}
+.journey-preview {
+  margin: 27px 0 10px;
+  border: 1px solid #b8d4ff22;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #172538, #0e1826);
+  padding: 25px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+.journey-preview h2 {
+  font:
+    30px "Grenze Gotisch",
+    Georgia,
+    serif;
+  margin: 9px 0 7px;
+}
+.journey-preview p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.journey-preview .eyebrow {
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+.journey-path {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  gap: 10px;
+  padding-top: 10px;
+}
+.journey-path:before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 33px;
+  height: 1px;
+  background: #e7aa5860;
+}
+.journey-stop {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  border: 0;
+  text-align: center;
+  padding: 0 0 8px;
+}
+.journey-stop b {
+  display: grid;
+  place-items: center;
+  margin: 0 auto 11px;
+  width: 48px;
+  height: 48px;
+  background: #152335;
+  border: 1px solid #809bbd66;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #b8d4ff;
+}
+.journey-stop.current b {
+  border-color: #efb66c;
+  color: #efb66c;
+  box-shadow: 0 0 20px #f2a04e22;
+}
+.journey-stop span {
+  font-size: 8px;
+  color: #a1afc2;
+  letter-spacing: 1px;
+  display: block;
+}
+.journey-stop strong {
+  font-size: 12px;
+  display: block;
+  margin: 6px 0;
+}
+.journey-stop small {
+  color: #efb66c;
+  letter-spacing: 3px;
+  font-size: 13px;
+}
+.journey-stop.locked {
+  opacity: 0.4;
+}
+.level-list {
+  display: grid;
+  gap: 11px;
+  margin-top: 22px;
+}
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 85px;
+  background: #122033;
+  border: 1px solid #b8d4ff33;
+  border-radius: 10px;
+  padding: 13px;
+  text-align: left;
+}
+.level-row > b {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid #e7aa5866;
+  border-radius: 50%;
+  color: #efb66c;
+  font:
+    24px "Grenze Gotisch",
+    serif;
+}
+.level-row strong {
+  font-size: 12px;
+  display: block;
+}
+.level-row small {
+  color: #9cafc5;
+  font-size: 10px;
+  line-height: 1.6;
+  display: block;
+  margin-top: 5px;
+}
+.level-row em {
+  font-size: 12px;
+  color: #efb66c;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.team-box {
+  background: #111d2c;
+}
+.team-box .ghost-art {
+  width: 115px;
+  height: 85px;
+}
+.team-detail {
+  gap: 10px;
+}
+.teams .team-option {
+  background: #122033;
+}
+.teams .team-option .ghost-art {
+  width: 140px;
+  height: 105px;
+  max-width: 100%;
+  padding: 0;
+}
+.team-option span {
+  padding: 0;
+}
+.mini-racer .racer-art {
+  height: 155px;
+  width: 140px;
+  max-width: 100%;
+  padding: 0;
+  margin: 0 auto;
+}
+.mini-racer .team-ribbon {
+  padding: 0;
+  margin: 0;
+}
+.mini-racer.selected {
+  background: radial-gradient(ellipse at 50% 65%, #e7aa5812, transparent 75%);
+  box-shadow: inset 0 -2px #edb46d;
+}
+.team-ribbon {
+  position: absolute !important;
+  display: block !important;
+  width: 14%;
+  height: 8%;
+  padding: 0 !important;
+  left: 65%;
+  top: 33%;
+  background: var(--ribbon);
+  border-radius: 3px;
+  rotate: -17deg;
+  mix-blend-mode: color;
+  pointer-events: none;
+}
+.racer-1 .team-ribbon {
+  left: 47%;
+  top: 36%;
+  rotate: 18deg;
+}
+.racer-2 .team-ribbon {
+  left: 69%;
+  top: 48%;
+}
+.racer-3 .team-ribbon {
+  left: 60%;
+  top: 35%;
+  rotate: 18deg;
+}
+.moonlit-tint > img {
+  filter: hue-rotate(40deg) brightness(1.1);
+}
+.costume-art {
+  position: absolute;
+  top: 13%;
+  left: 59%;
+  width: 31%;
+  height: 25%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px #0007);
+}
+.racer-1 .costume-art {
+  left: 29%;
+  top: 13%;
+}
+.racer-2 .costume-art {
+  left: 61%;
+  top: 17%;
+}
+.racer-3 .costume-art {
+  left: 43%;
+  top: 13%;
+}
+.costume-art.bow-tie {
+  top: 34%;
+  left: 56%;
+  width: 19%;
+  height: 14%;
+}
+.ghost-costume {
+  top: 12%;
+  left: 74%;
+  width: 20%;
+  height: 25%;
+}
+.ghost-slink .ghost-costume {
+  left: 76%;
+  top: 12%;
+}
+.ghost-misty .ghost-costume {
+  top: 23%;
+  left: 43%;
+}
+.track {
+  border-color: #b8d4ff33;
+  background: #0a1727;
+}
+.track .cinematic-landscape {
+  opacity: 0.75;
+  background-position: 65% 45%;
+  filter: saturate(0.85);
+}
+.track:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #07101d44, #07101d11);
+  z-index: 1;
+  pointer-events: none;
+}
+.track-lanes {
+  z-index: 2;
+}
+.course-0 .cinematic-landscape {
+  background-position: 15% 55%;
+}
+.course-1 .cinematic-landscape {
+  background-position: 90% 78%;
+}
+.course-2 .cinematic-landscape {
+  background-position: 82% 40%;
+}
+.course-3 .cinematic-landscape {
+  background-position: 75% 10%;
+}
+.lane {
+  border-color: #b8d4ff33;
+}
+.runner .racer-art {
+  width: 66px;
+  height: 59px;
+  filter: drop-shadow(0 3px 3px #0009);
+}
+.runner .ghost-art {
+  width: 64px;
+  height: 49px;
+  margin-left: -18px;
+}
+.runner-name {
+  bottom: 51px;
+  font-size: 8px;
+  text-shadow: 0 1px 3px #000;
+}
+.runner .racer-art .costume-art {
+  height: 30%;
+}
+.runner.broken .racer-art {
+  animation: puppet-tumble 0.35s infinite alternate;
+}
+.race-panel {
+  background: radial-gradient(ellipse at top, #22364c, #111c2c);
+  border-color: #b8d4ff33;
+}
+.choice {
+  background: linear-gradient(150deg, #253b52, #142437);
+  border-color: #b8d4ff33;
+  box-shadow:
+    inset 0 2px #e2efff0b,
+    0 3px 0 #080e18;
+}
+.choice:hover {
+  background: linear-gradient(150deg, #364a5d, #243348);
+  border-color: #e7aa58;
+}
+.timer div {
+  box-shadow: 0 0 12px #f2a04e77;
+}
+.item-bar {
+  background: #111e2d;
+}
+.level-result {
+  margin: 5px auto 24px;
+  padding: 16px;
+  max-width: 480px;
+  border: 1px solid #e7aa5833;
+  border-radius: 10px;
+  background: #e7aa5808;
+}
+.level-result > span {
+  font-size: 28px;
+  letter-spacing: 9px;
+  color: #efb66c;
+}
+.level-result p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #cfdae8;
+  margin-top: 8px;
+}
+.podium-place .racer-art {
+  height: 145px;
+  width: 100%;
+}
+.lobby-player {
+  background: #122033;
+}
+.result .ghost-art {
+  width: 260px;
+  height: 170px;
+}
+.item-button {
+  background: linear-gradient(120deg, #6c4826, #3c2f25);
+  border-color: #e7aa5880;
+}
+dialog {
+  background: linear-gradient(140deg, #1c2b40, #101a29);
+  border-color: #87a3c766;
+}
+input {
+  background: #0b1523;
+  border-color: #87a3c744;
+}
+@keyframes puppet-tumble {
+  to {
+    rotate: 18deg;
+    translate: -5px 8px;
+    filter: drop-shadow(0 3px 3px #f2a04e55);
+  }
+}
+@media (max-width: 700px) {
+  .hero {
+    height: 480px;
+  }
+  .hero-copy {
+    padding: 33px 24px;
+  }
+  .hero h1 {
+    font-size: 73px;
+  }
+  .hero-copy p {
+    max-width: 200px;
+  }
+  .hero .cinematic-landscape {
+    width: 100%;
+    left: 0;
+    background-position: 72% 40%;
+  }
+  .hero:after {
+    background: linear-gradient(90deg, #080e1ac4, #080e1a44 80%);
+  }
+  .hero-mach {
+    width: 255px !important;
+    height: 185px !important;
+    right: -7px;
+    top: 263px;
+  }
+  .hero-badge {
+    font-size: 7px;
+    letter-spacing: 0.7px;
+    gap: 5px;
+    margin-top: 23px;
+  }
+  .hero-caption {
+    bottom: 18px;
+    right: 19px;
+  }
+  .ghost-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .ghost-card {
+    padding: 11px 8px 15px;
+  }
+  .ghost-card .ghost-art {
+    height: 120px;
+  }
+  .ghost-card h3 {
+    font-size: 30px;
+  }
+  .ghost-card p {
+    font-size: 10px;
+    margin-bottom: 13px;
+  }
+  .ghost-species {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .ghost-card small {
+    font-size: 9px;
+  }
+  .journey-preview {
+    padding: 20px 14px;
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+  .journey-preview h2 {
+    font-size: 28px;
+  }
+  .journey-preview .btn {
+    justify-self: start;
+    padding: 10px 14px;
+    font-size: 10px;
+  }
+  .journey-preview p {
+    font-size: 10px;
+  }
+  .journey-preview .eyebrow {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .journey-path {
+    gap: 0;
+    padding-top: 4px;
+  }
+  .journey-path:before {
+    top: 26px;
+  }
+  .journey-stop b {
+    width: 43px;
+    height: 43px;
+    font-size: 20px;
+  }
+  .journey-stop strong {
+    font-size: 9px;
+    line-height: 1.5;
+  }
+  .journey-stop span {
+    font-size: 7px;
+  }
+  .journey-stop small {
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+  .mini-racer .racer-art {
+    width: 90px;
+    height: 108px;
+  }
+  .mini-racer > span:last-child {
+    font-size: 9px;
+  }
+  .team-box .ghost-art {
+    width: 130px;
+    height: 92px;
+  }
+  .runner .racer-art {
+    width: 51px;
+    height: 52px;
+  }
+  .runner .ghost-art {
+    width: 50px;
+    height: 42px;
+    margin-left: -13px;
+  }
+  .runner-name {
+    bottom: 46px;
+    font-size: 7px;
+  }
+  .podium-place .racer-art {
+    height: 105px;
+  }
+  .result .ghost-art {
+    height: 140px;
+    width: 230px;
+  }
+  .level-list .level-row {
+    padding: 11px;
+    gap: 10px;
+  }
+  .level-row strong {
+    font-size: 11px;
+  }
+  .level-row small {
+    font-size: 9px;
+  }
+  .level-row em {
+    font-size: 10px;
+  }
+  .level-result p {
+    font-size: 11px;
+  }
+}
+.bottom-grid > div {
+  min-width: 0;
+}
+.racer-strip {
+  min-width: 0;
+}
+.mini-racer {
+  min-width: 0;
+  width: 0;
+}
+.small-heading {
+  gap: 8px;
+}
+.small-heading > span {
+  min-width: 0;
+}
+.small-heading .text-btn {
+  flex-shrink: 1;
+  min-width: 0;
+}
+.team-progress {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+@media (max-width: 700px) {
+  .bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

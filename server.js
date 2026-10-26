@@ -38,6 +38,7 @@ const server = http.createServer((req, res) => {
           ".svg": "image/svg+xml",
           ".ttf": "font/ttf",
           ".m4a": "audio/mp4",
+          ".webp": "image/webp",
         }[path.extname(file)] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
     });
@@ -54,6 +55,7 @@ function snapshot(r) {
     type: "state",
     code: r.code,
     solo: r.solo,
+    level: r.level,
     host: r.host,
     phase: r.phase,
     bots: r.bots,
@@ -135,12 +137,10 @@ function start(r) {
       const used = r.players.map((p) => p.team);
       const team =
         E.TEAMS.find((t) => !used.includes(t)) || E.TEAMS[r.players.length % 4];
-      const p = E.player(
-        ["Rattle", "Nibbles", "Crumb"][r.players.length - 1] || "Bones",
-        r.players.length % 4,
-        team,
-        true,
-      );
+      const racerId =
+        [0, 1, 2, 3].find((id) => !r.players.some((p) => p.racer === id)) ??
+        r.players.length % 4;
+      const p = E.player(E.RACERS[racerId], racerId, team, true);
       p.personality = ["fast", "steady", "average"][(r.players.length - 1) % 3];
       r.players.push(p);
     }
@@ -153,7 +153,7 @@ function start(r) {
 }
 function newChallenge(r, now) {
   r.round++;
-  r.challenge = E.challenge(r.round, now);
+  r.challenge = E.challenge(r.round, now, Math.random, r.level);
   for (const p of r.players) {
     if (p.bot) {
       p.planned =
@@ -163,6 +163,7 @@ function newChallenge(r, now) {
           : p.personality === "steady"
             ? 1700 + Math.random() * 900
             : 900 + Math.random() * 1500);
+      p.planned = now + (p.planned - now) * E.LEVELS[r.level].botDelay;
       p.sloppy = p.personality === "fast";
     } else if (r.round > 0 && !p.finish && p.answered !== r.previous) {
       p.blockedUntil = Math.max(p.blockedUntil, now + 100);
@@ -191,11 +192,13 @@ let tick = setInterval(() => {
           if (p.stones) p.stones--;
           if (p.planned <= now && p.answered !== r.challenge.id) {
             const index =
-              p.sloppy && Math.random() < 0.22 ? -1 : r.challenge.answer[0];
+              Math.random() < E.LEVELS[r.level].botMiss + (p.sloppy ? 0.16 : 0)
+                ? -1
+                : r.challenge.answer[0];
             if (r.challenge.kind !== 2 || now >= r.challenge.extinguish)
               E.answer(r, p, r.challenge.id, index, now);
           }
-          if (p.item && Math.random() < 0.025) {
+          if (E.botWantsItem(r, p) && Math.random() < 0.008 + r.level * 0.006) {
             const event = E.useItem(r, p, now);
             if (event)
               r.events.push({
@@ -258,6 +261,12 @@ wss.on("connection", (ws) => {
             players: [],
             phase: "lobby",
             solo: !!m.solo,
+            level:
+              m.solo && Number.isInteger(m.level) && m.level >= 0 && m.level < 4
+                ? m.level
+                : m.solo
+                  ? 0
+                  : 3,
             bots: true,
             events: [],
             active: now,
