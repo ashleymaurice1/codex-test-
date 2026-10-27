@@ -39,7 +39,7 @@ const assert = require("node:assert/strict");
     for (const r of rendered) {
       assert.equal(r.meter, 3);
       assert.ok(r.peak < 0.8 && r.peak > 0.02);
-      assert.ok(r.rms > 0.008 && r.rms < 0.15);
+      assert.ok(r.rms > 0.002 && r.rms < 0.06);
     }
     assert.deepEqual(errors, []);
     console.log(

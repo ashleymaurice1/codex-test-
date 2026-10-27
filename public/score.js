@@ -37,7 +37,7 @@
         if (phrase === 2 && bar % 4 === 0 && step === 0)
           degree = chords[bar % 8][1] - tonic;
         if (phrase === 4 && bar % 8 === 7 && step === 1) degree = 0;
-        return tonic + 24 + degree;
+        return tonic + 12 + degree;
       },
     };
   }

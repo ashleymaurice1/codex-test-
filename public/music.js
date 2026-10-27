@@ -18,27 +18,27 @@
   const timbres = {
     celesta: [
       [1, 1],
-      [2.76, 0.19],
-      [4.12, 0.075],
-      [5.43, 0.025],
+      [2, 0.055],
+      [3, 0.015],
+      [4, 0.004],
     ],
     pizzicato: [
       [1, 0.8],
-      [2, 0.18],
-      [3, 0.07],
-      [4, 0.025],
+      [2, 0.09],
+      [3, 0.025],
+      [4, 0.008],
     ],
     reed: [
       [1, 0.8],
       [2, 0.08],
-      [3, 0.2],
-      [5, 0.045],
+      [3, 0.035],
+      [5, 0.008],
     ],
     organ: [
       [1, 0.7],
       [2, 0.2],
       [3, 0.075],
-      [4, 0.025],
+      [4, 0.008],
     ],
     bass: [
       [1, 1],
@@ -58,7 +58,7 @@
   ) {
     const frequency = 440 * Math.pow(2, (midi - 69) / 12);
     const attack =
-      instrument === "organ" ? 0.16 : instrument === "reed" ? 0.055 : 0.008;
+      instrument === "organ" ? 0.2 : instrument === "reed" ? 0.1 : 0.045;
     const end = time + Math.max(duration, attack + 0.04);
     for (const [ratio, weight] of timbres[instrument]) {
       const o = ac.createOscillator(),
@@ -94,14 +94,14 @@
       beat = song.beat;
     const dynamic = phrase === 2 ? 0.72 : phrase === 4 ? 0.9 : 1;
     if (p !== null) {
-      const lead = phrase === 2 ? "reed" : song.lead;
+      const lead = song.lead === "reed" ? "organ" : song.lead;
       voice(
         ac,
         destination,
         p,
         time,
         beat * (lead === "reed" ? 1.05 : 1.45),
-        0.12 * dynamic,
+        0.085 * dynamic,
         lead,
         tracked,
       );
@@ -114,7 +114,7 @@
         chord[0] - 12,
         time,
         beat * 0.72,
-        0.09,
+        0.045,
         "bass",
         tracked,
       );
@@ -138,22 +138,11 @@
           n + 12,
           time,
           beat * 0.48,
-          0.023 * dynamic,
+          0.012 * dynamic,
           "pizzicato",
           tracked,
         );
     }
-    if (step === 0 && bar % 8 === 0)
-      voice(
-        ac,
-        destination,
-        chord[0] + 36,
-        time,
-        beat * 2.6,
-        0.012,
-        "celesta",
-        tracked,
-      );
   }
   function updateVolume() {
     if (master)
@@ -161,10 +150,10 @@
         muted || document.hidden
           ? 0
           : scene === "maze"
-            ? 0.36
+            ? 0.3
             : scene === "rhythm"
-              ? 0.56
-              : 0.44,
+              ? 0.46
+              : 0.36,
         ctx.currentTime,
         0.6,
       );
@@ -188,9 +177,9 @@
       comp = ac.createDynamicsCompressor();
     out.gain.value = level;
     filter.type = "lowpass";
-    filter.frequency.value = 5200;
+    filter.frequency.value = 2800;
     delay.delayTime.value = 0.19;
-    send.gain.value = 0.09;
+    send.gain.value = 0.045;
     comp.threshold.value = -18;
     comp.ratio.value = 2.5;
     filter.connect(out);
@@ -282,7 +271,7 @@
       const song = root.MidnightScore.getSong(stage),
         rate = 22050,
         ac = new OfflineAudioContext(2, Math.ceil(seconds * rate), rate),
-        mix = createMix(ac, ac.destination, 0.56);
+        mix = createMix(ac, ac.destination, 0.46);
       for (let i = 0; i * song.beat < seconds; i++)
         arrangeBeat(ac, mix.filter, song, i, i * song.beat + 0.03);
       return ac.startRendering();
