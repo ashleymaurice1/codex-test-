@@ -1,284 +1,173 @@
-/* Original haunted chamber waltzes: celesta, pizzicato, reeds and soft organ. */
+/* Finished, full-length instrumental recordings. No synthesized music or short-note loops. */
 (function (root) {
   let ctx,
     master,
-    bus,
-    echo,
-    echoGain,
-    compressor,
-    timer = null,
-    origin = 0,
-    nextBeat = 0,
     muted = false,
+    volume = 0.35,
     scene = "menu",
+    previewing = false,
+    source = null,
+    sourceGain = null,
+    sourceOffset = 0,
+    origin = 0,
+    playingStage = 0,
+    homeStage = 0,
+    homePosition = 0,
     transportPaused = false,
-    totalNotes = 0;
-  let score = root.MidnightScore.getSong(0);
-  const voices = new Set();
-  const sampled = new Map();
-  let sampleLoad = null,
-    sampleError = null;
-  const instruments = {
-    celesta: "acoustic_grand_piano",
-    pizzicato: "orchestral_harp",
-    reed: "string_ensemble_1",
-    organ: "string_ensemble_1",
-    bass: "contrabass",
-  };
-  async function ready() {
-    if (sampleLoad) return sampleLoad;
-    sampleLoad = (async () => {
-      const response = await fetch("/assets/audio/instruments/manifest.json");
-      if (!response.ok) throw new Error("Instrument library could not load");
-      const manifest = await response.json();
-      const decoder = new OfflineAudioContext(1, 1, 44100);
-      await Promise.all(
-        Object.entries(manifest).map(async ([name, notes]) => {
-          const bank = await Promise.all(
-            notes.map(async (midi) => {
-              const r = await fetch(
-                `/assets/audio/instruments/${name}-${midi}.mp3`,
-              );
-              if (!r.ok) throw new Error("Instrument sample could not load");
-              return {
-                midi,
-                buffer: await decoder.decodeAudioData(await r.arrayBuffer()),
-              };
-            }),
-          );
-          sampled.set(name, bank);
-        }),
-      );
-    })().catch((error) => {
-      sampleError = error.message;
-      sampleLoad = null;
-      sampled.clear();
-      throw error;
-    });
-    return sampleLoad;
-  }
-  function voice(
-    ac,
-    destination,
-    midi,
-    time,
-    duration,
-    volume,
-    instrument,
-    tracked,
-  ) {
-    const bank = sampled.get(instruments[instrument]);
-    if (!bank) return;
-    const sample = bank.reduce((best, n) =>
-      Math.abs(n.midi - midi) < Math.abs(best.midi - midi) ? n : best,
-    );
-    const source = ac.createBufferSource(),
-      gain = ac.createGain();
-    source.buffer = sample.buffer;
-    source.playbackRate.value = Math.pow(2, (midi - sample.midi) / 12);
-    const sustained = instrument === "organ" || instrument === "reed";
-    const attack = sustained ? 0.16 : 0.012,
-      release = sustained ? 0.48 : 0.28;
-    const level =
-      volume * 4 * (sustained ? 1.6 : instrument === "bass" ? 2.3 : 2.8);
-    gain.gain.setValueAtTime(0.00001, time);
-    gain.gain.exponentialRampToValueAtTime(
-      Math.max(0.00002, level),
-      time + attack,
-    );
-    gain.gain.setValueAtTime(
-      Math.max(0.00002, level * (sustained ? 0.8 : 0.6)),
-      time + Math.max(attack, duration * 0.6),
-    );
-    gain.gain.exponentialRampToValueAtTime(0.00001, time + duration + release);
-    source.connect(gain).connect(destination);
-    if (tracked) {
-      tracked.add(source);
-      source.onended = () => tracked.delete(source);
-    }
-    source.start(time);
-    source.stop(time + duration + release + 0.02);
-  }
-  function arrangeBeat(ac, destination, song, index, time, tracked) {
-    const bar = Math.floor(index / song.beatsPerBar),
-      step = index % song.beatsPerBar,
-      phrase = Math.floor(bar / 8) % 5,
-      chord = song.chords[bar % song.chords.length],
-      p = song.noteAtBeat(index),
-      beat = song.beat;
-    const dynamic = phrase === 2 ? 0.72 : phrase === 4 ? 0.9 : 1;
-    if (p !== null) {
-      const lead = song.lead === "reed" ? "organ" : song.lead;
-      voice(
-        ac,
-        destination,
-        p,
-        time,
-        beat * (lead === "reed" ? 1.05 : 1.45),
-        0.085 * dynamic,
-        lead,
-        tracked,
-      );
-    }
-    // The dancing bass-and-two-plucks pattern makes the 3/4 pulse audible.
-    if (step === 0 || (song.beatsPerBar === 4 && step === 2)) {
-      voice(
-        ac,
-        destination,
-        chord[0] - 12 + (step === 2 ? 7 : 0),
-        time,
-        beat * 0.72,
-        0.045,
-        "bass",
-        tracked,
-      );
-      if (step === 0 && bar % 4 === 0)
-        for (const n of chord.slice(0, 3))
-          voice(
-            ac,
-            destination,
-            n + 12,
-            time,
-            beat * 2.85,
-            0.008,
-            "organ",
-            tracked,
-          );
-    } else {
-      for (const n of chord.slice(0, 3))
-        voice(
-          ac,
-          destination,
-          n + 12,
-          time,
-          beat * 0.48,
-          0.012 * dynamic,
-          "pizzicato",
-          tracked,
-        );
-    }
-  }
-  function updateVolume() {
-    if (master)
-      master.gain.setTargetAtTime(
-        muted || document.hidden || scene !== "rhythm"
-          ? 0
-          : scene === "maze"
-            ? 0.3
-            : scene === "rhythm"
-              ? 0.46
-              : 0.36,
-        ctx.currentTime,
-        0.6,
-      );
-  }
-  function schedule() {
-    if (!ctx || sampled.size !== 4 || scene !== "rhythm") return;
-    while (origin + nextBeat * score.beat < ctx.currentTime + 0.35) {
-      const t = origin + nextBeat * score.beat;
-      if (t >= ctx.currentTime - 0.04) {
-        arrangeBeat(ctx, bus, score, nextBeat, t, voices);
-        if (score.noteAtBeat(nextBeat) !== null) totalNotes++;
-      }
-      nextBeat++;
-    }
-  }
-  function createMix(ac, destination, level) {
-    const out = ac.createGain(),
-      filter = ac.createBiquadFilter(),
-      delay = ac.createDelay(1),
-      send = ac.createGain(),
-      comp = ac.createDynamicsCompressor();
-    out.gain.value = level;
-    filter.type = "lowpass";
-    filter.frequency.value = 2800;
-    delay.delayTime.value = 0.19;
-    send.gain.value = 0.045;
-    comp.threshold.value = -18;
-    comp.ratio.value = 2.5;
-    filter.connect(out);
-    filter.connect(delay);
-    delay.connect(send).connect(out);
-    out.connect(comp).connect(destination);
-    return { out, filter, delay, send, comp };
-  }
+    generation = 0;
+  const buffers = new Map(),
+    loading = new Map();
   function ensure() {
     if (ctx) return;
     const AC = root.AudioContext || root.webkitAudioContext;
     if (!AC) return;
     ctx = new AC();
-    const mix = createMix(ctx, ctx.destination, 0);
-    master = mix.out;
-    bus = mix.filter;
-    echo = mix.delay;
-    echoGain = mix.send;
-    compressor = mix.comp;
-    origin = ctx.currentTime + 0.08;
-    timer = setInterval(schedule, 80);
-    ready()
-      .then(() => {
-        origin = ctx.currentTime + 0.08;
-        nextBeat = 0;
-        schedule();
-      })
-      .catch(() => {});
+    master = ctx.createGain();
+    master.gain.value = 0;
+    master.connect(ctx.destination);
     document.addEventListener("visibilitychange", updateVolume);
   }
+  function updateVolume() {
+    if (master)
+      master.gain.setTargetAtTime(
+        muted || previewing || document.hidden
+          ? 0
+          : volume * (scene === "rhythm" ? 1 : 0.65),
+        ctx.currentTime,
+        0.35,
+      );
+  }
+  async function ready(stage = 0) {
+    stage = Math.max(0, Math.min(4, Number(stage) || 0));
+    if (buffers.has(stage)) return buffers.get(stage);
+    if (loading.has(stage)) return loading.get(stage);
+    const promise = (async () => {
+      const r = await fetch(root.MidnightScore.getSong(stage).file);
+      if (!r.ok) throw Error("Music recording could not load");
+      const decoder = new OfflineAudioContext(2, 1, 22050),
+        buffer = await decoder.decodeAudioData(await r.arrayBuffer());
+      buffers.set(stage, buffer);
+      while (buffers.size > 2) {
+        const old = [...buffers.keys()].find(
+          (k) => k !== stage && k !== playingStage,
+        );
+        if (old === undefined) break;
+        buffers.delete(old);
+      }
+      return buffer;
+    })().finally(() => loading.delete(stage));
+    loading.set(stage, promise);
+    return promise;
+  }
+  function stopSource(fade = 0.35) {
+    if (!source || !ctx) return;
+    const old = source,
+      g = sourceGain;
+    old.onended = null;
+    try {
+      g.gain.cancelScheduledValues(ctx.currentTime);
+      g.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
+      old.stop(ctx.currentTime + fade);
+    } catch {}
+    source = null;
+    sourceGain = null;
+  }
+  function playBuffer(stage, buffer, offset = 0, lead = 0.05, ended = null) {
+    ensure();
+    stopSource();
+    playingStage = stage;
+    sourceOffset = Math.max(0, Math.min(offset, buffer.duration - 0.1));
+    origin = ctx.currentTime + lead;
+    const s = ctx.createBufferSource(),
+      gain = ctx.createGain();
+    s.buffer = buffer;
+    gain.gain.setValueAtTime(0, origin);
+    gain.gain.linearRampToValueAtTime(1, origin + 0.35);
+    s.connect(gain).connect(master);
+    source = s;
+    sourceGain = gain;
+    s.onended = () => {
+      if (source === s) {
+        source = null;
+        sourceGain = null;
+        if (ended) ended();
+      }
+    };
+    s.start(origin, sourceOffset);
+    updateVolume();
+  }
+  async function playHome() {
+    const token = ++generation;
+    try {
+      const buffer = await ready(homeStage);
+      if (token !== generation || scene === "rhythm" || !ctx) return;
+      playBuffer(homeStage, buffer, homePosition, 0.05, () => {
+        homePosition = 0;
+        homeStage = (homeStage + 1) % 5;
+        playHome();
+      });
+    } catch {}
+  }
+  function rememberHome() {
+    if (source && scene !== "rhythm" && ctx)
+      homePosition = Math.max(0, sourceOffset + ctx.currentTime - origin);
+  }
   function start() {
-    muted = false;
-    if (scene !== "rhythm") {
-      root.MidnightHomeMusic.start();
-      return;
-    }
     ensure();
     muted = false;
     if (ctx && !transportPaused) ctx.resume().catch(() => {});
+    if (!source && scene !== "rhythm") playHome();
     updateVolume();
   }
   function setMuted(value) {
-    muted = value;
-    root.MidnightHomeMusic.setMuted(value || scene === "rhythm");
-    if (ctx && !value && !transportPaused) ctx.resume().catch(() => {});
+    muted = !!value;
+    if (ctx && !muted && !transportPaused) ctx.resume().catch(() => {});
     updateVolume();
   }
   root.MidnightMusic = {
     start,
     setMuted,
     ready,
+    setVolume(value) {
+      volume = Math.max(0, Math.min(1, Number(value) || 0));
+      updateVolume();
+    },
+    setHomeSong(stage) {
+      homeStage = Math.max(0, Math.min(4, Number(stage) || 0));
+      homePosition = 0;
+      if (ctx && scene !== "rhythm") playHome();
+    },
+    setPreviewing(value) {
+      previewing = !!value;
+      updateVolume();
+    },
     ensureClock(value = false) {
       ensure();
-      muted = value;
+      muted = !!value;
       if (ctx && !transportPaused) ctx.resume().catch(() => {});
       updateVolume();
     },
     selectSong(stage = 0, lead = 0.1) {
       ensure();
-      score = root.MidnightScore.getSong(stage);
-      for (const o of voices) {
-        try {
-          o.stop();
-        } catch {}
-      }
-      voices.clear();
-      origin = (ctx?.currentTime || 0) + lead;
-      nextBeat = 0;
-      schedule();
+      const buffer = buffers.get(stage);
+      if (!buffer) throw Error("The music is still loading");
+      ++generation;
+      playBuffer(stage, buffer, 0, lead);
     },
     setScene(value) {
+      if (value === scene) return;
       const previous = scene;
+      if (value === "rhythm") {
+        rememberHome();
+        ++generation;
+        stopSource();
+      }
       scene = value;
-      root.MidnightHomeMusic.setMuted(muted || value === "rhythm");
-      if (
-        value !== "rhythm" &&
-        !muted &&
-        (previous === "rhythm" ||
-          root.MidnightHomeMusic.status().state !== "not-started")
-      )
-        root.MidnightHomeMusic.start();
+      if (previous === "rhythm" && value !== "rhythm" && ctx) playHome();
       updateVolume();
     },
     setPaused(value) {
-      transportPaused = value;
+      transportPaused = !!value;
       if (!ctx) return;
       if (value) ctx.suspend().catch(() => {});
       else ctx.resume().catch(() => {});
@@ -286,32 +175,33 @@
     clock: () => ({
       time: ctx?.currentTime || 0,
       origin,
-      beat: score.beat,
+      beat: root.MidnightScore.getSong(playingStage).beat,
       running: ctx?.state === "running",
     }),
     status: () => ({
-      source: score.title,
-      arrangement: "Sampled piano, harp and strings",
-      samplesReady: sampled.size === 4,
-      sampleError,
-      instruments: ["piano", "harp", "strings", "double bass"],
-      beatsPerBar: score.beatsPerBar,
-      state: ctx?.state || "not-started",
+      source: root.MidnightScore.getSong(playingStage).title,
+      artist: root.MidnightScore.getSong(playingStage).artist,
+      mode: scene,
+      recordingReady: buffers.has(playingStage),
+      recordingOffset: sourceOffset,
       muted,
-      totalNotes,
-      tempo: score.tempo,
-      themeSeconds: score.duration,
-      hasScheduler: !!timer,
+      volume,
+      previewing,
+      state: ctx?.state || "not-started",
+      tempo: root.MidnightScore.getSong(playingStage).tempo,
+      themeSeconds: root.MidnightScore.getSong(playingStage).duration,
       transportPaused,
     }),
     async renderPreview(stage = 0, seconds = 12) {
-      await ready();
-      const song = root.MidnightScore.getSong(stage),
+      const buffer = await ready(stage),
         rate = 22050,
         ac = new OfflineAudioContext(2, Math.ceil(seconds * rate), rate),
-        mix = createMix(ac, ac.destination, 0.46);
-      for (let i = 0; i * song.beat < seconds; i++)
-        arrangeBeat(ac, mix.filter, song, i, i * song.beat + 0.03);
+        s = ac.createBufferSource(),
+        g = ac.createGain();
+      s.buffer = buffer;
+      g.gain.value = 0.35;
+      s.connect(g).connect(ac.destination);
+      s.start();
       return ac.startRendering();
     },
   };

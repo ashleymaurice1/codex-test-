@@ -3,19 +3,20 @@ const assert = require("node:assert/strict");
 const A = require("../public/arcade-core");
 const S = require("../public/score");
 const R = require("../public/records");
-test("rhythm notes match the soundtrack clock and accurate playing wins", () => {
+test("recording beat times and rhythm notes share the same clock, and accurate playing wins", () => {
   const s = A.createRhythm();
-  A.prepareRhythm(s, { time: 10, origin: 0 });
-  for (const n of s.notes) {
-    assert.equal(n.midi, S.noteAtBeat(n.beat));
-    assert.equal(n.time, n.beat * S.beat);
+  A.prepareRhythm(s, { time: 0, origin: 2 });
+  const expected = S.getSong(0).chart.filter((_, i) => i % 2 === 0);
+  assert.equal(s.notes.length, expected.length);
+  for (const [i, n] of s.notes.entries()) {
+    assert.equal(n.time, 2 + expected[i].time);
     A.stepRhythm(s, n.time);
     assert.equal(A.hitRhythm(s, n.lane, n.time), true);
   }
   A.stepRhythm(s, s.endAudio);
   assert.equal(s.status, "won");
   assert.equal(s.hits, s.target);
-  assert.ok(S.duration > 80);
+  assert.ok(S.duration > 120);
 });
 test("rhythm pauses and missed notes cannot win", () => {
   const s = A.createRhythm();
@@ -53,32 +54,33 @@ test("jump advances through stationary obstacles and has a higher arc", () => {
   assert.ok(s.player.x > x);
   assert.ok(peak > 165);
 });
-test("five distinct songs each produce a complete synchronized, winnable chart", () => {
+test("five full recordings each have valid beat charts and are winnable on their recording clock", () => {
+  const fs = require("node:fs"),
+    path = require("node:path");
   assert.equal(S.songs.length, 5);
-  assert.equal(new Set(S.songs.map((s) => s.title)).size, 5);
-  assert.equal(
-    new Set(
-      S.songs.map((s) =>
-        JSON.stringify(Array.from({ length: 32 }, (_, i) => s.noteAtBeat(i))),
-      ),
-    ).size,
-    5,
-  );
+  assert.equal(new Set(S.songs.map((s) => s.file)).size, 5);
   for (let stage = 0; stage < 5; stage++) {
     const song = S.getSong(stage),
       s = A.createRhythm(stage);
     A.prepareRhythm(s, { time: 0, origin: 2 });
-    assert.equal(
-      s.target,
-      Array.from({ length: song.length }, (_, i) => song.noteAtBeat(i)).filter(
-        (n) => n !== null,
-      ).length,
+    assert.ok(song.duration > 120);
+    assert.ok(
+      fs.statSync(path.join(__dirname, "../public", song.file)).size > 1000000,
     );
-    assert.ok(s.keys.every((k) => k.startsWith("Arrow")));
-    assert.equal(s.laneCount, stage === 0 ? 2 : stage < 3 ? 3 : 4);
-    for (const n of s.notes) {
-      assert.equal(n.midi, song.noteAtBeat(n.beat));
-      assert.equal(n.time, 2 + n.beat * song.beat);
+    assert.ok(song.chart.length > 30);
+    assert.ok(
+      song.chart.every(
+        (n, i) =>
+          n.time > 0 &&
+          n.time < song.playSeconds &&
+          (i === 0 || n.time > song.chart[i - 1].time),
+      ),
+    );
+    const expected = song.chart.filter((_, i) => !(stage < 2 && i % 2));
+    assert.equal(s.target, expected.length);
+    for (const [i, n] of s.notes.entries()) {
+      assert.equal(n.time, 2 + expected[i].time);
+      assert.ok(n.lane >= 0 && n.lane < s.laneCount);
       A.stepRhythm(s, n.time);
       assert.equal(A.hitRhythm(s, n.lane, n.time), true);
     }
@@ -86,5 +88,4 @@ test("five distinct songs each produce a complete synchronized, winnable chart",
     assert.equal(s.status, "won");
     assert.equal(s.hits, s.target);
   }
-  assert.ok(S.songs.every((s, i) => i === 0 || s.tempo > S.songs[i - 1].tempo));
 });

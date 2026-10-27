@@ -14,6 +14,8 @@ const defaults = {
   best: null,
   tutorial: false,
   mute: false,
+  musicVolume: 0.35,
+  homeSong: 0,
   level: 0,
   unlockedLevel: 0,
   levelStars: [],
@@ -244,7 +246,7 @@ function home() {
   renderKey = "";
   state = null;
   document.documentElement.style.setProperty("--team", colors[profile.team]);
-  app.innerHTML = `<div class="shell home-shell">${header()}<main><section class="hero">${landscape()}<div class="hero-copy"><div class="eyebrow">A little spooky. A lot of silly.</div><h1>Midnight<span>Zombies</span></h1><p>A glowing woodland. Four little spirits.<br>Your kind of Halloween adventure.</p><div class="hero-badge"><b>✦</b> JUMP <b>·</b> MAZE <b>·</b> RHYTHM <b>·</b> RACE</div></div>${ghost("Mach", "hero-mach")}<div class="hero-caption">MACH · YOUR GHOST FALCON<small>Follow a little moonlight.</small></div></section><div class="section-top"><div><h2>How would you like to play?</h2><p>The Journey takes you through all four games. Quick Play is one standalone game.</p></div><button class="text-btn" data-action="help">How to play →</button></div><section class="play-grid" aria-label="Choose a play mode"><button class="play-card primary" data-action="solo"><span class="card-icon">↟</span><span class="tag">SERIES OF LEVELS</span><h3>${profile.journeyStep ? "Continue Journey" : "Start Journey"}</h3><p>Jump → Maze → Rhythm → Tap Race. All four games across five chapters. ${profile.journeyStep || 0}/20 complete.</p><span class="arrow">→</span></button><button class="play-card" data-action="quick"><span class="card-icon">✦</span><span class="tag">ONE GAME</span><h3>Quick Play</h3><p>Pick Jump, Maze, Rhythm, or Tap Race. Choose your difficulty.</p><span class="arrow">→</span></button><div class="play-card friends-card"><span class="card-icon">♧</span><h3>Play with Friends</h3><p>A live tap race. Share a room code.</p><div class="friends-actions"><button class="text-btn" data-action="create">Create room →</button><button class="text-btn" data-action="join">Join room →</button></div></div></section><section class="record-panel"><div><h2>Your high scores</h2><p>Personal bests for every style, saved on this device.</p></div><button class="btn secondary" data-action="highscores">View high scores →</button></section>${teamGallery()}<section class="bottom-grid"><div class="chosen-spirit"><div class="small-heading"><span>YOUR RACING SPIRIT</span><button class="text-btn" data-action="shop">Ghost shop →</button></div><div class="chosen-spirit-preview">${racer(profile.racer, profile.team, profile.hat)}<div><h3>${profile.team}</h3><p>${species[profile.team]}</p><button class="text-btn" data-action="team">Change character →</button></div></div></div><div class="team-box"><div class="small-heading"><span>YOUR PLAYER</span><button class="text-btn" data-action="player-settings">Player settings →</button></div><h3 class="player-name">${esc(profile.name || "Pick a nickname when you start")}</h3><div class="team-progress"><span>◈ ${profile.coins} coins</span><span>♥ ${profile.extraLives} spare lives</span></div><div class="team-progress"><span>Score ${profile.totalScore}</span><span>Team ${profile.points} pts</span></div></div></section></main><footer><span>Made of moonlight & mischief.</span><button class="text-btn" data-action="race-solo">Tap-race course map →</button></footer></div>`;
+  app.innerHTML = `<div class="shell home-shell">${header()}<main><section class="hero">${landscape()}<div class="hero-copy"><div class="eyebrow">A little spooky. A lot of silly.</div><h1>Midnight<span>Zombies</span></h1><p>A glowing woodland. Four little spirits.<br>Your kind of Halloween adventure.</p><div class="hero-badge"><b>✦</b> JUMP <b>·</b> MAZE <b>·</b> RHYTHM <b>·</b> RACE</div></div>${ghost("Mach", "hero-mach")}<div class="hero-caption">MACH · YOUR GHOST FALCON<small>Follow a little moonlight.</small></div></section><div class="section-top"><div><h2>How would you like to play?</h2><p>The Journey takes you through all four games. Quick Play is one standalone game.</p></div><button class="text-btn" data-action="help">How to play →</button></div><section class="play-grid" aria-label="Choose a play mode"><button class="play-card primary" data-action="solo"><span class="card-icon">↟</span><span class="tag">SERIES OF LEVELS</span><h3>${profile.journeyStep ? "Continue Journey" : "Start Journey"}</h3><p>Jump → Maze → Rhythm → Tap Race. All four games across five chapters. ${profile.journeyStep || 0}/20 complete.</p><span class="arrow">→</span></button><button class="play-card" data-action="quick"><span class="card-icon">✦</span><span class="tag">ONE GAME</span><h3>Quick Play</h3><p>Pick Jump, Maze, Rhythm, or Tap Race. Choose your difficulty.</p><span class="arrow">→</span></button><div class="play-card friends-card"><span class="card-icon">♧</span><h3>Play with Friends</h3><p>A live tap race. Share a room code.</p><div class="friends-actions"><button class="text-btn" data-action="create">Create room →</button><button class="text-btn" data-action="join">Join room →</button></div></div></section><section class="record-panel"><div><h2>Your high scores</h2><p>Personal bests for every style, saved on this device.</p></div><button class="btn secondary" data-action="highscores">View high scores →</button></section>${teamGallery()}<section class="bottom-grid"><div class="chosen-spirit"><div class="small-heading"><span>YOUR RACING SPIRIT</span><button class="text-btn" data-action="shop">Ghost shop →</button></div><div class="chosen-spirit-preview">${racer(profile.racer, profile.team, profile.hat)}<div><h3>${profile.team}</h3><p>${species[profile.team]}</p><button class="text-btn" data-action="team">Change character →</button></div></div></div><div class="team-box"><div class="small-heading"><span>YOUR PLAYER</span><button class="text-btn" data-action="player-settings">Player settings →</button></div><h3 class="player-name">${esc(profile.name || "Pick a nickname when you start")}</h3><div class="team-progress"><span>◈ ${profile.coins} coins</span><span>♥ ${profile.extraLives} spare lives</span></div><div class="team-progress"><span>Score ${profile.totalScore}</span><span>Team ${profile.points} pts</span></div></div></section></main><footer><span>Made of moonlight & mischief.</span><button class="text-btn" data-action="music-options">Music & volume</button><button class="text-btn" data-action="race-solo">Tap-race course map →</button></footer></div>`;
 }
 function highScores(mode = "all") {
   const labels = {
@@ -268,9 +270,31 @@ function highScores(mode = "all") {
       )}</div>${rows.length ? `<div class="score-table-wrap"><table class="score-table"><thead><tr><th>#</th><th>Run</th><th>Score</th><th>Time</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${i + 1}</td><td><strong>${esc(r.name || "You")}</strong><small>${labels[r.mode]} · L${r.level} · ${["Chill", "Spooky", "Fiendish"][r.difficulty || 0]}</small></td><td>${r.score}</td><td>${r.seconds.toFixed(1)}s</td></tr>`).join("")}</tbody></table></div>` : '<p class="empty-scores">Your first high score is waiting. Play a game to set it!</p>'}`,
   );
 }
+function musicOptions() {
+  modal(
+    `<h2>Halloween music</h2><p>Full instrumental recordings. Listen before choosing your background music.</p><label>HOME-PAGE MUSIC<select id="home-music">${MidnightScore.songs.map((song, i) => `<option value="${i}" ${Number(profile.homeSong) === i ? "selected" : ""}>${song.title} · ${song.artist}</option>`).join("")}</select></label><audio class="music-preview" controls preload="none" src="${MidnightScore.getSong(profile.homeSong).file}" aria-label="Preview background music"></audio><label for="music-volume">MUSIC VOLUME · <span id="music-volume-value">${Math.round(profile.musicVolume * 100)}%</span></label><input id="music-volume" type="range" min="0" max="100" value="${Math.round(profile.musicVolume * 100)}"><p class="muted">The music button in the top corner mutes all sound.</p><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`,
+  );
+  $("#home-music").onchange = (e) => {
+    profile.homeSong = Number(e.target.value);
+    save();
+    MidnightMusic.setHomeSong(profile.homeSong);
+    const audio = $("dialog audio");
+    audio.pause();
+    audio.src = MidnightScore.getSong(profile.homeSong).file;
+  };
+  $("#music-volume").oninput = (e) => {
+    profile.musicVolume = Number(e.target.value) / 100;
+    save();
+    MidnightMusic.setVolume(profile.musicVolume);
+    $("#music-volume-value").textContent = e.target.value + "%";
+    document
+      .querySelectorAll(".music-preview")
+      .forEach((a) => (a.volume = profile.musicVolume));
+  };
+}
 function playerSettings() {
   modal(
-    `<h2>Your player.</h2><p>Change your nickname or start fresh on this browser.</p><form id="rename-form"><label for="player-nickname">NICKNAME</label><input id="player-nickname" name="name" value="${esc(profile.name)}" maxlength="18" required><div class="actions"><button class="btn" type="submit">Save nickname</button></div></form><div class="reset-player-panel"><h3>Start over</h3><p>Reset your player, coins, spare lives, score, and unlocked levels. You can keep your high-score history.</p><button class="btn secondary" data-action="reset-confirm">Reset Player…</button></div>`,
+    `<h2>Your player.</h2><p>Change your nickname or start fresh on this browser.</p><form id="rename-form"><label for="player-nickname">NICKNAME</label><input id="player-nickname" name="name" value="${esc(profile.name)}" maxlength="18" required><div class="actions"><button class="btn" type="submit">Save nickname</button></div></form><button class="btn secondary" data-action="music-options">Music & volume →</button><div class="reset-player-panel"><h3>Start over</h3><p>Reset your player, coins, spare lives, score, and unlocked levels. You can keep your high-score history.</p><button class="btn secondary" data-action="reset-confirm">Reset Player…</button></div>`,
   );
   $("#rename-form").onsubmit = (e) => {
     e.preventDefault();
@@ -292,7 +316,9 @@ function confirmPlayerReset() {
 function resetPlayer() {
   const keep = $("#reset-keep-scores")?.checked,
     records = keep ? structuredClone(profile.highScores || []) : [],
-    mute = profile.mute;
+    mute = profile.mute,
+    musicVolume = profile.musicVolume,
+    homeSong = profile.homeSong;
   transmit({ type: "leave" });
   state = null;
   myId = null;
@@ -308,6 +334,8 @@ function resetPlayer() {
   profile = structuredClone(defaults);
   profile.highScores = records;
   profile.mute = mute;
+  profile.musicVolume = musicVolume;
+  profile.homeSong = homeSong;
   save();
   document.querySelector("dialog")?.remove();
   home();
@@ -380,7 +408,7 @@ function arcadeMenu(
       jump: "Run forward through the woods and jump over obstacles. Space or the Jump button.",
       maze: "Collect the candy, avoid woodland creatures, and enter the glowing house. Arrows / WASD or swipe.",
       rhythm:
-        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five original Halloween songs.",
+        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five different Halloween instrumentals.",
     }[mode];
   modal(
     `<div class="play-mode-label">${playMode === "quick" ? "QUICK PLAY · ONE STANDALONE GAME" : "ADVENTURE · SERIES OF LEVELS"}</div><h2>${title}</h2><p>${description}</p>${playMode === "journey" ? journeyProgress() : ""}${
@@ -392,7 +420,9 @@ function arcadeMenu(
                   i,
                 )
                   .map((k) => MidnightScore.arrows[k])
-                  .join(" ")}</small></button></li>`,
+                  .join(
+                    " ",
+                  )}</small></button><audio class="music-preview" controls preload="none" src="${song.file}" aria-label="Listen to ${song.title}"></audio></li>`,
             )
             .join(
               "",
@@ -453,11 +483,31 @@ function levelMap() {
   );
 }
 function modal(content) {
+  document.querySelectorAll("dialog audio").forEach((a) => a.pause());
+  MidnightMusic.setPreviewing(false);
   document.querySelector("dialog")?.remove();
   const d = document.createElement("dialog");
   d.innerHTML = `<button class="close" data-action="close" aria-label="Close dialog">×</button>${content}`;
   document.body.append(d);
   d.showModal();
+  const previews = [...d.querySelectorAll("audio.music-preview")];
+  previews.forEach((audio) => {
+    audio.volume = profile.musicVolume;
+    audio.onplay = () => {
+      previews.forEach((a) => {
+        if (a !== audio) a.pause();
+      });
+      MidnightMusic.setPreviewing(true);
+    };
+    const resume = () =>
+      MidnightMusic.setPreviewing(previews.some((a) => !a.paused && !a.ended));
+    audio.onpause = resume;
+    audio.onended = resume;
+  });
+  d.addEventListener("close", () => {
+    previews.forEach((a) => a.pause());
+    MidnightMusic.setPreviewing(false);
+  });
   d.addEventListener("click", (e) => {
     if (e.target === d) d.close();
   });
@@ -1003,6 +1053,7 @@ document.addEventListener("click", (e) => {
   }
   if (action === "highscores") return highScores();
   if (action === "score-filter") return highScores(value);
+  if (action === "music-options") return musicOptions();
   if (action === "player-settings") return playerSettings();
   if (action === "reset-confirm") return confirmPlayerReset();
   if (action === "reset-player") return resetPlayer();
@@ -1171,6 +1222,8 @@ function animate() {
   requestAnimationFrame(animate);
 }
 MidnightMusic.setMuted(profile.mute);
+MidnightMusic.setVolume(profile.musicVolume);
+MidnightMusic.setHomeSong(profile.homeSong);
 home();
 requestAnimationFrame(animate);
 if (sessionStorage.getItem("midnight-session")) connect();

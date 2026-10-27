@@ -44,4 +44,6 @@ The Render free instance can take about a minute to wake after inactivity. Rooms
 Current arcade update: Adventure offers a series of progressively harder Jump, Maze, Rhythm and Tap Race games; Quick Play clearly offers one standalone game. The rhythm style uses the audio clock of an original mellow 32-bar Halloween score. Saved personal high scores, a confirmed player reset with optional score retention, mobile countdowns, smoother maze movement and higher forward-moving jumps are included. Character pose atlases add blinking and distinct happy/disappointed expressions while retaining Mach, Slink, Ember and Misty.
 
 
-Latest update adds five original rhythm songs with arrow-key controls, three illustrated maze environments (Mexican Graveyard inspired by Día de los Muertos, American Graveyard, and a Japanese Obon-inspired lantern river garden), stable portraits with subtle facial blinks, and rarer spare lives capped at three.
+Latest update adds five licensed full-length instrumental recordings with arrow-key controls, three illustrated maze environments (Mexican Graveyard inspired by Día de los Muertos, American Graveyard, and a Japanese Obon-inspired lantern river garden), stable portraits with subtle facial blinks, and rarer spare lives capped at three.
+
+Music now uses finished CC0 recordings from FreePD, credited by artist, with real beat charts, native previews and saved background-volume preferences. Generated music and repetitive sample loops have been removed.

@@ -1,6 +1,6 @@
 # Midnight Zombies
 
-A moonlit Halloween arcade with three play styles and four original flowing ghost characters. Play Solo starts with the one-button Moonlit Leap course. Ghostlight Maze adds candy collection and roaming creatures. The original tap races support solo rivals and private multiplayer rooms with up to six humans.
+A moonlit Halloween arcade with four play styles and four original flowing ghost characters. Play Solo starts with the one-button Moonlit Leap course. Ghostlight Maze adds candy collection and roaming creatures. The original tap races support solo rivals and private multiplayer rooms with up to six humans.
 
 ## Run
 
@@ -11,7 +11,7 @@ npm ci --cache /tmp/midnight-npm --no-audit --no-fund
 npm start
 ```
 
-Open the server on port 3000. `PORT` overrides it. `npm run dev` enables Node's file watcher. No accounts, API keys, external databases, or third-party services are needed. Fonts and media are bundled locally. Sound starts after a user gesture; the music button always toggles it. The creator’s original audio remains the soundtrack. `public/music.js` overlaps the ends of the supplied clip with equal-power crossfades so it continues across menus and races without silent gaps; no replacement melody is layered over it.
+Open the server on port 3000. `PORT` overrides it. `npm run dev` enables Node's file watcher. No accounts, API keys, external databases, or third-party services are needed. Fonts and media are bundled locally. Sound starts after a user gesture; the music button always toggles it.  Full-length instrumental recordings are bundled in `public/assets/audio/recordings/`; no external audio service or keys are required.
 
 ```sh
 npm test
@@ -57,7 +57,7 @@ Every challenge explicitly requires one tap except Tombstone Drop, which shows t
 
 The server advances a solo player to the next challenge after a one-second celebration rather than leaving a completed grid on screen. Solo rivals keep independent challenge clocks, so answering faster does not prevent bots from taking their turns. Multiplayer retains shared challenge order and timing, and moves on early once all active racers have answered.
 
-The original supplied audio continues across menus and races using overlapping crossfaded loops. No additional melody replaces or masks it. The mute control fades the music without resetting its musical phase.
+Music uses finished FreePD/CC0 recordings with gentle playback volume. The supplied reference excerpt remains archived as an asset, but synthesized music and short repeating musical clips are no longer used.
 
 ## Character choice
 
@@ -86,7 +86,7 @@ Each correct solo answer earns 100 persistent score points. Every 2,500 points e
 
 The homepage separates **Adventure** (a series with level unlocks), **Quick Play** (one standalone game), and live **Friends** rooms. Jump and maze games wait for their art to load and show a 3–2–1–GO countdown, with the board and controls fitted into the phone viewport. Jumping now has a higher arc and forward world movement; the maze uses slower, interpolated movement and buffered turns.
 
-**Moonlight Melody** adds a two-, three-, or four-lane rhythm game controlled by arrow keys or phone arrow pads. Its notes share the audio clock and melody of the original 40-bar, 84 BPM *Moonlit Lounge* composition. Soft celesta, organ-like chords, and bass replace the busy short repeat. The composition runs about 86 seconds before cycling. Pause freezes the rhythm transport as well as the game.
+**Moonlight Melody** uses two, three or four arrow-key lanes and five finished instrumental recordings. Beat charts are detected from each audio file, and note judgments share the exact recording playback clock. Pause suspends both audio and game time.
 
 Character atlases animate blinking, wings, breathing and expressions. Winners settle into a happy pose after their one victory flight, and other podium characters show disappointed expressions.
 
@@ -95,7 +95,7 @@ Character atlases animate blinking, wings, breathing and expressions. Winners se
 `node scripts/profile-rhythm-browser-check.cjs` verifies rhythm gameplay with actual key presses, countdown and mobile viewport, Quick Play progression isolation, and reset cancel/keep/clear behavior. `test/records-rhythm.test.js` checks soundtrack synchronization, rhythm failure/pause, high-score ordering/deduplication and forward jump physics.
 
 
-The rhythm arcade now has five full-song levels: **Moonlit Lounge** (84 BPM), **Pumpkin Parade** (96), **Witchlight Waltz** (104), **Ghost Train Groove** (112), and **Monster Masquerade** (120). Each has a different original melody and accompaniment. Songs restart after the countdown and charts follow their exact audio clock; later levels use more arrow lanes. Quick Play allows choosing any of the five songs; winning offers a direct Next Song action.
+The five rhythm recordings are **Witch Waltz** (Kevin MacLeod), **Magic in the Garden** (Rafael Krux), **Fright Night Twist** (Bryan Teoh), **Creepy Comedy** (Rafael Krux), and **Night in the Castle** (Kevin MacLeod). The full recordings last over two minutes; rhythm rounds use progressively longer 45–65 second sections, with more arrow lanes and narrower timing windows. Early Chill charts use every other beat. Quick Play exposes all five songs with native audio previews.
 
 Maze settings: Moonlit Woods; **Mexican Graveyard — inspired by Día de los Muertos** with multicolored memorial lights, decorated graves, candles and marigolds; **American Graveyard** with gray stones and fog; **Lantern River Garden**, inspired by Japanese Obon remembrance traditions; and Monster Bash Woodland. Quick Play exposes all settings with preview art. Memorial/lantern levels use roaming light wisps instead of Halloween creatures. These are artistic inspirations, not simulations of ceremonies.
 
@@ -116,9 +116,9 @@ Maze pursuers now follow actual paths toward the player during chase phases, wit
 `npm run test:journey-browser` checks the rhythm-to-race-to-next-chapter transition with actual inputs and persistence; `npm run test:faces-browser` verifies that only localized facial pixels animate while all body poses remain fixed. The arcade browser suite checks Jump → Maze progression with real keyboard input.
 
 
-Music now uses a lilting **3/4 haunted chamber-waltz** arrangement with original minor-key melodies, music-box celesta, plucked strings, a warm reed voice, gentle organ chords and a dancing bass pattern. All five songs retain the shared rhythm clock, but use distinct melodies and increasingly faster tempos. The mix stays soft, uses restrained echo and compression, and avoids sudden loud stings. `npm run test:music-browser` renders every arrangement through OfflineAudioContext and checks that audio is present and does not clip.
+`public/music.js` plays the finished recordings through Web Audio buffer sources. It loads a song before the countdown, keeps at most two decoded recordings cached, and resumes the home-page recording at its previous position after a rhythm round. Background tracks rotate only when the full recording ends. There are no oscillator-generated music parts or single-note sample loops.
 
 
-The approved soft homepage waltz is now preserved independently in `ambience-score.js` and `ambience.js`. Rhythm games use a separate four-instrument sampled library: piano, orchestral harp, strings and double bass. Music samples load before the countdown; the homepage waltz fades out when the rhythm round begins and resumes when returning home. A five-song picker labels every song and mood explicitly. Tracks include three ballroom/enchanted waltzes and two playful party grooves. See `/music-credits.html` and `public/assets/audio/instruments/CREDITS.txt` for FluidR3 GM sample attribution and CC BY 3.0 license information.
+**Music & volume**, available in Player Settings and the home-page footer, allows choosing a background recording, listening first, and saving a volume preference. Native previews silence background playback while listening and stop when their dialog closes. See `/music-credits.html` and the bundled CC0 license for recording provenance and artist credits.
 
-`npm run test:music-transitions-browser` verifies song selection, sampled-instrument readiness, home/rhythm muting, preservation of the homepage melody and saved mute preferences.
+`npm run test:music-transitions-browser` verifies previews, background choice, saved volume/mute settings, recording-clock gameplay, and resuming the previous home recording. `npm run test:music-browser` renders real recordings and verifies audible, unclipped, nonidentical sections. Optional `scripts/analyze-recordings.py` regenerates beat charts with librosa; audio analysis is not a runtime dependency.

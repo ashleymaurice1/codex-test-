@@ -475,26 +475,22 @@
   }
   function prepareRhythm(s, clock) {
     const song = SCORE.getSong(s.stage);
-    s.notes = [];
-    const first = Math.max(
-      0,
-      Math.ceil((clock.time - clock.origin) / song.beat),
-    );
-    for (let beat = first; beat < first + song.length; beat++) {
-      const midi = song.noteAtBeat(beat);
-      if (midi !== null)
-        s.notes.push({
-          beat,
-          midi,
-          lane: midi % s.laneCount,
-          time: clock.origin + beat * song.beat,
-          status: "pending",
-        });
-    }
+    const stride = s.difficulty === 0 && s.stage < 2 ? 2 : 1;
+    s.notes = song.chart
+      .filter((_, i) => i % stride === 0)
+      .map((n, i) => ({
+        beat: i,
+        time: clock.origin + n.time,
+        lane: Math.min(s.laneCount - 1, Math.floor(n.tone * s.laneCount)),
+        status: "pending",
+      }));
     s.target = s.notes.length;
     s.startedAudio = clock.time;
     s.lastAudio = clock.time;
-    s.endAudio = s.notes.at(-1).time + s.hitWindow + 0.3;
+    s.endAudio = Math.max(
+      s.notes.at(-1).time + s.hitWindow + 0.3,
+      clock.origin + song.playSeconds,
+    );
     s.ready = true;
   }
   function missNote(s, n) {

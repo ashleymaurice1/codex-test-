@@ -19,33 +19,41 @@ const assert = require("node:assert/strict");
     const rendered = await p.evaluate(async () => {
       const out = [];
       for (let stage = 0; stage < 5; stage++) {
-        const b = await MidnightMusic.renderPreview(stage, 12),
-          data = b.getChannelData(0);
+        const b = await MidnightMusic.renderPreview(stage, 18),
+          d = b.getChannelData(0);
         let peak = 0,
-          sum = 0;
-        for (const v of data) {
-          peak = Math.max(peak, Math.abs(v));
-          sum += v * v;
+          sum = 0,
+          difference = 0;
+        for (let i = 0; i < d.length; i++) {
+          peak = Math.max(peak, Math.abs(d[i]));
+          sum += d[i] * d[i];
+          if (i < d.length / 3)
+            difference += Math.abs(d[i] - d[i + Math.floor(b.sampleRate * 10)]);
         }
         out.push({
           song: MidnightScore.getSong(stage).title,
-          meter: MidnightScore.getSong(stage).beatsPerBar,
+          artist: MidnightScore.getSong(stage).artist,
+          duration: MidnightScore.getSong(stage).duration,
           peak,
-          rms: Math.sqrt(sum / data.length),
+          rms: Math.sqrt(sum / d.length),
+          difference,
         });
       }
       return out;
     });
-    for (const [i, r] of rendered.entries()) {
-      assert.equal(r.meter, [3, 4, 3, 4, 3][i]);
-      assert.ok(r.peak < 0.8 && r.peak > 0.02);
-      assert.ok(r.rms > 0.002 && r.rms < 0.06);
+    for (const r of rendered) {
+      assert.ok(r.duration > 120);
+      assert.ok(r.artist.length > 3);
+      assert.ok(r.peak < 0.6 && r.peak > 0.02);
+      assert.ok(r.rms > 0.002 && r.rms < 0.15);
+      assert.ok(r.difference > 1);
     }
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({
-        fiveOriginalHalloweenSongs: rendered,
+        fullInstrumentalRecordings: rendered,
         noClipping: true,
+        noShortExactRepeat: true,
         errors,
       }),
     );

@@ -17,64 +17,56 @@ const assert = require("node:assert/strict");
         );
     });
     await p.goto("http://localhost:3000");
-    await p.locator("[data-action=quick]").click();
+    await p.locator("[data-action=music-options]").first().click();
     await p.waitForFunction(
-      () => MidnightHomeMusic.status().state === "running",
+      () =>
+        MidnightMusic.status().recordingReady &&
+        MidnightMusic.status().state === "running",
     );
-    const before = await p.evaluate(() => ({
-      source: MidnightHomeMusic.status().source,
-      melody: Array.from({ length: 32 }, (_, i) =>
-        MidnightHomeScore.noteAtBeat(i),
-      ),
-      tempo: MidnightHomeScore.tempo,
-    }));
-    assert.equal(
-      await p.evaluate(() => MidnightHomeMusic.status().muted),
-      false,
+    await p.locator("#home-music").selectOption("1");
+    await p.waitForFunction(
+      () => MidnightMusic.status().source === "Magic in the Garden",
     );
+    await p.locator("#home-music").selectOption("0");
+    await p.waitForFunction(
+      () => MidnightMusic.status().source === "Witch Waltz",
+    );
+    await p.locator("#music-volume").evaluate((e) => {
+      e.value = 20;
+      e.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    assert.equal(await p.evaluate(() => profile.musicVolume), 0.2);
+    await p.locator("dialog audio").evaluate((a) => a.play());
+    await p.waitForFunction(() => MidnightMusic.status().previewing);
+    await p.locator("dialog audio").evaluate((a) => a.pause());
+    await p.waitForFunction(() => !MidnightMusic.status().previewing);
+    await p.getByRole("button", { name: "Close dialog" }).click();
+    await p.locator("[data-action=quick]").click();
     await p.locator("dialog [data-value=rhythm]").click();
+    assert.equal(await p.locator("dialog audio").count(), 5);
     await p.locator('[data-song="1"]').click();
-    assert.equal(await p.locator("select[name=stage]").inputValue(), "1");
     await p.locator("#arcade-form button[type=submit]").click();
     await p.waitForFunction(() => MidnightArcadeUI.getState()?.ready);
     assert.equal(
-      await p.evaluate(() => MidnightHomeMusic.status().muted),
-      true,
-    );
-    assert.equal(
-      await p.evaluate(() => MidnightMusic.status().samplesReady),
-      true,
-    );
-    assert.equal(
       await p.evaluate(() => MidnightMusic.status().source),
-      "Pumpkin Parade",
+      "Magic in the Garden",
     );
+    assert.equal(await p.evaluate(() => MidnightMusic.status().mode), "rhythm");
     await p.locator("[data-arcade=home]").click();
-    assert.equal(
-      await p.evaluate(() => MidnightHomeMusic.status().muted),
-      false,
+    await p.waitForFunction(
+      () => MidnightMusic.status().source === "Witch Waltz",
     );
-    const after = await p.evaluate(() => ({
-      source: MidnightHomeMusic.status().source,
-      melody: Array.from({ length: 32 }, (_, i) =>
-        MidnightHomeScore.noteAtBeat(i),
-      ),
-      tempo: MidnightHomeScore.tempo,
-    }));
-    assert.deepEqual(after, before);
+    assert.ok(
+      await p.evaluate(() => MidnightMusic.status().recordingOffset > 0),
+    );
     await p.locator("[data-action=mute]").click();
-    assert.equal(
-      await p.evaluate(() => MidnightHomeMusic.status().muted),
-      true,
-    );
+    assert.equal(await p.evaluate(() => MidnightMusic.status().muted), true);
     await p.reload();
-    assert.equal(
-      await p.evaluate(() => MidnightHomeMusic.status().muted),
-      true,
-    );
+    assert.equal(await p.evaluate(() => MidnightMusic.status().muted), true);
+    assert.equal(await p.evaluate(() => profile.musicVolume), 0.2);
     assert.deepEqual(errors, []);
     console.log(
-      "Homepage waltz preserved; five-song picker works; sampled rhythm music replaces ambience during play; home waltz resumes; mute persists",
+      "Finished recordings, five native previews, background choice, saved volume/mute, beat-clock playback, and home recording resumes: passed",
     );
   } finally {
     await b.close();

@@ -245,7 +245,7 @@
       ),
       image("/assets/arcade/witch.webp"),
       image("/assets/arcade/zombie.webp"),
-      mode === "rhythm" ? MidnightMusic.ready() : Promise.resolve(),
+      mode === "rhythm" ? MidnightMusic.ready(stage) : Promise.resolve(),
     ])
       .then(([player, forest, witch, zombie]) => {
         if (current !== owner) return;

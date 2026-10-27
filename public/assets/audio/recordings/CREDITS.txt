@@ -1,0 +1,12 @@
+Witch Waltz — Kevin MacLeod (2018)
+Magic in the Garden — Rafael Krux (2018)
+Fright Night Twist — Bryan Teoh (2020)
+Creepy Comedy — Rafael Krux / CinematicWaves.com (2014)
+Night in the Castle — Kevin MacLeod (2015)
+
+Source: https://github.com/SoundSafari/CC0-1.0-Music/tree/main/freepd.com
+Original collection: https://freepd.com/
+License: CC0 1.0 Universal; see CC0-1.0.txt.
+Repository license: https://github.com/SoundSafari/CC0-1.0-Music/blob/main/LICENSE
+Copies normalized to a gentle playback level, re-encoded as 96 kbps MP3,
+and stripped of cover images. No synthesized instrumental layers are added.

@@ -53,7 +53,7 @@ const assert = require("node:assert/strict");
     assert.ok(
       await p.evaluate(() => MidnightMusic.status().themeSeconds >= 32),
     );
-    const end = Date.now() + 55000;
+    const end = Date.now() + 90000;
     while (Date.now() < end) {
       const n = await p.evaluate(() => {
         const s = MidnightArcadeUI.getState();
@@ -83,7 +83,7 @@ const assert = require("node:assert/strict");
     assert.equal(await p.evaluate(() => MidnightArcadeUI.getState().stage), 4);
     assert.equal(
       await p.evaluate(() => MidnightMusic.status().source),
-      "Monster Masquerade",
+      "Night in the Castle",
     );
     await p.locator("[data-arcade=home]").click();
     await p.locator("[data-action=player-settings]").click();

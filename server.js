@@ -41,6 +41,7 @@ const server = http.createServer((req, res) => {
           ".m4a": "audio/mp4",
           ".mp3": "audio/mpeg",
           ".json": "application/json",
+          ".txt": "text/plain; charset=utf-8",
           ".webp": "image/webp",
         }[path.extname(file)] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",

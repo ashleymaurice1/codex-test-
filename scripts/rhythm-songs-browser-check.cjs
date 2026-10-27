@@ -43,7 +43,7 @@ const assert = require("node:assert/strict");
       assert.equal(info.song, info.source);
       assert.equal(info.overflow, false);
       songs.push(info.song);
-      const until = Date.now() + 12000;
+      const until = Date.now() + 15000;
       while (Date.now() < until) {
         const n = await p.evaluate(() => {
           const s = MidnightArcadeUI.getState();
