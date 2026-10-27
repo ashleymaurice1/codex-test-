@@ -97,7 +97,7 @@
     if (mode === "rhythm") MidnightMusic.ensureClock(profile.mute);
     current.paused = true;
     document.body.classList.add("arcade-active");
-    MidnightMusic.setScene(mode);
+    MidnightMusic.setScene(mode === "rhythm" ? "menu" : mode);
     rewarded = false;
     lastDisplay = "";
     hint = "Gathering a little moonlight…";
@@ -245,6 +245,7 @@
       ),
       image("/assets/arcade/witch.webp"),
       image("/assets/arcade/zombie.webp"),
+      mode === "rhythm" ? MidnightMusic.ready() : Promise.resolve(),
     ])
       .then(([player, forest, witch, zombie]) => {
         if (current !== owner) return;
@@ -726,6 +727,7 @@
       current.paused = false;
       current.countdown = 0;
       if (current.mode === "rhythm") {
+        MidnightMusic.setScene("rhythm");
         MidnightMusic.selectSong(current.stage, 2);
         MidnightArcade.prepareRhythm(current, MidnightMusic.clock());
       }

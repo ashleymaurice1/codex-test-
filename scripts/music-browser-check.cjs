@@ -36,15 +36,15 @@ const assert = require("node:assert/strict");
       }
       return out;
     });
-    for (const r of rendered) {
-      assert.equal(r.meter, 3);
+    for (const [i, r] of rendered.entries()) {
+      assert.equal(r.meter, [3, 4, 3, 4, 3][i]);
       assert.ok(r.peak < 0.8 && r.peak > 0.02);
       assert.ok(r.rms > 0.002 && r.rms < 0.06);
     }
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({
-        fiveOriginalHauntedWaltzes: rendered,
+        fiveOriginalHalloweenSongs: rendered,
         noClipping: true,
         errors,
       }),

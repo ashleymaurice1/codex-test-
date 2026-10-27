@@ -39,6 +39,8 @@ const server = http.createServer((req, res) => {
           ".svg": "image/svg+xml",
           ".ttf": "font/ttf",
           ".m4a": "audio/mp4",
+          ".mp3": "audio/mpeg",
+          ".json": "application/json",
           ".webp": "image/webp",
         }[path.extname(file)] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",

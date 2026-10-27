@@ -15,37 +15,48 @@
     totalNotes = 0;
   let score = root.MidnightScore.getSong(0);
   const voices = new Set();
-  const timbres = {
-    celesta: [
-      [1, 1],
-      [2, 0.055],
-      [3, 0.015],
-      [4, 0.004],
-    ],
-    pizzicato: [
-      [1, 0.8],
-      [2, 0.09],
-      [3, 0.025],
-      [4, 0.008],
-    ],
-    reed: [
-      [1, 0.8],
-      [2, 0.08],
-      [3, 0.035],
-      [5, 0.008],
-    ],
-    organ: [
-      [1, 0.7],
-      [2, 0.2],
-      [3, 0.075],
-      [4, 0.008],
-    ],
-    bass: [
-      [1, 1],
-      [2, 0.12],
-      [3, 0.025],
-    ],
+  const sampled = new Map();
+  let sampleLoad = null,
+    sampleError = null;
+  const instruments = {
+    celesta: "acoustic_grand_piano",
+    pizzicato: "orchestral_harp",
+    reed: "string_ensemble_1",
+    organ: "string_ensemble_1",
+    bass: "contrabass",
   };
+  async function ready() {
+    if (sampleLoad) return sampleLoad;
+    sampleLoad = (async () => {
+      const response = await fetch("/assets/audio/instruments/manifest.json");
+      if (!response.ok) throw new Error("Instrument library could not load");
+      const manifest = await response.json();
+      const decoder = new OfflineAudioContext(1, 1, 44100);
+      await Promise.all(
+        Object.entries(manifest).map(async ([name, notes]) => {
+          const bank = await Promise.all(
+            notes.map(async (midi) => {
+              const r = await fetch(
+                `/assets/audio/instruments/${name}-${midi}.mp3`,
+              );
+              if (!r.ok) throw new Error("Instrument sample could not load");
+              return {
+                midi,
+                buffer: await decoder.decodeAudioData(await r.arrayBuffer()),
+              };
+            }),
+          );
+          sampled.set(name, bank);
+        }),
+      );
+    })().catch((error) => {
+      sampleError = error.message;
+      sampleLoad = null;
+      sampled.clear();
+      throw error;
+    });
+    return sampleLoad;
+  }
   function voice(
     ac,
     destination,
@@ -56,34 +67,37 @@
     instrument,
     tracked,
   ) {
-    const frequency = 440 * Math.pow(2, (midi - 69) / 12);
-    const attack =
-      instrument === "organ" ? 0.2 : instrument === "reed" ? 0.1 : 0.045;
-    const end = time + Math.max(duration, attack + 0.04);
-    for (const [ratio, weight] of timbres[instrument]) {
-      const o = ac.createOscillator(),
-        g = ac.createGain();
-      o.type = "sine";
-      o.frequency.value = frequency * ratio;
-      g.gain.setValueAtTime(0.00001, time);
-      g.gain.exponentialRampToValueAtTime(
-        Math.max(0.00002, volume * weight),
-        time + attack,
-      );
-      if (instrument === "organ" || instrument === "reed")
-        g.gain.setValueAtTime(
-          Math.max(0.00002, volume * weight * 0.65),
-          time + Math.min(duration * 0.5, attack + 0.2),
-        );
-      g.gain.exponentialRampToValueAtTime(0.00001, end);
-      o.connect(g).connect(destination);
-      if (tracked) {
-        tracked.add(o);
-        o.onended = () => tracked.delete(o);
-      }
-      o.start(time);
-      o.stop(end + 0.025);
+    const bank = sampled.get(instruments[instrument]);
+    if (!bank) return;
+    const sample = bank.reduce((best, n) =>
+      Math.abs(n.midi - midi) < Math.abs(best.midi - midi) ? n : best,
+    );
+    const source = ac.createBufferSource(),
+      gain = ac.createGain();
+    source.buffer = sample.buffer;
+    source.playbackRate.value = Math.pow(2, (midi - sample.midi) / 12);
+    const sustained = instrument === "organ" || instrument === "reed";
+    const attack = sustained ? 0.16 : 0.012,
+      release = sustained ? 0.48 : 0.28;
+    const level =
+      volume * 4 * (sustained ? 1.6 : instrument === "bass" ? 2.3 : 2.8);
+    gain.gain.setValueAtTime(0.00001, time);
+    gain.gain.exponentialRampToValueAtTime(
+      Math.max(0.00002, level),
+      time + attack,
+    );
+    gain.gain.setValueAtTime(
+      Math.max(0.00002, level * (sustained ? 0.8 : 0.6)),
+      time + Math.max(attack, duration * 0.6),
+    );
+    gain.gain.exponentialRampToValueAtTime(0.00001, time + duration + release);
+    source.connect(gain).connect(destination);
+    if (tracked) {
+      tracked.add(source);
+      source.onended = () => tracked.delete(source);
     }
+    source.start(time);
+    source.stop(time + duration + release + 0.02);
   }
   function arrangeBeat(ac, destination, song, index, time, tracked) {
     const bar = Math.floor(index / song.beatsPerBar),
@@ -107,18 +121,18 @@
       );
     }
     // The dancing bass-and-two-plucks pattern makes the 3/4 pulse audible.
-    if (step === 0) {
+    if (step === 0 || (song.beatsPerBar === 4 && step === 2)) {
       voice(
         ac,
         destination,
-        chord[0] - 12,
+        chord[0] - 12 + (step === 2 ? 7 : 0),
         time,
         beat * 0.72,
         0.045,
         "bass",
         tracked,
       );
-      if (bar % 4 === 0)
+      if (step === 0 && bar % 4 === 0)
         for (const n of chord.slice(0, 3))
           voice(
             ac,
@@ -147,7 +161,7 @@
   function updateVolume() {
     if (master)
       master.gain.setTargetAtTime(
-        muted || document.hidden
+        muted || document.hidden || scene !== "rhythm"
           ? 0
           : scene === "maze"
             ? 0.3
@@ -159,7 +173,7 @@
       );
   }
   function schedule() {
-    if (!ctx) return;
+    if (!ctx || sampled.size !== 4 || scene !== "rhythm") return;
     while (origin + nextBeat * score.beat < ctx.currentTime + 0.35) {
       const t = origin + nextBeat * score.beat;
       if (t >= ctx.currentTime - 0.04) {
@@ -201,10 +215,21 @@
     compressor = mix.comp;
     origin = ctx.currentTime + 0.08;
     timer = setInterval(schedule, 80);
-    schedule();
+    ready()
+      .then(() => {
+        origin = ctx.currentTime + 0.08;
+        nextBeat = 0;
+        schedule();
+      })
+      .catch(() => {});
     document.addEventListener("visibilitychange", updateVolume);
   }
   function start() {
+    muted = false;
+    if (scene !== "rhythm") {
+      root.MidnightHomeMusic.start();
+      return;
+    }
     ensure();
     muted = false;
     if (ctx && !transportPaused) ctx.resume().catch(() => {});
@@ -212,12 +237,14 @@
   }
   function setMuted(value) {
     muted = value;
+    root.MidnightHomeMusic.setMuted(value || scene === "rhythm");
     if (ctx && !value && !transportPaused) ctx.resume().catch(() => {});
     updateVolume();
   }
   root.MidnightMusic = {
     start,
     setMuted,
+    ready,
     ensureClock(value = false) {
       ensure();
       muted = value;
@@ -238,8 +265,16 @@
       schedule();
     },
     setScene(value) {
-      if (scene === "rhythm" && value !== "rhythm") this.selectSong(0);
+      const previous = scene;
       scene = value;
+      root.MidnightHomeMusic.setMuted(muted || value === "rhythm");
+      if (
+        value !== "rhythm" &&
+        !muted &&
+        (previous === "rhythm" ||
+          root.MidnightHomeMusic.status().state !== "not-started")
+      )
+        root.MidnightHomeMusic.start();
       updateVolume();
     },
     setPaused(value) {
@@ -256,8 +291,10 @@
     }),
     status: () => ({
       source: score.title,
-      arrangement: "Haunted chamber waltz",
-      instruments: ["celesta", "pizzicato", "reed", "organ", "bass"],
+      arrangement: "Sampled piano, harp and strings",
+      samplesReady: sampled.size === 4,
+      sampleError,
+      instruments: ["piano", "harp", "strings", "double bass"],
       beatsPerBar: score.beatsPerBar,
       state: ctx?.state || "not-started",
       muted,
@@ -268,6 +305,7 @@
       transportPaused,
     }),
     async renderPreview(stage = 0, seconds = 12) {
+      await ready();
       const song = root.MidnightScore.getSong(stage),
         rate = 22050,
         ac = new OfflineAudioContext(2, Math.ceil(seconds * rate), rate),

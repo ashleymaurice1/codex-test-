@@ -117,3 +117,8 @@ Maze pursuers now follow actual paths toward the player during chase phases, wit
 
 
 Music now uses a lilting **3/4 haunted chamber-waltz** arrangement with original minor-key melodies, music-box celesta, plucked strings, a warm reed voice, gentle organ chords and a dancing bass pattern. All five songs retain the shared rhythm clock, but use distinct melodies and increasingly faster tempos. The mix stays soft, uses restrained echo and compression, and avoids sudden loud stings. `npm run test:music-browser` renders every arrangement through OfflineAudioContext and checks that audio is present and does not clip.
+
+
+The approved soft homepage waltz is now preserved independently in `ambience-score.js` and `ambience.js`. Rhythm games use a separate four-instrument sampled library: piano, orchestral harp, strings and double bass. Music samples load before the countdown; the homepage waltz fades out when the rhythm round begins and resumes when returning home. A five-song picker labels every song and mood explicitly. Tracks include three ballroom/enchanted waltzes and two playful party grooves. See `/music-credits.html` and `public/assets/audio/instruments/CREDITS.txt` for FluidR3 GM sample attribution and CC BY 3.0 license information.
+
+`npm run test:music-transitions-browser` verifies song selection, sampled-instrument readiness, home/rhythm muting, preservation of the homepage melody and saved mute preferences.

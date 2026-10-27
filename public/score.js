@@ -124,6 +124,51 @@
       "celesta",
     ),
   ];
+  const moods = [
+    "Haunted ballroom waltz",
+    "Playful pumpkin party",
+    "Enchanted harp waltz",
+    "Moonlit party groove",
+    "Grand midnight waltz",
+  ];
+  songs.forEach((song, i) => (song.mood = moods[i]));
+  for (const stage of [1, 3]) {
+    const song = songs[stage],
+      tonic = stage === 1 ? 48 : 45;
+    const motifs =
+      stage === 1
+        ? [
+            [0, 3, 7, 10],
+            [8, 7, 3, 0],
+            [2, 5, 8, 5],
+            [7, 11, 14, 11],
+            [12, 7, 3, 0],
+            [5, 8, 12, 8],
+            [2, 5, 8, 11],
+            [7, 11, 2, 0],
+          ]
+        : [
+            [0, 0, 3, 7],
+            [8, 7, 3, 0],
+            [2, 5, 2, 8],
+            [7, 11, 7, 2],
+            [7, 3, 12, 7],
+            [5, 8, 5, 12],
+            [8, 5, 2, 5],
+            [11, 7, 2, 0],
+          ];
+    if (stage === 3) song.lead = "celesta";
+    song.beatsPerBar = 4;
+    song.length = song.bars * 4;
+    song.duration = song.length * song.beat;
+    song.noteAtBeat = (index) => {
+      const i = ((Math.floor(index) % song.length) + song.length) % song.length,
+        bar = Math.floor(i / 4),
+        step = i % 4;
+      if (step === 3 && bar % 4 === 3) return null;
+      return tonic + 12 + motifs[bar % 8][step];
+    };
+  }
   function getSong(stage = 0) {
     return songs[Math.max(0, Math.min(4, Math.floor(stage) || 0))];
   }

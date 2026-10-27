@@ -27,7 +27,11 @@ const assert = require("node:assert/strict");
       await p.locator("[data-action=quick]").click();
       await p.locator("dialog [data-value=rhythm]").click();
       assert.equal(await p.locator(".rhythm-song-list li").count(), 5);
-      await p.locator("select[name=stage]").selectOption(String(stage));
+      await p.locator(`[data-song="${stage}"]`).click();
+      assert.equal(
+        await p.locator("select[name=stage]").inputValue(),
+        String(stage),
+      );
       await p.locator("#arcade-form button[type=submit]").click();
       await p.waitForFunction(() => MidnightArcadeUI.getState()?.ready);
       const info = await p.evaluate(() => ({

@@ -1,0 +1,9 @@
+FluidR3 GM instrument samples by Frank Wen and contributors.
+Rendered sample distribution: https://github.com/gleitz/midi-js-soundfonts
+Source files: https://github.com/gleitz/midi-js-soundfonts/tree/gh-pages/FluidR3_GM
+License stated by that distribution: Creative Commons Attribution 3.0 US.
+https://creativecommons.org/licenses/by/3.0/us/
+Selected samples are extracted unchanged from the acoustic_grand_piano,
+orchestral_harp, string_ensemble_1 and contrabass MP3 soundfont distributions.
+Runtime playback varies pitch, gain, note length and arrangement.
+Original game compositions are distinct from the soundfont recordings.
