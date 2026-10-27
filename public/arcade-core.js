@@ -4,6 +4,10 @@
     typeof module !== "undefined" && module.exports
       ? require("./score")
       : root.MidnightScore;
+  const LIFE =
+    typeof module !== "undefined" && module.exports
+      ? require("./economy")
+      : root.MidnightEconomy;
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   function random(seed) {
     let n = seed >>> 0;
@@ -22,7 +26,10 @@
       paused: false,
       elapsed: 0,
       lives: 3,
-      reserveLives: Math.max(0, Math.min(99, profile.extraLives || 0)),
+      reserveLives: Math.max(
+        0,
+        Math.min(LIFE.maxSpareLives, profile.extraLives || 0),
+      ),
       totalScore: Math.max(0, profile.totalScore || 0),
       runScore: 0,
       invulnerable: 0,
@@ -30,13 +37,14 @@
     };
   }
   function score(s, points) {
-    const old = Math.floor(s.totalScore / 500);
+    const old = Math.floor(s.totalScore / LIFE.scorePerLife);
     s.totalScore += points;
     s.runScore += points;
-    const bonuses = Math.floor(s.totalScore / 500) - old;
-    if (bonuses) {
-      s.reserveLives = Math.min(99, s.reserveLives + bonuses);
-      s.events.push({ type: "bonus-life", count: bonuses });
+    const bonuses = Math.floor(s.totalScore / LIFE.scorePerLife) - old;
+    if (bonuses && s.reserveLives < LIFE.maxSpareLives) {
+      const gained = Math.min(bonuses, LIFE.maxSpareLives - s.reserveLives);
+      s.reserveLives += gained;
+      s.events.push({ type: "bonus-life", count: gained });
     }
   }
   function hit(s) {
@@ -146,7 +154,7 @@
     );
     s.enemyInterval = Math.max(
       0.32,
-      1.25 - s.stage * 0.15 - s.difficulty * 0.14,
+      0.64 - s.stage * 0.05 - s.difficulty * 0.08,
     );
     s.rng = random(331 + s.stage * 71);
     const route = path(s.grid, [1, 1], [s.exit.x, s.exit.y]).slice(1, -1);
@@ -182,17 +190,18 @@
       (t) => t !== s.team,
     );
     s.enemies = Array.from(
-      { length: Math.min(3, 1 + Math.floor((s.stage + s.difficulty) / 2)) },
+      { length: Math.min(3, 1 + Math.ceil((s.stage + s.difficulty) / 2)) },
       (_, i) => {
-        const cell = far[Math.max(0, far.length - 1 - i * 7)] || [
+        const cell = route[Math.min(route.length - 1, 10 + i * 8)] || [
           s.exit.x,
           s.exit.y,
         ];
+        const respawn = far[Math.max(0, far.length - 1 - i * 7)] || cell;
         return {
           x: cell[0],
           y: cell[1],
-          spawnX: cell[0],
-          spawnY: cell[1],
+          spawnX: respawn[0],
+          spawnY: respawn[1],
           px: cell[0],
           py: cell[1],
           fromX: cell[0],
@@ -211,7 +220,7 @@
     if (!d) return;
     s.queuedDirection = direction;
     const m = s.player.motion;
-    if (!m) return;
+    if (!m || direction === s.direction) return;
     const old = DIRS[s.direction];
     if (old && d[0] === -old[0] && d[1] === -old[1]) {
       s.player.motion = {
@@ -262,9 +271,7 @@
       ) &&
       hit(s)
     ) {
-      Object.assign(s.player, { x: 1, y: 1, px: 1, py: 1, motion: null });
-      s.direction = null;
-      s.queuedDirection = null;
+      // Keep collected progress and give a short escape window after contact.
       s.enemyClock = 0;
       for (const e of s.enemies)
         Object.assign(e, {
@@ -323,14 +330,14 @@
         if (options.length > 1)
           options = options.filter(([x, y]) => x !== e.lastX || y !== e.lastY);
         let to;
-        if (s.rng() < 0.2 + s.stage * 0.1 + s.difficulty * 0.08)
-          to = options.sort(
-            (a, b) =>
-              Math.abs(a[0] - s.player.x) +
-              Math.abs(a[1] - s.player.y) -
-              (Math.abs(b[0] - s.player.x) + Math.abs(b[1] - s.player.y)),
-          )[0];
-        else to = options[Math.floor(s.rng() * options.length)];
+        const chasing =
+          Math.floor((s.elapsed + s.enemies.indexOf(e) * 2) / 7) % 3 !== 2;
+        if (chasing) {
+          const pursuit = path(s.grid, [e.x, e.y], [s.player.x, s.player.y]);
+          to = pursuit[1];
+        }
+        if (!to) to = options[Math.floor(s.rng() * options.length)];
+        e.chasing = chasing;
         if (to) {
           e.fromX = e.x;
           e.fromY = e.y;
@@ -451,11 +458,13 @@
     const s = base("rhythm", stage, profile, difficulty);
     s.width = 900;
     s.height = 540;
-    s.target = 12 + s.stage * 4;
+    s.song = SCORE.getSong(s.stage).title;
+    s.keys = SCORE.lanesFor(s.stage, s.difficulty);
+    s.target = 0;
     s.hits = 0;
     s.misses = 0;
     s.combo = 0;
-    s.laneCount = s.stage + s.difficulty === 0 ? 2 : 3;
+    s.laneCount = s.keys.length;
     s.hitWindow = Math.max(0.12, 0.25 - s.stage * 0.018 - s.difficulty * 0.035);
     s.notes = [];
     s.ready = false;
@@ -465,19 +474,24 @@
     return s;
   }
   function prepareRhythm(s, clock) {
-    let beat = Math.ceil((clock.time - clock.origin) / SCORE.beat) + 4;
-    while (s.notes.length < s.target) {
-      const midi = SCORE.noteAtBeat(beat);
+    const song = SCORE.getSong(s.stage);
+    s.notes = [];
+    const first = Math.max(
+      0,
+      Math.ceil((clock.time - clock.origin) / song.beat),
+    );
+    for (let beat = first; beat < first + song.length; beat++) {
+      const midi = song.noteAtBeat(beat);
       if (midi !== null)
         s.notes.push({
           beat,
           midi,
           lane: midi % s.laneCount,
-          time: clock.origin + beat * SCORE.beat,
+          time: clock.origin + beat * song.beat,
           status: "pending",
         });
-      beat++;
     }
+    s.target = s.notes.length;
     s.startedAudio = clock.time;
     s.lastAudio = clock.time;
     s.endAudio = s.notes.at(-1).time + s.hitWindow + 0.3;

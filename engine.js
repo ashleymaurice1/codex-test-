@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const LIFE = require("./public/economy");
 const LEVELS = require("./public/levels");
 const TEAMS = ["Mach", "Slink", "Ember", "Misty"];
 const RACERS = [...TEAMS];
@@ -174,13 +175,14 @@ function answer(room, p, id, index, now = Date.now()) {
   if (ok) {
     p.correct++;
     if (room.solo && !p.bot) {
-      const before = Math.floor(p.totalScore / 500);
+      const before = Math.floor(p.totalScore / LIFE.scorePerLife);
       p.totalScore += 100;
       p.runScore += 100;
-      const bonus = Math.floor(p.totalScore / 500) - before;
-      if (bonus) {
-        p.reserveLives = Math.min(99, p.reserveLives + bonus);
-        p.bonusLivesEarned += bonus;
+      const bonus = Math.floor(p.totalScore / LIFE.scorePerLife) - before;
+      if (bonus && p.reserveLives < LIFE.maxSpareLives) {
+        const gained = Math.min(bonus, LIFE.maxSpareLives - p.reserveLives);
+        p.reserveLives = Math.min(LIFE.maxSpareLives, p.reserveLives + bonus);
+        p.bonusLivesEarned += gained;
       }
     }
     p.progress = Math.min(

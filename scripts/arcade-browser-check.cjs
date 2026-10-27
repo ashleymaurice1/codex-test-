@@ -71,10 +71,9 @@ const assert = require("node:assert/strict");
     "none",
   );
   await p.screenshot({ path: "/tmp/midnight-jump-win.png", fullPage: true });
-  await p.locator("[data-arcade-result=next]").click();
-  await p.locator("dialog [data-action=arcade][data-value=maze]").click();
+  await p.locator("[data-arcade-result=journey]").click();
   assert.equal(await p.locator("#nickname").count(), 0);
-  assert.equal(await p.locator("select[name=stage]").inputValue(), "1");
+  assert.equal(await p.locator("input[name=stage]").inputValue(), "0");
   await p.locator("#arcade-form button[type=submit]").click();
   await p.waitForFunction(() => MidnightArcadeUI.getState()?.paused === false);
   await p.screenshot({ path: "/tmp/midnight-maze.png", fullPage: true });
@@ -133,7 +132,7 @@ const assert = require("node:assert/strict");
     await p.locator(".nickname-summary").textContent(),
     /Moon racer/,
   );
-  assert.equal(await p.evaluate(() => profile.arcadeUnlocked), 2);
+  assert.equal(await p.evaluate(() => profile.arcadeUnlocked), 1);
   assert.equal(
     await p.evaluate(() => document.documentElement.scrollWidth > innerWidth),
     false,
@@ -144,7 +143,7 @@ const assert = require("node:assert/strict");
       jumpWinUsingSpace: true,
       mazeWinUsingArrows: true,
       harderSameStyle: true,
-      nextLevelAllStyles: true,
+      journeySwitchesGames: true,
       nicknameOnlyOnce: true,
       victorySwirlStops: true,
       noOverflow: true,

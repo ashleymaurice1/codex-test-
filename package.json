@@ -12,7 +12,11 @@
     "test:campaign-browser": "node scripts/campaign-browser-check.cjs",
     "test:characters-browser": "node scripts/character-browser-check.cjs",
     "test:arcade-browser": "node scripts/arcade-browser-check.cjs",
-    "test:profile-browser": "node scripts/profile-rhythm-browser-check.cjs"
+    "test:profile-browser": "node scripts/profile-rhythm-browser-check.cjs",
+    "test:rhythm-browser": "node scripts/rhythm-songs-browser-check.cjs",
+    "test:scenes-browser": "node scripts/scenes-browser-check.cjs",
+    "test:journey-browser": "node scripts/journey-browser-check.cjs",
+    "test:faces-browser": "node scripts/faces-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

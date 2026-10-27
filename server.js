@@ -4,6 +4,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { WebSocketServer, WebSocket } = require("ws");
 const E = require("./engine");
+const LIFE = require("./public/economy");
 const rooms = new Map(),
   sessions = new Map();
 const root = path.join(__dirname, "public");
@@ -384,7 +385,7 @@ wss.on("connection", (ws) => {
         if (r.solo) {
           p.reserveLives = Math.max(
             0,
-            Math.min(99, Math.floor(Number(m.extraLives) || 0)),
+            Math.min(LIFE.maxSpareLives, Math.floor(Number(m.extraLives) || 0)),
           );
           p.totalScore = Math.max(
             0,

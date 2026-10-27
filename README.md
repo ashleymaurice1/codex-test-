@@ -67,7 +67,7 @@ Solo, Create Room, and Join Room each include an illustrated **Choose your chara
 
 Each solo race starts with three hearts. An incorrect or timed-out challenge costs one heart; when the last heart is lost, one owned spare life is consumed automatically to keep the player in the race with one heart. Without a spare, the run ends and can be retried with three fresh hearts. Multiplayer races retain their shared racing rules without solo elimination.
 
-Each correct solo answer earns 100 persistent score points. Every 500 points earns one spare life; rewards do not repeat after refresh. The ghost shop sells a spare life for 80 coins, up to a stash of 99. Score and unused spare lives persist in the same browser. No cash purchases or accounts are involved.
+Each correct solo answer earns 100 persistent score points. Every 2,500 points earns one spare life; rewards do not repeat after refresh. The ghost shop sells a spare life for 200 coins, up to a stash of 3. Score and unused spare lives persist in the same browser. No cash purchases or accounts are involved.
 
 `npm run test:characters-browser` verifies character choice for solo/create/join, remembered choices, sticky live race positions, life purchases, balance protection, and saved inventory. The mobile full track is expandable; a compact live leaderboard stays visible above the challenge while scrolling.
 
@@ -86,10 +86,31 @@ Each correct solo answer earns 100 persistent score points. Every 500 points ear
 
 The homepage separates **Adventure** (a series with level unlocks), **Quick Play** (one standalone game), and live **Friends** rooms. Jump and maze games wait for their art to load and show a 3–2–1–GO countdown, with the board and controls fitted into the phone viewport. Jumping now has a higher arc and forward world movement; the maze uses slower, interpolated movement and buffered turns.
 
-**Moonlight Melody** adds a two- or three-lane rhythm game controlled by A/S/D or phone pads. Its notes share the audio clock and melody of the original 32-bar, 88 BPM *Moonlit Lounge* composition. Soft celesta, organ-like chords, and bass replace the busy short repeat. The composition runs about 87 seconds before cycling. Pause freezes the rhythm transport as well as the game.
+**Moonlight Melody** adds a two-, three-, or four-lane rhythm game controlled by arrow keys or phone arrow pads. Its notes share the audio clock and melody of the original 32-bar, 88 BPM *Moonlit Lounge* composition. Soft celesta, organ-like chords, and bass replace the busy short repeat. The composition runs about 87 seconds before cycling. Pause freezes the rhythm transport as well as the game.
 
 Character atlases animate blinking, wings, breathing and expressions. Winners settle into a happy pose after their one victory flight, and other podium characters show disappointed expressions.
 
 **High scores** saves personal run records by game style in this browser. **Player settings → Reset Player…** requires confirmation and offers a checked-by-default option to keep high scores. Reset clears the nickname, character choice, coins, spare lives, score and level unlocks for this browser; it preserves the audio preference.
 
 `node scripts/profile-rhythm-browser-check.cjs` verifies rhythm gameplay with actual key presses, countdown and mobile viewport, Quick Play progression isolation, and reset cancel/keep/clear behavior. `test/records-rhythm.test.js` checks soundtrack synchronization, rhythm failure/pause, high-score ordering/deduplication and forward jump physics.
+
+
+The rhythm arcade now has five full-song levels: **Moonlit Lounge** (88 BPM), **Pumpkin Parade** (96), **Witchlight Waltz** (104), **Ghost Train Groove** (112), and **Monster Masquerade** (120). Each has a different original melody and accompaniment. Songs restart after the countdown and charts follow their exact audio clock; later levels use more arrow lanes. Quick Play allows choosing any of the five songs; winning offers a direct Next Song action.
+
+Maze settings: Moonlit Woods; **Mexican Graveyard — inspired by Día de los Muertos** with multicolored memorial lights, decorated graves, candles and marigolds; **American Graveyard** with gray stones and fog; **Lantern River Garden**, inspired by Japanese Obon remembrance traditions; and Monster Bash Woodland. Quick Play exposes all settings with preview art. Memorial/lantern levels use roaming light wisps instead of Halloween creatures. These are artistic inspirations, not simulations of ceremonies.
+
+Pose atlases now hold distinct idle, happy and disappointed expressions instead of crossfading unregistered silhouettes, fixing character-picker flicker. Faces blink softly about once every seven seconds, using a localized eye overlay while the body stays fixed.
+
+`npm run test:rhythm-browser` checks all five songs with actual arrow-key input, four-lane controls and transport pause. `npm run test:scenes-browser` checks the new maze art, scene selection, mobile fit and stable character-picker poses.
+
+
+Life balance now uses shared rules in `public/economy.js`: a spare every **2,500 points**, a maximum stash of **3**, and **200 coins** per shop life. Legacy stashes above three convert surplus lives to coins once at the original 80-coin price. Points beyond the cap do not bank future lives. Server and browser arcade games use the same thresholds.
+
+Facial animation blends only small, feathered eyelid patches onto the registered idle pose, with a gentle half-second blink about every seven seconds. Character bodies stay fixed; happy and disappointed faces remain distinct at results. Reduced-motion preferences disable blinking.
+
+
+**Start Journey / Continue Journey** now follows a fixed sequence: Jump → Maze → Rhythm → Tap Race in each of five chapters (20 games total). The next result button opens the next style automatically; nickname and journey position persist. Quick Play remains a standalone choice of style and level. Replaying a completed game cannot skip journey stops. The fifth chapter reuses the final Tap Race course.
+
+Maze pursuers now follow actual paths toward the player during chase phases, with shorter scatter breaks, earlier visible encounters, and increasing speed/count on later stages and difficulties. An exclamation mark identifies an active pursuer. Contact costs a heart and disperses pursuers while preserving collected candy and offering a short invulnerable escape window.
+
+`npm run test:journey-browser` checks the rhythm-to-race-to-next-chapter transition with actual inputs and persistence; `npm run test:faces-browser` verifies that only localized facial pixels animate while all body poses remain fixed. The arcade browser suite checks Jump → Maze progression with real keyboard input.

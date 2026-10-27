@@ -14,10 +14,33 @@
     jump: "Moonlit Leap",
     rhythm: "Moonlight Melody",
   };
+  const mazeScenes = [
+    { name: "Moonlit Woods", asset: "/assets/moonlit-woodland.webp" },
+    {
+      name: "Mexican Graveyard",
+      credit: "Inspired by Día de los Muertos",
+      asset: "/assets/arcade/marigold-garden.webp",
+      description:
+        "Inspired by Día de los Muertos: a beautiful Mexican graveyard with multicolored memorial lights, decorated graves, candles and marigolds.",
+    },
+    {
+      name: "American Graveyard",
+      asset: "/assets/arcade/fogbound-cemetery.webp",
+      description:
+        "A classic American-style cemetery: gray headstones, bare trees and silver moonlit fog.",
+    },
+    {
+      name: "Lantern River Garden",
+      asset: "/assets/arcade/lantern-garden.webp",
+      description:
+        "A peaceful lantern garden inspired by Japanese Obon traditions of remembering ancestors.",
+    },
+    { name: "Monster Bash Woodland", asset: "/assets/moonlit-woodland.webp" },
+  ];
   const tips = {
-    maze: "Collect every candy, then reach the glowing house. Arrows / WASD, swipe, or use the arrows below.",
+    maze: "Collect every candy, dodge the pursuers, then reach the glowing house. Arrows / WASD, swipe, or use the arrows below.",
     rhythm:
-      "Hit the matching glowing notes on the line. A / S / D or the big pads below.",
+      "Hit the matching glowing notes on the line. Use the matching arrow keys (← ↓ ↑ →). Touch arrows work on phones too.",
     jump: "Run forward and jump over the obstacles. Press Space / ↑ or tap JUMP once per jump.",
   };
   function stop() {
@@ -68,6 +91,7 @@
         : mode === "rhythm"
           ? MidnightArcade.createRhythm(stage, profile, difficulty)
           : MidnightArcade.createJump(stage, profile, difficulty);
+    if (mode === "maze") current.scene = mazeScenes[current.stage].name;
     current.playMode = playMode;
     current.runId = crypto.randomUUID();
     if (mode === "rhythm") MidnightMusic.ensureClock(profile.mute);
@@ -80,7 +104,15 @@
     abort = new AbortController();
     const signal = abort.signal;
     document.getElementById("app").innerHTML =
-      `<div class="game-shell arcade-shell">${header()}<div class="race-top"><button class="text-btn" data-arcade="home">← Home</button><span>${playMode === "quick" ? "QUICK PLAY" : "ADVENTURE · LEVEL " + (stage + 1)} · ${["CHILL", "SPOOKY", "FIENDISH"][difficulty]}</span><button class="text-btn" data-arcade="pause">Pause Ⅱ</button></div><main><div class="arcade-heading"><div><span class="eyebrow">${esc(profile.name || "Grave guest")} · ${profile.team}</span><h1>${titles[mode]}</h1></div>${ghost(profile.team)}</div><p class="arcade-instruction">${tips[mode]}</p><div class="arcade-stats" id="arcade-stats"></div><div class="arcade-board-wrap"><canvas id="arcade-board" class="arcade-board ${mode === "maze" ? "maze-board" : "jump-board"}" width="${mode === "maze" ? 544 : 900}" height="${mode === "maze" ? 480 : 540}" tabindex="0" aria-label="${titles[mode]} game board. ${tips[mode]}"></canvas><div class="arcade-pause" id="arcade-pause"><h2>Gathering moonlight…</h2></div></div><div class="arcade-hint" id="arcade-hint" role="status" aria-live="polite">${hint}</div>${mode === "maze" ? '<div class="maze-controls" aria-label="Maze direction controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-arcade="pause" aria-label="Pause to plan your route">Ⅱ</button><button data-dir="right" aria-label="Move right">→</button><button data-dir="down" aria-label="Move down">↓</button></div>' : mode === "rhythm" ? `<div class="rhythm-controls" aria-label="Rhythm note pads">${Array.from({ length: current.laneCount }, (_, i) => `<button data-lane="${i}" style="--note:${["#B8D4FF", "#F28C28", "#B396E2"][i]}">${["A", "S", "D"][i]}<small>TAP</small></button>`).join("")}</div>` : '<button class="jump-control" data-arcade="jump">JUMP <small>SPACE / ↑</small></button>'}<p class="arcade-footer-note">Three hearts · spare lives save your glow · +1 life every 500 score</p></main></div>`;
+      `<div class="game-shell arcade-shell">${header()}<div class="race-top"><button class="text-btn" data-arcade="home">← Home</button><span>${playMode === "quick" ? "QUICK PLAY" : "ADVENTURE · LEVEL " + (stage + 1)} · ${["CHILL", "SPOOKY", "FIENDISH"][difficulty]}</span><button class="text-btn" data-arcade="pause">Pause Ⅱ</button></div><main><div class="arcade-heading"><div><span class="eyebrow">${esc(profile.name || "Grave guest")} · ${profile.team}</span><h1>${titles[mode]}</h1>${mode === "rhythm" ? `<span class="rhythm-song">Song ${stage + 1}/5 · ${esc(current.song)}</span>` : mode === "maze" ? `<span class="rhythm-song">${esc(current.scene)}${mazeScenes[stage].credit ? " · " + mazeScenes[stage].credit : ""}</span>` : ""}</div>${ghost(profile.team)}</div><p class="arcade-instruction">${playMode === "journey" ? "Journey · Game " + (profile.journeyStep + 1) + "/20. " : ""}${tips[mode]}${mode === "rhythm" ? ` Level ${stage + 1}: ${current.keys.map((k) => MidnightScore.arrows[k]).join(" ")}.` : ""}</p><div class="arcade-stats" id="arcade-stats"></div><div class="arcade-board-wrap"><canvas id="arcade-board" class="arcade-board ${mode === "maze" ? "maze-board" : "jump-board"}" width="${mode === "maze" ? 544 : 900}" height="${mode === "maze" ? 480 : 540}" tabindex="0" aria-label="${titles[mode]} game board. ${tips[mode]}"></canvas><div class="arcade-pause" id="arcade-pause"><h2>Gathering moonlight…</h2></div></div><div class="arcade-hint" id="arcade-hint" role="status" aria-live="polite">${hint}</div>${mode === "maze" ? '<div class="maze-controls" aria-label="Maze direction controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-arcade="pause" aria-label="Pause to plan your route">Ⅱ</button><button data-dir="right" aria-label="Move right">→</button><button data-dir="down" aria-label="Move down">↓</button></div>' : mode === "rhythm" ? `<div class="rhythm-controls" aria-label="Rhythm note pads">${Array.from({ length: current.laneCount }, (_, i) => `<button data-lane="${i}" style="--note:${["#B8D4FF", "#F28C28", "#B396E2", "#9BD14B"][i]}">${MidnightScore.arrows[current.keys[i]]}<small>${current.keys[i].replace("Arrow", "").toUpperCase()}</small></button>`).join("")}</div>` : '<button class="jump-control" data-arcade="jump">JUMP <small>SPACE / ↑</small></button>'}<p class="arcade-footer-note">Three hearts · spare lives save your glow · +1 life every 2,500 score</p></main></div>`;
+    if (mode === "maze") {
+      const shell = document.querySelector(".arcade-shell");
+      shell.classList.add("maze-scene-shell");
+      shell.style.setProperty(
+        "--maze-scene",
+        `url("${mazeScenes[stage].asset}")`,
+      );
+    }
     window.scrollTo(0, 0);
     const canvas = document.getElementById("arcade-board");
     let down = null;
@@ -172,15 +204,11 @@
           D: "right",
         };
         if (e.code === "Space" || e.key.startsWith("Arrow")) e.preventDefault();
-        if (
-          mode === "rhythm" &&
-          ["a", "s", "d"].includes(e.key.toLowerCase()) &&
-          !e.repeat
-        ) {
+        if (mode === "rhythm" && current.keys.includes(e.key) && !e.repeat) {
           e.preventDefault();
           MidnightArcade.hitRhythm(
             current,
-            ["a", "s", "d"].indexOf(e.key.toLowerCase()),
+            current.keys.indexOf(e.key),
             MidnightMusic.clock().time,
           );
           return;
@@ -210,7 +238,11 @@
     const owner = current;
     Promise.all([
       MidnightCharacters.load(profile.team),
-      image("/assets/moonlit-woodland.webp"),
+      image(
+        mode === "maze"
+          ? mazeScenes[stage].asset
+          : "/assets/moonlit-woodland.webp",
+      ),
       image("/assets/arcade/witch.webp"),
       image("/assets/arcade/zombie.webp"),
     ])
@@ -223,7 +255,9 @@
         hint =
           mode === "maze"
             ? "Follow the candy glow. The house opens when you have them all."
-            : "Watch the first obstacle. One well-timed jump—you’ve got this!";
+            : mode === "rhythm"
+              ? "Follow the arrows. Press when each note meets the glowing line."
+              : "Watch the first obstacle. One well-timed jump—you’ve got this!";
         document.getElementById("arcade-pause").classList.remove("hide");
         last = performance.now();
         countdownUntil = last + 3300;
@@ -271,7 +305,7 @@
     if (key === lastDisplay) return;
     lastDisplay = key;
     document.getElementById("arcade-stats").innerHTML =
-      `<span class="hearts" aria-label="${s.lives} hearts remaining">${"♥".repeat(s.lives)}<i>${"♡".repeat(3 - s.lives)}</i></span><span>${s.mode === "maze" ? `Candy ${s.collected}/${s.target}` : s.mode === "rhythm" ? `Notes ${s.hits}/${s.target}` : `Obstacles ${s.passed}/${s.target}`}<small>Level ${s.stage + 1}</small></span><span>Score ${s.totalScore}<small>♥ ${s.reserveLives} spare · ${500 - (s.totalScore % 500)} to bonus</small></span>`;
+      `<span class="hearts" aria-label="${s.lives} hearts remaining">${"♥".repeat(s.lives)}<i>${"♡".repeat(3 - s.lives)}</i></span><span>${s.mode === "maze" ? `Candy ${s.collected}/${s.target}` : s.mode === "rhythm" ? `Notes ${s.hits}/${s.target}` : `Obstacles ${s.passed}/${s.target}`}<small>Level ${s.stage + 1}</small></span><span>Score ${s.totalScore}<small>♥ ${s.reserveLives} spare · ${MidnightEconomy.scorePerLife - (s.totalScore % MidnightEconomy.scorePerLife)} to bonus</small></span>`;
   }
   function sprite(c, img, x, y, w, h, alpha = 1, angle = 0) {
     if (!img) return;
@@ -307,7 +341,9 @@
     );
     c.fillStyle =
       current.mode === "maze"
-        ? "#071323dd"
+        ? current.stage === 0 || current.stage === 4
+          ? "#071323c9"
+          : "#07132366"
         : current.mode === "rhythm"
           ? "#07132399"
           : "#07132333";
@@ -317,19 +353,39 @@
     const s = current,
       tile = 32;
     forest(c, 544, 480);
+    const memorial = s.stage === 1,
+      lantern = s.stage === 3,
+      fog = s.stage === 2;
+    const lights = memorial
+      ? ["#ffb347", "#df89e8", "#70dfcf", "#92baff"]
+      : lantern
+        ? ["#ffc57a", "#ffac67"]
+        : ["#83ccff"];
     for (let y = 0; y < s.height; y++)
       for (let x = 0; x < s.width; x++) {
         if (s.grid[y][x]) {
-          c.fillStyle = "#173449";
-          c.strokeStyle = "#4c8db766";
+          c.fillStyle = memorial
+            ? "#283044b8"
+            : lantern
+              ? "#233a44c9"
+              : fog
+                ? "#35414bc9"
+                : "#173449";
+          c.strokeStyle = memorial
+            ? "#e9a95699"
+            : lantern
+              ? "#ffc57a77"
+              : fog
+                ? "#a9b8c366"
+                : "#4c8db766";
           c.lineWidth = 1;
           c.beginPath();
           c.roundRect(x * tile + 1, y * tile + 1, tile - 2, tile - 2, 7);
           c.fill();
           c.stroke();
-          if ((x * 7 + y * 11) % 9 === 0) {
-            c.fillStyle = "#83ccff";
-            c.shadowColor = "#83ccff";
+          if ((x * 7 + y * 11) % (memorial || lantern ? 3 : 9) === 0) {
+            c.fillStyle = lights[(x + y) % lights.length];
+            c.shadowColor = c.fillStyle;
             c.shadowBlur = 8;
             c.beginPath();
             c.arc(x * tile + 8, y * tile + 8, 2, 0, 7);
@@ -343,8 +399,8 @@
       c.save();
       c.translate(x * tile + 16, y * tile + 16);
       c.rotate(Math.PI / 4);
-      c.fillStyle = "#f1b65e";
-      c.shadowColor = "#f1b65e";
+      c.fillStyle = memorial ? lights[(x + y) % lights.length] : "#f1b65e";
+      c.shadowColor = c.fillStyle;
       c.shadowBlur = 8;
       c.fillRect(-4, -4, 8, 8);
       c.restore();
@@ -365,6 +421,30 @@
     c.fillRect(ex + 14, ey + 19, 5, 11);
     c.shadowBlur = 0;
     for (const e of s.enemies) {
+      if (e.chasing) {
+        c.save();
+        c.fillStyle = "#ffc57a";
+        c.font = "bold 16px sans-serif";
+        c.textAlign = "center";
+        c.fillText("!", (e.px ?? e.x) * 32 + 16, (e.py ?? e.y) * 32 - 5);
+        c.restore();
+      }
+      if (memorial || lantern) {
+        const x = (e.px ?? e.x) * 32 + 16,
+          y = (e.py ?? e.y) * 32 + 16;
+        c.fillStyle = lights[s.enemies.indexOf(e) % lights.length];
+        c.shadowColor = c.fillStyle;
+        c.shadowBlur = 12;
+        c.beginPath();
+        c.arc(x, y, 7, 0, Math.PI * 2);
+        c.fill();
+        c.shadowBlur = 0;
+        c.fillStyle = "#fff4d5";
+        c.beginPath();
+        c.arc(x - 2, y - 2, 2, 0, Math.PI * 2);
+        c.fill();
+        continue;
+      }
       if (e.kind === "spider") {
         c.fillStyle = "#b39bcc";
         c.beginPath();
@@ -566,7 +646,7 @@
       laneWidth = (w - 140) / s.laneCount,
       hitY = 445,
       now = MidnightMusic.clock().time,
-      palette = ["#B8D4FF", "#F28C28", "#B396E2"];
+      palette = ["#B8D4FF", "#F28C28", "#B396E2", "#9BD14B"];
     for (let lane = 0; lane < s.laneCount; lane++) {
       const x = pad + lane * laneWidth;
       c.fillStyle = "#112136c9";
@@ -581,7 +661,7 @@
       c.fillStyle = palette[lane];
       c.font = "bold 28px sans-serif";
       c.textAlign = "center";
-      c.fillText(["A", "S", "D"][lane], x + laneWidth / 2, 490);
+      c.fillText(MidnightScore.arrows[s.keys[lane]], x + laneWidth / 2, 490);
       c.strokeStyle = palette[lane];
       c.lineWidth = 4;
       c.beginPath();
@@ -608,7 +688,7 @@
       c.shadowBlur = 0;
       c.fillStyle = "#122032";
       c.font = "bold 26px serif";
-      c.fillText("♪", x, y + 8);
+      c.fillText(MidnightScore.arrows[s.keys[note.lane]], x, y + 8);
     }
     c.textAlign = "left";
     c.globalAlpha = 1;
@@ -645,8 +725,10 @@
       countdownUntil = 0;
       current.paused = false;
       current.countdown = 0;
-      if (current.mode === "rhythm")
+      if (current.mode === "rhythm") {
+        MidnightMusic.selectSong(current.stage, 2);
         MidnightArcade.prepareRhythm(current, MidnightMusic.clock());
+      }
       document.getElementById("arcade-pause").classList.add("hide");
     }
     if (current.mode === "maze") {
@@ -661,7 +743,7 @@
     }
     for (const e of current.events.splice(0)) {
       if (e.type === "bonus-life")
-        hint = "500 score—an extra life! Spellbinding!";
+        hint = "2,500 score—an extra life! Spellbinding!";
       else if (e.type === "saved") hint = "A spare life saved your glow!";
       else if (e.type === "hit")
         hint =
@@ -717,6 +799,8 @@
     });
     save();
     if (won) {
+      if (s.playMode === "journey")
+        MidnightJourney.complete(profile, s.mode, s.stage);
       profile.coins += 45 + s.stage * 10 + s.lives * 5;
       profile.points += 15 + s.stage * 5;
       if (s.playMode !== "quick") {
@@ -741,12 +825,16 @@
     if (abort) abort.abort();
     abort = null;
     document.getElementById("app").innerHTML =
-      `<div class="game-shell">${header()}<main class="result arcade-result"><div class="eyebrow" style="justify-content:center">${titles[s.mode]} · LEVEL ${s.stage + 1}</div>${ghost(s.team, "victory-spirit")}<h1>${won ? (s.mode === "maze" ? "A-maze-ing!" : s.mode === "rhythm" ? "Spellbinding rhythm!" : "A leap of moonlight!") : s.reason === "accuracy" ? "One more encore?" : "Out of glow!"}</h1><p class="muted">${won ? "A well-earned win. Your ghost looks rather proud." : "Three fresh hearts are waiting on your next try."}</p>${personalBest ? '<p class="personal-best">★ NEW PERSONAL HIGH SCORE</p>' : ""}<div class="result-rewards"><div>◈ ${won ? "+" + (45 + s.stage * 10 + s.lives * 5) : "0"}<small>COINS</small></div><div>+${s.runScore}<small>SCORE THIS RUN</small></div><div>♥ ${s.reserveLives}<small>SPARE LIVES</small></div></div><div class="arcade-result-actions">${won && s.difficulty < 2 ? '<button class="btn" data-arcade-result="harder">Make this style harder →</button>' : ""}${won && s.stage < 4 && s.playMode !== "quick" ? '<button class="btn secondary" data-arcade-result="next">Next level · choose any style →</button>' : ""}<button class="btn secondary" data-arcade-result="retry">${won ? "Play this level again" : "Try again"}</button><button class="btn secondary" data-arcade-result="styles">${s.playMode === "quick" ? "Choose another single game" : "Choose a style at this level"}</button><button class="text-btn" data-action="highscores">High scores</button><button class="text-btn" data-arcade-result="home">Home</button></div></main></div>`;
+      `<div class="game-shell">${header()}<main class="result arcade-result"><div class="eyebrow" style="justify-content:center">${titles[s.mode]} · LEVEL ${s.stage + 1}${s.mode === "rhythm" ? " · " + esc(s.song) : ""}</div>${ghost(s.team, "victory-spirit")}<h1>${won ? (s.mode === "maze" ? "A-maze-ing!" : s.mode === "rhythm" ? "Spellbinding rhythm!" : "A leap of moonlight!") : s.reason === "accuracy" ? "One more encore?" : "Out of glow!"}</h1><p class="muted">${won ? "A well-earned win. Your ghost looks rather proud." : "Three fresh hearts are waiting on your next try."}</p>${personalBest ? '<p class="personal-best">★ NEW PERSONAL HIGH SCORE</p>' : ""}<div class="result-rewards"><div>◈ ${won ? "+" + (45 + s.stage * 10 + s.lives * 5) : "0"}<small>COINS</small></div><div>+${s.runScore}<small>SCORE THIS RUN</small></div><div>♥ ${s.reserveLives}<small>SPARE LIVES</small></div></div><div class="arcade-result-actions">${won && s.playMode === "journey" ? '<button class="btn" data-arcade-result="journey">Continue journey →</button>' : ""}${won && s.mode === "rhythm" && s.stage < 4 && s.playMode !== "journey" ? '<button class="btn" data-arcade-result="next-song">Next song · Level ' + (s.stage + 2) + " →</button>" : ""}${won && s.difficulty < 2 ? '<button class="btn" data-arcade-result="harder">Make this style harder →</button>' : ""}${won && s.stage < 4 && s.playMode !== "quick" && s.playMode !== "journey" ? '<button class="btn secondary" data-arcade-result="next">Next level · choose any style →</button>' : ""}<button class="btn secondary" data-arcade-result="retry">${won ? "Play this level again" : "Try again"}</button><button class="btn secondary" data-arcade-result="styles">${s.playMode === "journey" ? "View journey route" : s.playMode === "quick" ? "Choose another single game" : "Choose a style at this level"}</button><button class="text-btn" data-action="highscores">High scores</button><button class="text-btn" data-arcade-result="home">Home</button></div></main></div>`;
     document.querySelectorAll("[data-arcade-result]").forEach(
       (b) =>
         (b.onclick = () => {
           const a = b.dataset.arcadeResult;
-          if (a === "home") {
+          if (a === "journey" || (a === "styles" && s.playMode === "journey")) {
+            stop();
+            home();
+            journeyMenu();
+          } else if (a === "home") {
             stop();
             home();
           } else if (a === "next" || a === "styles") {
@@ -756,7 +844,7 @@
           } else
             launch(
               s.mode,
-              s.stage,
+              a === "next-song" ? s.stage + 1 : s.stage,
               a === "harder" ? s.difficulty + 1 : s.difficulty,
               s.playMode,
             );
@@ -768,5 +856,5 @@
       MidnightVictory.play(s.team, document.querySelector(".victory-spirit"));
     } else sound(false);
   }
-  root.MidnightArcadeUI = { launch, stop, getState: () => current };
+  root.MidnightArcadeUI = { launch, stop, getState: () => current, mazeScenes };
 })(globalThis);

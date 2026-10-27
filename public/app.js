@@ -22,6 +22,7 @@ const defaults = {
   highScores: [],
   arcadeUnlocked: 0,
   arcadeLevel: 0,
+  journeyStep: 0,
   arcadeMedals: { maze: [], jump: [], rhythm: [] },
 };
 let profile;
@@ -33,6 +34,8 @@ try {
 } catch {
   profile = { ...defaults };
 }
+MidnightEconomy.normalize(profile);
+localStorage.setItem("midnight-profile", JSON.stringify(profile));
 if (!colors[profile.team]) profile.team = "Mach";
 profile.unlockedLevel = Math.max(
   0,
@@ -220,6 +223,19 @@ function mute() {
 function header() {
   return `<header><div class="brand"><span class="brand-mark">☾</span> Midnight Zombies<span style="color:#f2a04e;font-size:13px">✦</span></div><div class="header-right"><span class="season"><i></i> THE WITCHING HOUR IS HERE</span><span class="coin">◈ ${profile.coins}</span><button class="icon-btn" data-action="mute" aria-label="${profile.mute ? "Unmute" : "Mute"} sound">${profile.mute ? "♪̸" : "♫"}</button></div></header>`;
 }
+function journeyMenu() {
+  const next = MidnightJourney.current(profile);
+  if (!next)
+    return modal(
+      `<h2>Every midnight conquered!</h2><p>You completed all four game styles across five chapters.</p><button class="btn" data-action="restart-journey">Play the journey again →</button>`,
+    );
+  if (next.mode === "race") return playForm("solo", next.stage, "journey");
+  return arcadeMenu(next.mode, next.stage, "journey");
+}
+function journeyProgress() {
+  const next = MidnightJourney.current(profile);
+  return `<div class="journey-order"><b>ALL FOUR GAMES · 5 CHAPTERS</b><p>Jump → Maze → Rhythm → Tap Race</p><small>${next ? `Chapter ${next.chapter + 1}/5 · Game ${profile.journeyStep + 1}/20 · Next: ${next.label}` : "All 20 games complete!"}</small></div>`;
+}
 function home() {
   MidnightArcadeUI.stop();
   MidnightVictory.stop();
@@ -228,7 +244,7 @@ function home() {
   renderKey = "";
   state = null;
   document.documentElement.style.setProperty("--team", colors[profile.team]);
-  app.innerHTML = `<div class="shell home-shell">${header()}<main><section class="hero">${landscape()}<div class="hero-copy"><div class="eyebrow">A little spooky. A lot of silly.</div><h1>Midnight<span>Zombies</span></h1><p>A glowing woodland. Four little spirits.<br>Your kind of Halloween adventure.</p><div class="hero-badge"><b>✦</b> JUMP <b>·</b> MAZE <b>·</b> RHYTHM <b>·</b> RACE</div></div>${ghost("Mach", "hero-mach")}<div class="hero-caption">MACH · YOUR GHOST FALCON<small>Follow a little moonlight.</small></div></section><div class="section-top"><div><h2>How would you like to play?</h2><p>Adventure is a series of levels. Quick Play is one standalone game.</p></div><button class="text-btn" data-action="help">How to play →</button></div><section class="play-grid" aria-label="Choose a play mode"><button class="play-card primary" data-action="solo"><span class="card-icon">↟</span><span class="tag">SERIES OF LEVELS</span><h3>${profile.arcadeLevel ? "Continue Adventure" : "Start Adventure"}</h3><p>Level ${(profile.arcadeLevel || 0) + 1}. Win, unlock the next level, and switch styles.</p><span class="arrow">→</span></button><button class="play-card" data-action="quick"><span class="card-icon">✦</span><span class="tag">ONE GAME</span><h3>Quick Play</h3><p>Pick Jump, Maze, Rhythm, or Tap Race. Choose your difficulty.</p><span class="arrow">→</span></button><div class="play-card friends-card"><span class="card-icon">♧</span><h3>Play with Friends</h3><p>A live tap race. Share a room code.</p><div class="friends-actions"><button class="text-btn" data-action="create">Create room →</button><button class="text-btn" data-action="join">Join room →</button></div></div></section><section class="record-panel"><div><h2>Your high scores</h2><p>Personal bests for every style, saved on this device.</p></div><button class="btn secondary" data-action="highscores">View high scores →</button></section>${teamGallery()}<section class="bottom-grid"><div class="chosen-spirit"><div class="small-heading"><span>YOUR RACING SPIRIT</span><button class="text-btn" data-action="shop">Ghost shop →</button></div><div class="chosen-spirit-preview">${racer(profile.racer, profile.team, profile.hat)}<div><h3>${profile.team}</h3><p>${species[profile.team]}</p><button class="text-btn" data-action="team">Change character →</button></div></div></div><div class="team-box"><div class="small-heading"><span>YOUR PLAYER</span><button class="text-btn" data-action="player-settings">Player settings →</button></div><h3 class="player-name">${esc(profile.name || "Pick a nickname when you start")}</h3><div class="team-progress"><span>◈ ${profile.coins} coins</span><span>♥ ${profile.extraLives} spare lives</span></div><div class="team-progress"><span>Score ${profile.totalScore}</span><span>Team ${profile.points} pts</span></div></div></section></main><footer><span>Made of moonlight & mischief.</span><button class="text-btn" data-action="race-solo">Tap-race course map →</button></footer></div>`;
+  app.innerHTML = `<div class="shell home-shell">${header()}<main><section class="hero">${landscape()}<div class="hero-copy"><div class="eyebrow">A little spooky. A lot of silly.</div><h1>Midnight<span>Zombies</span></h1><p>A glowing woodland. Four little spirits.<br>Your kind of Halloween adventure.</p><div class="hero-badge"><b>✦</b> JUMP <b>·</b> MAZE <b>·</b> RHYTHM <b>·</b> RACE</div></div>${ghost("Mach", "hero-mach")}<div class="hero-caption">MACH · YOUR GHOST FALCON<small>Follow a little moonlight.</small></div></section><div class="section-top"><div><h2>How would you like to play?</h2><p>The Journey takes you through all four games. Quick Play is one standalone game.</p></div><button class="text-btn" data-action="help">How to play →</button></div><section class="play-grid" aria-label="Choose a play mode"><button class="play-card primary" data-action="solo"><span class="card-icon">↟</span><span class="tag">SERIES OF LEVELS</span><h3>${profile.journeyStep ? "Continue Journey" : "Start Journey"}</h3><p>Jump → Maze → Rhythm → Tap Race. All four games across five chapters. ${profile.journeyStep || 0}/20 complete.</p><span class="arrow">→</span></button><button class="play-card" data-action="quick"><span class="card-icon">✦</span><span class="tag">ONE GAME</span><h3>Quick Play</h3><p>Pick Jump, Maze, Rhythm, or Tap Race. Choose your difficulty.</p><span class="arrow">→</span></button><div class="play-card friends-card"><span class="card-icon">♧</span><h3>Play with Friends</h3><p>A live tap race. Share a room code.</p><div class="friends-actions"><button class="text-btn" data-action="create">Create room →</button><button class="text-btn" data-action="join">Join room →</button></div></div></section><section class="record-panel"><div><h2>Your high scores</h2><p>Personal bests for every style, saved on this device.</p></div><button class="btn secondary" data-action="highscores">View high scores →</button></section>${teamGallery()}<section class="bottom-grid"><div class="chosen-spirit"><div class="small-heading"><span>YOUR RACING SPIRIT</span><button class="text-btn" data-action="shop">Ghost shop →</button></div><div class="chosen-spirit-preview">${racer(profile.racer, profile.team, profile.hat)}<div><h3>${profile.team}</h3><p>${species[profile.team]}</p><button class="text-btn" data-action="team">Change character →</button></div></div></div><div class="team-box"><div class="small-heading"><span>YOUR PLAYER</span><button class="text-btn" data-action="player-settings">Player settings →</button></div><h3 class="player-name">${esc(profile.name || "Pick a nickname when you start")}</h3><div class="team-progress"><span>◈ ${profile.coins} coins</span><span>♥ ${profile.extraLives} spare lives</span></div><div class="team-progress"><span>Score ${profile.totalScore}</span><span>Team ${profile.points} pts</span></div></div></section></main><footer><span>Made of moonlight & mischief.</span><button class="text-btn" data-action="race-solo">Tap-race course map →</button></footer></div>`;
 }
 function highScores(mode = "all") {
   const labels = {
@@ -344,8 +360,16 @@ function arcadeMenu(
   if (!["jump", "maze", "rhythm"].includes(mode)) return;
   const stage =
     playMode === "quick"
-      ? 0
-      : Math.max(0, Math.min(profile.arcadeUnlocked || 0, level));
+      ? ["rhythm", "maze"].includes(mode)
+        ? Math.max(0, Math.min(4, level))
+        : 0
+      : Math.max(
+          0,
+          Math.min(
+            playMode === "journey" ? 4 : profile.arcadeUnlocked || 0,
+            level,
+          ),
+        );
   music();
   const title = {
       jump: "Moonlit Leap",
@@ -356,11 +380,33 @@ function arcadeMenu(
       jump: "Run forward through the woods and jump over obstacles. Space or the Jump button.",
       maze: "Collect the candy, avoid woodland creatures, and enter the glowing house. Arrows / WASD or swipe.",
       rhythm:
-        "Hit each glowing note on the line, in time with the Halloween melody. A / S / D or the big pads.",
+        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five original Halloween songs.",
     }[mode];
   modal(
-    `<div class="play-mode-label">${playMode === "quick" ? "QUICK PLAY · ONE STANDALONE GAME" : "ADVENTURE · SERIES OF LEVELS"}</div><h2>${title}</h2><p>${description}</p><form id="arcade-form">${characterPicker()}${nicknameField()}<div class="arcade-options">${playMode === "quick" ? '<input type="hidden" name="stage" value="0">' : `<label>LEVEL<select name="stage">${Array.from({ length: Math.min(4, profile.arcadeUnlocked || 0) + 1 }, (_, i) => `<option value="${i}" ${stage === i ? "selected" : ""}>Level ${i + 1}</option>`).join("")}</select></label>`}<label>DIFFICULTY<select name="difficulty"><option value="0">Chill · start easy</option><option value="1">Spooky · a little faster</option><option value="2">Fiendish · a real challenge</option></select></label></div><div class="actions"><button class="btn" type="submit">${playMode === "quick" ? "Play this game" : "Start this adventure level"} →</button></div></form>`,
+    `<div class="play-mode-label">${playMode === "quick" ? "QUICK PLAY · ONE STANDALONE GAME" : "ADVENTURE · SERIES OF LEVELS"}</div><h2>${title}</h2><p>${description}</p>${playMode === "journey" ? journeyProgress() : ""}${
+      mode === "rhythm"
+        ? `<ol class="rhythm-song-list">${MidnightScore.songs
+            .map(
+              (song, i) =>
+                `<li><b>${i + 1}. ${song.title}</b><small>${song.tempo} BPM · ${MidnightScore.lanesFor(
+                  i,
+                )
+                  .map((k) => MidnightScore.arrows[k])
+                  .join(" ")}</small></li>`,
+            )
+            .join("")}</ol>`
+        : ""
+    }${mode === "maze" ? `<div class="maze-scene-preview"><img id="maze-scene-image" src="${MidnightArcadeUI.mazeScenes[stage].asset}" alt="${MidnightArcadeUI.mazeScenes[stage].name}"><b id="maze-scene-name">${MidnightArcadeUI.mazeScenes[stage].name}</b><p id="maze-scene-description">${MidnightArcadeUI.mazeScenes[stage].description || "Follow the woodland glow to the Monster Bash."}</p></div>` : ""}<form id="arcade-form">${characterPicker()}${nicknameField()}<div class="arcade-options">${playMode === "journey" ? `<input type="hidden" name="stage" value="${stage}">` : playMode === "quick" && !["rhythm", "maze"].includes(mode) ? '<input type="hidden" name="stage" value="0">' : `<label>LEVEL<select name="stage">${Array.from({ length: playMode === "quick" ? 5 : Math.min(4, profile.arcadeUnlocked || 0) + 1 }, (_, i) => `<option value="${i}" ${stage === i ? "selected" : ""}>Level ${i + 1}${mode === "rhythm" ? " · " + MidnightScore.getSong(i).title : mode === "maze" ? " · " + MidnightArcadeUI.mazeScenes[i].name : ""}</option>`).join("")}</select></label>`}<label>DIFFICULTY<select name="difficulty"><option value="0">Chill · start easy</option><option value="1">Spooky · a little faster</option><option value="2">Fiendish · a real challenge</option></select></label></div><div class="actions"><button class="btn" type="submit">${playMode === "quick" ? "Play this game" : "Start this adventure level"} →</button></div></form>`,
   );
+  if (mode === "maze" && $("#arcade-form select[name=stage]"))
+    $("#arcade-form select[name=stage]").onchange = (e) => {
+      const scene = MidnightArcadeUI.mazeScenes[Number(e.target.value)];
+      $("#maze-scene-image").src = scene.asset;
+      $("#maze-scene-image").alt = scene.name;
+      $("#maze-scene-name").textContent = scene.name;
+      $("#maze-scene-description").textContent =
+        scene.description || "Follow the woodland glow to the Monster Bash.";
+    };
   $("#arcade-form").onsubmit = (e) => {
     e.preventDefault();
     const f = new FormData(e.target),
@@ -402,7 +448,7 @@ function modal(content) {
 }
 function help(first = false) {
   modal(
-    `<div style="font-size:35px;margin-bottom:13px">☾ ✦</div><h2>Dead simple.</h2><p>Tap the right thing, fast. Every correct tap moves your ghost forward. Grab items to mess with your friends. First to the party wins!</p><p>Each challenge has one instruction. Miss one? Pull yourself together and try the next. Earn an item every 3 correct taps from Level 2.</p><p>Solo starts with 3 hearts. A missed challenge costs a heart. Spare lives save you when your hearts run out; earn one every 500 score points or buy one for 80 coins.</p><div class="actions"><button class="btn" data-action="help-done">Let’s make some mischief →</button>${first ? '<button class="btn secondary" data-action="help-done">Skip</button>' : ""}</div>`,
+    `<div style="font-size:35px;margin-bottom:13px">☾ ✦</div><h2>Dead simple.</h2><p>Tap the right thing, fast. Every correct tap moves your ghost forward. Grab items to mess with your friends. First to the party wins!</p><p>Each challenge has one instruction. Miss one? Pull yourself together and try the next. Earn an item every 3 correct taps from Level 2.</p><p>Solo starts with 3 hearts. A missed challenge costs a heart. Spare lives save you when your hearts run out; earn one every 2,500 score points or buy one for 200 coins. You can carry up to 3 spare lives.</p><div class="actions"><button class="btn" data-action="help-done">Let’s make some mischief →</button>${first ? '<button class="btn secondary" data-action="help-done">Skip</button>' : ""}</div>`,
   );
 }
 function teamMenu() {
@@ -451,7 +497,7 @@ function quiz() {
 }
 function shop() {
   modal(
-    `<h2>The costume cupboard.</h2><p>Looking dead good. ◈ ${profile.coins} coins<br>Dress your ghost or stock up on extra lives.</p><div class="life-shop"><div><strong>♥ Extra life</strong><small>You have ${profile.extraLives} spare lives. One is used automatically when your hearts run out.</small></div><button class="btn" data-action="buy-life" ${profile.extraLives >= 99 ? "disabled" : ""}>◈ 80 · Buy</button></div><p class="life-shop-hint">Earn a free spare life every 500 score points. ${500 - (profile.totalScore % 500)} points until your next one.</p><div class="shop-list">${[
+    `<h2>The costume cupboard.</h2><p>Looking dead good. ◈ ${profile.coins} coins<br>Dress your ghost or stock up on extra lives.</p><div class="life-shop"><div><strong>♥ Extra life</strong><small>You have ${profile.extraLives} spare lives. One is used automatically when your hearts run out.</small></div><button class="btn" data-action="buy-life" ${profile.extraLives >= MidnightEconomy.maxSpareLives ? "disabled" : ""}>◈ 200 · Buy</button></div><p class="life-shop-hint">Earn a free spare life every 2,500 score points (maximum 3 spares). ${MidnightEconomy.scorePerLife - (profile.totalScore % MidnightEconomy.scorePerLife)} points until your next one.</p><div class="shop-list">${[
       "Witch hat",
       "Party hat",
       "Propeller beanie",
@@ -484,7 +530,7 @@ function playForm(mode, level = profile.level, context = "adventure") {
   }
   music();
   modal(
-    `<h2>${{ solo: "Your midnight awaits.", create: "Invite your favorite ghouls.", join: "Secret knock?" }[mode]}</h2><p>${mode === "solo" ? `Level ${profile.level + 1} · ${levels[profile.level].name}. You and three delightfully unreliable rivals.` : mode === "create" ? "Create a room, share its four-letter code, then race together." : "Enter the four-letter code from your host."}</p><form id="play-form">${characterPicker()}${nicknameField()}${mode === "join" ? '<label for="room-code">ROOM CODE</label><input id="room-code" name="code" pattern="[A-Za-z]{4}" maxlength="4" required placeholder="ABCD" style="text-transform:uppercase;letter-spacing:6px" autocomplete="off">' : ""}<p id="character-choice-summary" class="character-choice-summary" role="status" aria-live="polite">${profile.team} selected · ${species[profile.team]}</p><div class="actions"><button class="btn" type="submit">${mode === "solo" ? "Let’s race →" : mode === "create" ? "Create room →" : "Join the party →"}</button></div></form>`,
+    `<h2>${{ solo: "Your midnight awaits.", create: "Invite your favorite ghouls.", join: "Secret knock?" }[mode]}</h2><p>${mode === "solo" ? `Level ${profile.level + 1} · ${levels[profile.level].name}. You and three delightfully unreliable rivals.` : mode === "create" ? "Create a room, share its four-letter code, then race together." : "Enter the four-letter code from your host."}</p><form id="play-form">${characterPicker()}${nicknameField()}${mode === "join" ? '<label for="room-code">ROOM CODE</label><input id="room-code" name="code" pattern="[A-Za-z]{4}" maxlength="4" required placeholder="ABCD" style="text-transform:uppercase;letter-spacing:6px" autocomplete="off">' : ""}${context === "journey" ? journeyProgress() : ""}<p id="character-choice-summary" class="character-choice-summary" role="status" aria-live="polite">${profile.team} selected · ${species[profile.team]}</p><div class="actions"><button class="btn" type="submit">${mode === "solo" ? "Let’s race →" : mode === "create" ? "Create room →" : "Join the party →"}</button></div></form>`,
   );
   $("#play-form").onchange = (e) => {
     if (e.target.name === "character")
@@ -579,7 +625,7 @@ function connect() {
       }
       successStreak = m.ok ? successStreak + 1 : 0;
       const text = m.lifeBonus
-        ? "500 points—bonus life! Spooktacular!"
+        ? "2,500 points—bonus life! Spooktacular!"
         : m.lifeSaved
           ? "A spare life saved your glow! Keep going."
           : m.ok
@@ -771,7 +817,7 @@ function updateControls() {
   const lifeKey = [p.lives, p.totalScore, p.reserveLives].join("/");
   if (hearts && hearts.dataset.key !== lifeKey) {
     hearts.dataset.key = lifeKey;
-    hearts.innerHTML = `<span class="hearts" aria-label="${p.lives} hearts remaining">${"♥".repeat(p.lives)}<span>${"♡".repeat(3 - p.lives)}</span></span><span>Score <b>${p.totalScore}</b><small>${500 - (p.totalScore % 500)} to a bonus life</small></span><span>♥ ${p.reserveLives}<small>spare lives</small></span>`;
+    hearts.innerHTML = `<span class="hearts" aria-label="${p.lives} hearts remaining">${"♥".repeat(p.lives)}<span>${"♡".repeat(3 - p.lives)}</span></span><span>Score <b>${p.totalScore}</b><small>${MidnightEconomy.scorePerLife - (p.totalScore % MidnightEconomy.scorePerLife)} to a bonus life</small></span><span>♥ ${p.reserveLives}<small>spare lives</small></span>`;
   }
   $("#position").textContent =
     `${ordinal(state.players.indexOf(p) + 1)} place · ${Math.round(p.progress)}%`;
@@ -859,6 +905,12 @@ function finish() {
     profile.points += Math.max(5, 50 - (place - 1) * 10);
     if (state.solo) {
       awardMidnightLevel(profile, state.level, place, p.correct);
+      if (
+        racePlayMode === "journey" &&
+        !p.eliminated &&
+        p.correct >= levels[state.level].finishHits
+      )
+        MidnightJourney.complete(profile, "race", state.level);
       if (racePlayMode !== "quick" && place <= 3 && p.correct >= 5) {
         profile.arcadeUnlocked = Math.max(
           profile.arcadeUnlocked || 0,
@@ -874,7 +926,7 @@ function finish() {
   const top = state.players.slice(0, 3);
   const order = [top[1], top[0], top[2]].filter(Boolean);
   gameFrame(
-    `<main class="result"><div class="eyebrow" style="justify-content:center">${won ? "Fashionably dead. Right on time." : "The party waits for no ghost."}</div>${ghost(p.eliminated ? p.team : winner.team, "victory-spirit")}<h1>${p.eliminated ? "Out of glow!" : won ? "You made an entrance!" : `${esc(winner.name)} wins!`}</h1><p class="muted" style="font-size:13px;margin-top:12px">${p.eliminated ? "Your hearts ran out. Retry with three fresh hearts, or stock up on spare lives in the shop." : won ? "Team " + p.team + " is raising the roof." : `You finished ${ordinal(place)}. There’s always another midnight.`}</p>${!won && winner.progress - p.progress < 7 ? '<p style="color:#f2a04e;margin-top:10px">SO CLOSE!</p>' : ""}${raceBest ? '<p class="personal-best">★ NEW PERSONAL HIGH SCORE</p>' : ""}<div class="podium">${order.map((x) => `<div class="podium-place ${state.players.indexOf(x) > 0 ? "podium-disappointed" : "podium-proud"}">${state.players.indexOf(x) > 0 ? `<small class="podium-thought">${state.players.indexOf(x) === 1 ? "So close…" : "Next midnight…"}</small>` : ""}${racer(x.racer, x.team, x.id === myId ? profile.hat : "")}<strong>${ordinal(state.players.indexOf(x) + 1)}</strong><span>${esc(x.name)}</span></div>`).join("")}</div><div class="result-rewards"><div>◈ +${coins}<small>COINS EARNED</small></div><div>✦ +${Math.max(5, 50 - (place - 1) * 10)}<small>TEAM POINTS</small></div><div>${Number.isFinite(elapsed) && elapsed > 0 ? elapsed.toFixed(1) + "s" : "2:00"}<small>${p.eliminated ? "RUN TIME" : "WINNING TIME"}</small></div></div>${state.solo ? `<div class="level-result"><span>${"★".repeat(profile.levelStars[state.level] || 0)}${"☆".repeat(3 - (profile.levelStars[state.level] || 0))}</span><p>${profile.levelStars[state.level] ? (state.level === 3 ? "You made it through every gate. The Monster Bash is yours!" : `Next gate open: ${levels[state.level + 1].name}`) : "Place in the top three with 5 correct taps to open the next gate."}</p></div>` : ""}<div class="actions" style="max-width:580px;margin:15px auto">${state.solo && racePlayMode !== "quick" && state.level < 3 && profile.unlockedLevel > state.level ? '<button class="btn" data-action="next-level">Next level →</button>' : ""}${state.host === myId ? '<button class="btn" data-action="rematch">One more midnight →</button>' : '<p class="muted">Waiting for the host to rematch…</p>'}<button class="btn secondary" data-action="leave">Back home</button></div></main>`,
+    `<main class="result"><div class="eyebrow" style="justify-content:center">${won ? "Fashionably dead. Right on time." : "The party waits for no ghost."}</div>${ghost(p.eliminated ? p.team : winner.team, "victory-spirit")}<h1>${p.eliminated ? "Out of glow!" : won ? "You made an entrance!" : `${esc(winner.name)} wins!`}</h1><p class="muted" style="font-size:13px;margin-top:12px">${p.eliminated ? "Your hearts ran out. Retry with three fresh hearts, or stock up on spare lives in the shop." : won ? "Team " + p.team + " is raising the roof." : `You finished ${ordinal(place)}. There’s always another midnight.`}</p>${!won && winner.progress - p.progress < 7 ? '<p style="color:#f2a04e;margin-top:10px">SO CLOSE!</p>' : ""}${raceBest ? '<p class="personal-best">★ NEW PERSONAL HIGH SCORE</p>' : ""}<div class="podium">${order.map((x) => `<div class="podium-place ${state.players.indexOf(x) > 0 ? "podium-disappointed" : "podium-proud"}">${state.players.indexOf(x) > 0 ? `<small class="podium-thought">${state.players.indexOf(x) === 1 ? "So close…" : "Next midnight…"}</small>` : ""}${racer(x.racer, x.team, x.id === myId ? profile.hat : "")}<strong>${ordinal(state.players.indexOf(x) + 1)}</strong><span>${esc(x.name)}</span></div>`).join("")}</div><div class="result-rewards"><div>◈ +${coins}<small>COINS EARNED</small></div><div>✦ +${Math.max(5, 50 - (place - 1) * 10)}<small>TEAM POINTS</small></div><div>${Number.isFinite(elapsed) && elapsed > 0 ? elapsed.toFixed(1) + "s" : "2:00"}<small>${p.eliminated ? "RUN TIME" : "WINNING TIME"}</small></div></div>${state.solo ? `<div class="level-result"><span>${"★".repeat(profile.levelStars[state.level] || 0)}${"☆".repeat(3 - (profile.levelStars[state.level] || 0))}</span><p>${profile.levelStars[state.level] ? (state.level === 3 ? "You made it through every gate. The Monster Bash is yours!" : `Next gate open: ${levels[state.level + 1].name}`) : "Place in the top three with 5 correct taps to open the next gate."}</p></div>` : ""}<div class="actions" style="max-width:580px;margin:15px auto">${state.solo && racePlayMode === "journey" && !p.eliminated && p.correct >= levels[state.level].finishHits ? '<button class="btn" data-action="journey-next">Continue journey →</button>' : ""}${state.solo && racePlayMode !== "quick" && racePlayMode !== "journey" && state.level < 3 && profile.unlockedLevel > state.level ? '<button class="btn" data-action="next-level">Next level →</button>' : ""}${state.host === myId ? '<button class="btn" data-action="rematch">One more midnight →</button>' : '<p class="muted">Waiting for the host to rematch…</p>'}<button class="btn secondary" data-action="leave">Back home</button></div></main>`,
   );
   sound(won);
   if (won) confetti();
@@ -918,8 +970,16 @@ document.addEventListener("click", (e) => {
     if (!profile.chosen) teamMenu();
     return;
   }
-  if (action === "solo")
-    return arcadeMenu("jump", profile.arcadeLevel || 0, "adventure");
+  if (action === "solo") return journeyMenu();
+  if (action === "journey-next") {
+    leave();
+    return journeyMenu();
+  }
+  if (action === "restart-journey") {
+    profile.journeyStep = 0;
+    save();
+    return journeyMenu();
+  }
   if (action === "quick") {
     if (state) leave();
     return arcadeHub(0, "quick");
@@ -1001,10 +1061,10 @@ document.addEventListener("click", (e) => {
   }
   if (action === "shop") return shop();
   if (action === "buy-life") {
-    if (profile.extraLives >= 99) return;
-    if (profile.coins < 80)
-      return toast("An extra life costs 80 coins. Earn more by racing!");
-    profile.coins -= 80;
+    if (profile.extraLives >= MidnightEconomy.maxSpareLives) return;
+    if (profile.coins < MidnightEconomy.lifePrice)
+      return toast("An extra life costs 200 coins. Earn more by racing!");
+    profile.coins -= MidnightEconomy.lifePrice;
     profile.extraLives++;
     save();
     home();
@@ -1096,4 +1156,7 @@ function animate() {
 home();
 requestAnimationFrame(animate);
 if (sessionStorage.getItem("midnight-session")) connect();
-else if (!profile.tutorial) setTimeout(() => help(true), 500);
+else if (!profile.tutorial)
+  setTimeout(() => {
+    if (view === "home" && !document.querySelector("dialog[open]")) help(true);
+  }, 500);

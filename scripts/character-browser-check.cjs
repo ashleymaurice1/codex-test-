@@ -18,7 +18,7 @@ const assert = require("node:assert/strict");
             chosen: true,
             team: "Mach",
             mute: true,
-            coins: 200,
+            coins: 450,
           }),
         );
     });
@@ -87,11 +87,11 @@ const assert = require("node:assert/strict");
   await p.locator("[data-action=shop]").click();
   await p.locator("[data-action=buy-life]").click();
   assert.equal(await p.evaluate(() => profile.extraLives), 1);
-  assert.equal(await p.evaluate(() => profile.coins), 120);
+  assert.equal(await p.evaluate(() => profile.coins), 250);
   await p.locator("[data-action=buy-life]").click();
   await p.locator("[data-action=buy-life]").click();
   assert.equal(await p.evaluate(() => profile.extraLives), 2);
-  assert.equal(await p.evaluate(() => profile.coins), 40);
+  assert.equal(await p.evaluate(() => profile.coins), 50);
   await p.reload();
   assert.equal(await p.evaluate(() => profile.extraLives), 2);
   await p.locator("[data-action=race-solo]").first().click();

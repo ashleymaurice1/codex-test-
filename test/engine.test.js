@@ -184,7 +184,7 @@ test("solo mistakes spend hearts and spare lives protect a player before elimina
     null,
   );
 });
-test("every 500 total solo score awards one spare life without duplicate rewards", () => {
+test("every 2500 total solo score awards one spare life without duplicate rewards", () => {
   const p = E.player("Ember", 2, "Ember"),
     r = {
       solo: true,
@@ -193,9 +193,9 @@ test("every 500 total solo score awards one spare life without duplicate rewards
       players: [p],
       challenge: E.challenge(0, 1000, () => 0.5, 0),
     };
-  p.totalScore = 400;
+  p.totalScore = 2400;
   E.answer(r, p, r.challenge.id, r.challenge.answer[0], 1200);
-  assert.equal(p.totalScore, 500);
+  assert.equal(p.totalScore, 2500);
   assert.equal(p.runScore, 100);
   assert.equal(p.reserveLives, 1);
   assert.equal(p.bonusLivesEarned, 1);
@@ -203,7 +203,7 @@ test("every 500 total solo score awards one spare life without duplicate rewards
   assert.equal(p.reserveLives, 1);
   r.challenge = E.challenge(1, 3000, () => 0.5, 0);
   E.answer(r, p, r.challenge.id, r.challenge.answer[0], 3200);
-  assert.equal(p.totalScore, 600);
+  assert.equal(p.totalScore, 2600);
   assert.equal(p.reserveLives, 1);
 });
 test("multiplayer and computer racers are not eliminated by solo heart rules", () => {

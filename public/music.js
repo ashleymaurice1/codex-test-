@@ -13,7 +13,8 @@
     scene = "menu",
     transportPaused = false,
     totalNotes = 0;
-  const score = root.MidnightScore;
+  let score = root.MidnightScore.getSong(0);
+  const voices = new Set();
   function hz(m) {
     return 440 * Math.pow(2, (m - 69) / 12);
   }
@@ -40,6 +41,8 @@
     g.gain.exponentialRampToValueAtTime(volume, time + 0.025);
     g.gain.exponentialRampToValueAtTime(0.0001, time + duration);
     o.connect(g).connect(bus);
+    voices.add(o);
+    o.onended = () => voices.delete(o);
     o.start(time);
     o.stop(time + duration + 0.03);
   }
@@ -50,16 +53,17 @@
       if (t >= ctx.currentTime - 0.04) {
         const p = score.noteAtBeat(nextBeat);
         if (p !== null) {
-          tone(p, t, score.beat * 1.45, 0.11);
+          tone(p, t, score.beat * 1.45, 0.11, score.voice);
           tone(p + 12, t, score.beat * 0.55, 0.009, "triangle");
           totalNotes++;
         }
         if (nextBeat % 4 === 0) {
-          const chord = score.chords[Math.floor(nextBeat / 4) % 8];
+          const chord =
+            score.chords[Math.floor(nextBeat / 4) % score.chords.length];
           chord.forEach((n) =>
             tone(n + 12, t, score.beat * 4.2, 0.012, "triangle"),
           );
-          tone(chord[0] - 12, t, score.beat * 2.5, 0.035);
+          tone(chord[0] - 12, t, score.beat * 2.5, 0.035, score.bass);
         }
       }
       nextBeat++;
@@ -111,7 +115,22 @@
       if (ctx && !transportPaused) ctx.resume().catch(() => {});
       updateVolume();
     },
+    selectSong(stage = 0, lead = 0.1) {
+      ensure();
+      score = root.MidnightScore.getSong(stage);
+      for (const o of voices) {
+        try {
+          o.stop();
+        } catch {}
+      }
+      voices.clear();
+      origin = (ctx?.currentTime || 0) + lead;
+      nextBeat = 0;
+      if (echo) echo.delayTime.value = score.beat * 0.75;
+      schedule();
+    },
     setScene(value) {
+      if (scene === "rhythm" && value !== "rhythm") this.selectSong(0);
       scene = value;
       updateVolume();
     },
@@ -128,7 +147,7 @@
       running: ctx?.state === "running",
     }),
     status: () => ({
-      source: "Moonlit Lounge — original 32-bar composition",
+      source: score.title,
       state: ctx?.state || "not-started",
       muted,
       totalNotes,

@@ -11,7 +11,7 @@ test("all five mazes connect every candy and the exit to the entrance", () => {
   }
 });
 test("first maze is winnable with real roaming creatures and awards score and a bonus life", () => {
-  const s = A.createMaze(0, { team: "Mach" });
+  const s = A.createMaze(0, { team: "Mach", totalScore: 2000 });
   for (let i = 0; i < 800 && s.status === "playing"; i++) {
     const targets = s.candies.size
         ? [...s.candies].map((k) => k.split(",").map(Number))
@@ -36,7 +36,7 @@ test("first maze is winnable with real roaming creatures and awards score and a 
   }
   assert.equal(s.status, "won");
   assert.equal(s.collected, s.target);
-  assert.equal(s.totalScore, 500);
+  assert.equal(s.totalScore, 2500);
   assert.equal(s.reserveLives, 1);
   const score = s.totalScore;
   A.stepMaze(s, 1);
@@ -109,4 +109,15 @@ test("unavoided obstacles consume spare lives and eventually end the run", () =>
   assert.equal(s.status, "lost");
   assert.equal(s.reserveLives, 0);
   assert.equal(s.lives, 0);
+});
+test("repeated direction key events do not restart smooth maze movement", () => {
+  const s = A.createMaze(0),
+    x = s.player.x,
+    y = s.player.y;
+  const direction = s.grid[y][x + 1] === 0 ? "right" : "down";
+  for (let i = 0; i < 30; i++) {
+    A.turnMaze(s, direction);
+    A.stepMaze(s, 1 / 60);
+  }
+  assert.ok(s.player.x !== x || s.player.y !== y);
 });

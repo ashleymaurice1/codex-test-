@@ -97,7 +97,7 @@ test("solo answers advance promptly while rival challenge clocks remain independ
     type: "create",
     solo: true,
     level: 0,
-    score: 425,
+    score: 2425,
     extraLives: 1,
     name: "Beginner",
     team: "Mach",
@@ -106,7 +106,7 @@ test("solo answers advance promptly while rival challenge clocks remain independ
   const state = await a.next((m) => m.phase === "race");
   const room = rooms.get(join.code);
   const self = room.players.find((p) => p.id === join.id);
-  assert.equal(self.totalScore, 425);
+  assert.equal(self.totalScore, 2425);
   const original = room.challenge.id;
   const botIds = room.players
     .filter((p) => p.bot)
@@ -117,7 +117,7 @@ test("solo answers advance promptly while rival challenge clocks remain independ
   const next = await a.next(
     (m) => m.phase === "race" && m.challenge.id !== original,
   );
-  assert.equal(self.totalScore, 525);
+  assert.equal(self.totalScore, 2525);
   assert.equal(self.reserveLives, 2);
   assert.ok(
     Date.now() - answeredAt < 2000,
