@@ -63,7 +63,7 @@ const assert = require("node:assert/strict");
     );
     for (const [mode, title] of [
       ["jump", "Del Rio Bravo"],
-      ["maze", "Midnight in the Green House"],
+      ["maze", "Creepy Comedy"],
     ]) {
       await p.locator("[data-action=quick]").click();
       await p.locator(`dialog [data-value=${mode}]`).click();

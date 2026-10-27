@@ -92,6 +92,8 @@
           ? MidnightArcade.createRhythm(stage, profile, difficulty)
           : MidnightArcade.createJump(stage, profile, difficulty);
     if (mode === "maze") current.scene = mazeScenes[current.stage].name;
+    if (mode === "jump")
+      current.scene = "Día de los Muertos · Candlelit woodland";
     current.playMode = playMode;
     current.runId = crypto.randomUUID();
     if (mode === "rhythm") MidnightMusic.ensureClock(profile.mute);
@@ -104,7 +106,7 @@
     abort = new AbortController();
     const signal = abort.signal;
     document.getElementById("app").innerHTML =
-      `<div class="game-shell arcade-shell">${header()}<div class="race-top"><button class="text-btn" data-arcade="home">← Home</button><span>${playMode === "quick" ? "QUICK PLAY" : "ADVENTURE · LEVEL " + (stage + 1)} · ${["CHILL", "SPOOKY", "FIENDISH"][difficulty]}</span><button class="text-btn" data-arcade="pause">Pause Ⅱ</button></div><main><div class="arcade-heading"><div><span class="eyebrow">${esc(profile.name || "Grave guest")} · ${profile.team}</span><h1>${titles[mode]}</h1>${mode === "rhythm" ? `<span class="rhythm-song">Song ${stage + 1}/5 · ${esc(current.song)} · ${esc(MidnightScore.getSong(stage).artist)}</span>` : mode === "maze" ? `<span class="rhythm-song">${esc(current.scene)}${mazeScenes[stage].credit ? " · " + mazeScenes[stage].credit : ""}</span>` : ""}</div>${ghost(profile.team)}</div><p class="arcade-instruction">${playMode === "journey" ? "Journey · Game " + (profile.journeyStep + 1) + "/20. " : ""}${tips[mode]}${mode === "rhythm" ? ` Level ${stage + 1}: ${current.keys.map((k) => MidnightScore.arrows[k]).join(" ")}.` : ""}</p><div class="arcade-stats" id="arcade-stats"></div><div class="arcade-board-wrap"><canvas id="arcade-board" class="arcade-board ${mode === "maze" ? "maze-board" : "jump-board"}" width="${mode === "maze" ? 544 : 900}" height="${mode === "maze" ? 480 : 540}" tabindex="0" aria-label="${titles[mode]} game board. ${tips[mode]}"></canvas><div class="arcade-pause" id="arcade-pause"><h2>Gathering moonlight…</h2></div></div><div class="arcade-hint" id="arcade-hint" role="status" aria-live="polite">${hint}</div>${mode === "maze" ? '<div class="maze-controls" aria-label="Maze direction controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-arcade="pause" aria-label="Pause to plan your route">Ⅱ</button><button data-dir="right" aria-label="Move right">→</button><button data-dir="down" aria-label="Move down">↓</button></div>' : mode === "rhythm" ? `<div class="rhythm-controls" aria-label="Rhythm note pads">${Array.from({ length: current.laneCount }, (_, i) => `<button data-lane="${i}" style="--note:${["#B8D4FF", "#F28C28", "#B396E2", "#9BD14B"][i]}">${MidnightScore.arrows[current.keys[i]]}<small>${current.keys[i].replace("Arrow", "").toUpperCase()}</small></button>`).join("")}</div>` : '<button class="jump-control" data-arcade="jump">JUMP <small>SPACE / ↑</small></button>'}<p class="arcade-footer-note">Three hearts · spare lives save your glow · +1 life every 2,500 score</p></main></div>`;
+      `<div class="game-shell arcade-shell">${header()}<div class="race-top"><button class="text-btn" data-arcade="home">← Home</button><span>${playMode === "quick" ? "QUICK PLAY" : "ADVENTURE · LEVEL " + (stage + 1)} · ${["CHILL", "SPOOKY", "FIENDISH"][difficulty]}</span><button class="text-btn" data-arcade="pause">Pause Ⅱ</button></div><main><div class="arcade-heading"><div><span class="eyebrow">${esc(profile.name || "Grave guest")} · ${profile.team}</span><h1>${titles[mode]}</h1>${mode === "rhythm" ? `<span class="rhythm-song">Song ${stage + 1}/5 · ${esc(current.song)} · ${esc(MidnightScore.getSong(stage).artist)}</span>` : mode === "maze" ? `<span class="rhythm-song">${esc(current.scene)}${mazeScenes[stage].credit ? " · " + mazeScenes[stage].credit : ""}</span>` : mode === "jump" ? `<span class="rhythm-song">${esc(current.scene)}</span>` : ""}</div>${ghost(profile.team)}</div><p class="arcade-instruction">${playMode === "journey" ? "Journey · Game " + (profile.journeyStep + 1) + "/20. " : ""}${tips[mode]}${mode === "rhythm" ? ` Level ${stage + 1}: ${current.keys.map((k) => MidnightScore.arrows[k]).join(" ")}.` : ""}</p><div class="arcade-stats" id="arcade-stats"></div><div class="arcade-board-wrap"><canvas id="arcade-board" class="arcade-board ${mode === "maze" ? "maze-board" : "jump-board"}" width="${mode === "maze" ? 544 : 900}" height="${mode === "maze" ? 480 : 540}" tabindex="0" aria-label="${titles[mode]} game board. ${tips[mode]}"></canvas><div class="arcade-pause" id="arcade-pause"><h2>Gathering moonlight…</h2></div></div><div class="arcade-hint" id="arcade-hint" role="status" aria-live="polite">${hint}</div>${mode === "maze" ? '<div class="maze-controls" aria-label="Maze direction controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-arcade="pause" aria-label="Pause to plan your route">Ⅱ</button><button data-dir="right" aria-label="Move right">→</button><button data-dir="down" aria-label="Move down">↓</button></div>' : mode === "rhythm" ? `<div class="rhythm-controls" aria-label="Rhythm note pads">${Array.from({ length: current.laneCount }, (_, i) => `<button data-lane="${i}" style="--note:${["#B8D4FF", "#F28C28", "#B396E2", "#9BD14B"][i]}">${MidnightScore.arrows[current.keys[i]]}<small>${current.keys[i].replace("Arrow", "").toUpperCase()}</small></button>`).join("")}</div>` : '<button class="jump-control" data-arcade="jump">JUMP <small>SPACE / ↑</small></button>'}<p class="arcade-footer-note">Three hearts · spare lives save your glow · +1 life every 2,500 score</p></main></div>`;
     if (mode === "maze") {
       const shell = document.querySelector(".arcade-shell");
       shell.classList.add("maze-scene-shell");
@@ -241,7 +243,9 @@
       image(
         mode === "maze"
           ? mazeScenes[stage].asset
-          : "/assets/moonlit-woodland.webp",
+          : mode === "jump"
+            ? mazeScenes[1].asset
+            : "/assets/moonlit-woodland.webp",
       ),
       image("/assets/arcade/witch.webp"),
       image("/assets/arcade/zombie.webp"),
@@ -489,6 +493,47 @@
       s.invulnerable > 0 && Math.floor(s.elapsed * 8) % 2 ? 0.4 : 1,
     );
   }
+  function marigold(c, x, y, r, color = "#ffa32e") {
+    c.save();
+    c.fillStyle = color;
+    for (let petal = 0; petal < 8; petal++) {
+      const angle = (petal * Math.PI) / 4;
+      c.beginPath();
+      c.arc(
+        x + Math.cos(angle) * r * 0.52,
+        y + Math.sin(angle) * r * 0.52,
+        r * 0.48,
+        0,
+        7,
+      );
+      c.fill();
+    }
+    c.fillStyle = "#b85e22";
+    c.beginPath();
+    c.arc(x, y, r * 0.28, 0, 7);
+    c.fill();
+    c.restore();
+  }
+  function candle(c, x, bottom, height, time) {
+    c.save();
+    c.fillStyle = "#f6d69e";
+    c.fillRect(x - 4, bottom - height, 8, height);
+    c.fillStyle = "#ffe0a0";
+    c.shadowColor = "#ffb84d";
+    c.shadowBlur = 12;
+    c.beginPath();
+    c.ellipse(
+      x,
+      bottom - height - 5,
+      3,
+      5 + Math.sin(time * 2 + x) * 0.5,
+      0,
+      0,
+      7,
+    );
+    c.fill();
+    c.restore();
+  }
   function drawJump(c) {
     const s = current,
       w = s.width,
@@ -496,93 +541,133 @@
     forest(c, w, h);
     c.save();
     c.translate(-s.cameraX, 0);
-    c.fillStyle = "#102132";
+    const path = c.createLinearGradient(0, s.ground, 0, h);
+    path.addColorStop(0, "#26334a");
+    path.addColorStop(1, "#101e32");
+    c.fillStyle = path;
     c.fillRect(s.cameraX, s.ground, w, h - s.ground);
-    c.strokeStyle = "#75b8dc";
+    c.strokeStyle = "#eeb366";
     c.lineWidth = 3;
     c.beginPath();
     c.moveTo(s.cameraX, s.ground);
     c.lineTo(s.cameraX + w, s.ground);
     c.stroke();
-    for (let i = 0; i < 14; i++) {
-      const x = Math.floor(s.cameraX / 83) * 83 + i * 83;
-      c.fillStyle = i % 2 ? "#90d3ff" : "#e9b067";
-      c.shadowColor = c.fillStyle;
-      c.shadowBlur = 9;
+    // World-anchored petals and memorial lights reinforce forward travel.
+    for (
+      let i = Math.floor(s.cameraX / 55);
+      i < (s.cameraX + w) / 55 + 1;
+      i++
+    ) {
+      const x = i * 55;
+      c.save();
+      c.translate(x, s.ground + 18 + ((i * 17) % 76));
+      c.rotate(i * 2.4);
+      c.fillStyle = i % 3 ? "#ef9a37" : "#ec74af";
+      c.globalAlpha = 0.7;
       c.beginPath();
-      c.arc(x, s.ground + 20 + ((i * 17) % 80), 3, 0, 7);
+      c.ellipse(0, 0, 4, 2, 0, 0, Math.PI * 2);
       c.fill();
+      c.restore();
     }
-    c.shadowBlur = 0;
-    sprite(
-      c,
-      images.witch,
-      s.cameraX + 665 + Math.sin(s.elapsed * 0.3) * 70,
-      45 + Math.sin(s.elapsed * 0.7) * 14,
-      165,
-      110,
-      0.75,
-    );
-    sprite(
-      c,
-      images.zombie,
-      350 + Math.floor(s.cameraX / 1800) * 1800,
-      330,
-      110,
-      85,
-      0.38,
-    );
+    // Small offerings sit beside the path, above the playable ground.
+    for (
+      let i = Math.floor(s.cameraX / 230);
+      i < (s.cameraX + w) / 230 + 1;
+      i++
+    ) {
+      const x = i * 230 + 95;
+      marigold(c, x, s.ground - 14, 10);
+      candle(c, x + 23, s.ground - 8, 17, s.elapsed);
+    }
     for (const o of s.obstacles) {
       const y = s.ground - o.height;
+      c.save();
       if (o.kind === "pumpkin") {
-        c.fillStyle = "#dd913c";
+        // Decorated calavera: warm ivory, flower eyes, painted flourishes.
+        c.fillStyle = "#f8e7c6";
+        c.strokeStyle = "#be667e";
+        c.lineWidth = 2;
         c.beginPath();
-        c.ellipse(
-          o.x + o.width / 2,
-          y + o.height * 0.58,
-          o.width * 0.65,
-          o.height * 0.43,
-          0,
-          0,
-          7,
+        c.roundRect(o.x, y, o.width, o.height * 0.78, [16, 16, 9, 9]);
+        c.fill();
+        c.stroke();
+        c.fillStyle = "#f8e7c6";
+        c.fillRect(
+          o.x + o.width * 0.2,
+          y + o.height * 0.65,
+          o.width * 0.6,
+          o.height * 0.35,
+        );
+        for (const [fraction, color] of [
+          [0.28, "#d94c91"],
+          [0.72, "#3cb9bf"],
+        ]) {
+          marigold(
+            c,
+            o.x + o.width * fraction,
+            y + o.height * 0.4,
+            o.width * 0.19,
+            color,
+          );
+          c.fillStyle = "#31344d";
+          c.beginPath();
+          c.arc(o.x + o.width * fraction, y + o.height * 0.4, 3, 0, 7);
+          c.fill();
+        }
+        c.fillStyle = "#794570";
+        c.beginPath();
+        c.moveTo(o.x + o.width / 2, y + o.height * 0.53);
+        c.lineTo(o.x + o.width * 0.42, y + o.height * 0.64);
+        c.lineTo(o.x + o.width * 0.58, y + o.height * 0.64);
+        c.fill();
+        c.strokeStyle = "#794570";
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(o.x + 9, y + o.height * 0.84);
+        c.lineTo(o.x + o.width - 9, y + o.height * 0.84);
+        c.stroke();
+        for (let j = 0; j < 3; j++)
+          c.strokeRect(o.x + 11 + j * 5, y + o.height * 0.8, 4, 6);
+        marigold(c, o.x + o.width / 2, y + 8, 5);
+      } else if (o.kind === "tombstone") {
+        // A painted lantern, rather than asking players to jump on a grave.
+        c.fillStyle = "#603b76";
+        c.strokeStyle = "#eeb366";
+        c.lineWidth = 2;
+        c.beginPath();
+        c.roundRect(o.x, y, o.width, o.height, [9, 9, 3, 3]);
+        c.fill();
+        c.stroke();
+        c.fillStyle = "#ffcc7755";
+        c.fillRect(o.x + 5, y + 9, o.width - 10, o.height - 16);
+        candle(c, o.x + o.width / 2, s.ground - 7, o.height * 0.42, s.elapsed);
+        c.strokeStyle = "#eeb366";
+        c.strokeRect(o.x + 5, y + 8, o.width - 10, o.height - 14);
+        c.fillStyle = "#eeb366";
+        c.fillRect(o.x + 2, s.ground - 5, o.width - 4, 5);
+      } else {
+        c.fillStyle = "#b45d69";
+        c.beginPath();
+        c.roundRect(
+          o.x,
+          y + o.height * 0.43,
+          o.width,
+          o.height * 0.57,
+          [3, 3, 8, 8],
         );
         c.fill();
-        c.fillStyle = "#21323c";
-        c.fillRect(o.x + o.width * 0.22, y + o.height * 0.43, 6, 7);
-        c.fillRect(o.x + o.width * 0.61, y + o.height * 0.43, 6, 7);
-        c.strokeStyle = "#769955";
-        c.lineWidth = 5;
-        c.beginPath();
-        c.moveTo(o.x + o.width / 2, y + o.height * 0.22);
-        c.lineTo(o.x + o.width * 0.65, y - 3);
-        c.stroke();
-      } else if (o.kind === "tombstone") {
-        c.fillStyle = "#7990a6";
-        c.beginPath();
-        c.roundRect(o.x, y, o.width, o.height, [13, 13, 2, 2]);
-        c.fill();
-        c.strokeStyle = "#3c5268";
+        c.strokeStyle = "#efbc6d";
         c.lineWidth = 3;
+        c.strokeRect(o.x + 2, y + o.height * 0.48, o.width - 4, 7);
+        marigold(c, o.x + o.width * 0.28, y + o.height * 0.34, o.width * 0.27);
+        marigold(c, o.x + o.width * 0.72, y + o.height * 0.34, o.width * 0.27);
+        marigold(c, o.x + o.width / 2, y + o.width * 0.27, o.width * 0.27);
+        c.fillStyle = "#53c7c0";
         c.beginPath();
-        c.moveTo(o.x + o.width / 2, y + 12);
-        c.lineTo(o.x + o.width / 2, y + o.height * 0.7);
-        c.moveTo(o.x + 7, y + 25);
-        c.lineTo(o.x + o.width - 7, y + 25);
-        c.stroke();
-      } else {
-        c.fillStyle = "#654f49";
-        c.beginPath();
-        c.moveTo(o.x - 7, s.ground);
-        c.lineTo(o.x + o.width * 0.2, y + 15);
-        c.lineTo(o.x + o.width * 0.5, y);
-        c.lineTo(o.x + o.width * 0.7, y + 20);
-        c.lineTo(o.x + o.width + 8, s.ground);
-        c.closePath();
+        c.arc(o.x + o.width / 2, y + o.height * 0.8, 4, 0, 7);
         c.fill();
-        c.strokeStyle = "#a7c8d8";
-        c.lineWidth = 2;
-        c.stroke();
       }
+      c.restore();
     }
     if (s.finishX) {
       c.strokeStyle = "#e9b86f";
@@ -635,7 +720,7 @@
     if (s.elapsed < 2.2) {
       c.fillStyle = "#ddeaff";
       c.font = "18px sans-serif";
-      c.fillText("Run forward. Jump before each woodland obstacle.", 45, 45);
+      c.fillText("Jump over the flower pots, calaveras and lanterns.", 45, 45);
     }
   }
   function drawRhythm(c) {
