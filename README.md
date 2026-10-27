@@ -86,7 +86,7 @@ Each correct solo answer earns 100 persistent score points. Every 2,500 points e
 
 The homepage separates **Adventure** (a series with level unlocks), **Quick Play** (one standalone game), and live **Friends** rooms. Jump and maze games wait for their art to load and show a 3–2–1–GO countdown, with the board and controls fitted into the phone viewport. Jumping now has a higher arc and forward world movement; the maze uses slower, interpolated movement and buffered turns.
 
-**Moonlight Melody** adds a two-, three-, or four-lane rhythm game controlled by arrow keys or phone arrow pads. Its notes share the audio clock and melody of the original 32-bar, 88 BPM *Moonlit Lounge* composition. Soft celesta, organ-like chords, and bass replace the busy short repeat. The composition runs about 87 seconds before cycling. Pause freezes the rhythm transport as well as the game.
+**Moonlight Melody** adds a two-, three-, or four-lane rhythm game controlled by arrow keys or phone arrow pads. Its notes share the audio clock and melody of the original 40-bar, 84 BPM *Moonlit Lounge* composition. Soft celesta, organ-like chords, and bass replace the busy short repeat. The composition runs about 86 seconds before cycling. Pause freezes the rhythm transport as well as the game.
 
 Character atlases animate blinking, wings, breathing and expressions. Winners settle into a happy pose after their one victory flight, and other podium characters show disappointed expressions.
 
@@ -95,7 +95,7 @@ Character atlases animate blinking, wings, breathing and expressions. Winners se
 `node scripts/profile-rhythm-browser-check.cjs` verifies rhythm gameplay with actual key presses, countdown and mobile viewport, Quick Play progression isolation, and reset cancel/keep/clear behavior. `test/records-rhythm.test.js` checks soundtrack synchronization, rhythm failure/pause, high-score ordering/deduplication and forward jump physics.
 
 
-The rhythm arcade now has five full-song levels: **Moonlit Lounge** (88 BPM), **Pumpkin Parade** (96), **Witchlight Waltz** (104), **Ghost Train Groove** (112), and **Monster Masquerade** (120). Each has a different original melody and accompaniment. Songs restart after the countdown and charts follow their exact audio clock; later levels use more arrow lanes. Quick Play allows choosing any of the five songs; winning offers a direct Next Song action.
+The rhythm arcade now has five full-song levels: **Moonlit Lounge** (84 BPM), **Pumpkin Parade** (96), **Witchlight Waltz** (104), **Ghost Train Groove** (112), and **Monster Masquerade** (120). Each has a different original melody and accompaniment. Songs restart after the countdown and charts follow their exact audio clock; later levels use more arrow lanes. Quick Play allows choosing any of the five songs; winning offers a direct Next Song action.
 
 Maze settings: Moonlit Woods; **Mexican Graveyard — inspired by Día de los Muertos** with multicolored memorial lights, decorated graves, candles and marigolds; **American Graveyard** with gray stones and fog; **Lantern River Garden**, inspired by Japanese Obon remembrance traditions; and Monster Bash Woodland. Quick Play exposes all settings with preview art. Memorial/lantern levels use roaming light wisps instead of Halloween creatures. These are artistic inspirations, not simulations of ceremonies.
 
@@ -114,3 +114,6 @@ Facial animation blends only small, feathered eyelid patches onto the registered
 Maze pursuers now follow actual paths toward the player during chase phases, with shorter scatter breaks, earlier visible encounters, and increasing speed/count on later stages and difficulties. An exclamation mark identifies an active pursuer. Contact costs a heart and disperses pursuers while preserving collected candy and offering a short invulnerable escape window.
 
 `npm run test:journey-browser` checks the rhythm-to-race-to-next-chapter transition with actual inputs and persistence; `npm run test:faces-browser` verifies that only localized facial pixels animate while all body poses remain fixed. The arcade browser suite checks Jump → Maze progression with real keyboard input.
+
+
+Music now uses a lilting **3/4 haunted chamber-waltz** arrangement with original minor-key melodies, music-box celesta, plucked strings, a warm reed voice, gentle organ chords and a dancing bass pattern. All five songs retain the shared rhythm clock, but use distinct melodies and increasingly faster tempos. The mix stays soft, uses restrained echo and compression, and avoids sudden loud stings. `npm run test:music-browser` renders every arrangement through OfflineAudioContext and checks that audio is present and does not clip.

@@ -1,149 +1,127 @@
-/* Moonlit Lounge: an original 32-bar Halloween music-box composition. */
+/* Five original minor-key Halloween waltzes, shared by soundtrack and rhythm charts. */
 (function (root) {
-  const tempo = 88,
-    beat = 60 / tempo,
-    bars = 32,
-    length = bars * 4;
-  const chords = [
-    [50, 53, 57, 64],
-    [46, 50, 53, 57],
-    [53, 57, 60, 64],
-    [48, 52, 55, 62],
-    [43, 46, 50, 57],
-    [46, 50, 53, 60],
-    [45, 49, 52, 55],
-    [50, 53, 57, 62],
+  const harmony = [
+    [0, 3, 7],
+    [8, 12, 15],
+    [2, 5, 8],
+    [7, 11, 14, 17],
+    [0, 3, 7],
+    [5, 8, 12],
+    [2, 5, 8, 11],
+    [7, 11, 14],
   ];
-  const motifs = [
-    [74, 77, 76, 69],
-    [70, 74, 72, 65],
-    [77, 76, 72, 69],
-    [72, 76, 74, 67],
-    [70, 74, 77, 69],
-    [74, 72, 70, 65],
-    [73, 76, 69, 67],
-    [74, 69, 77, 74],
-  ];
-  function noteAtBeat(index) {
-    const i = ((Math.floor(index) % length) + length) % length,
-      bar = Math.floor(i / 4),
-      step = i % 4,
-      v = Math.floor(bar / 8);
-    if (step === 3 && bar % 4 === 3) return null;
-    let p =
-      motifs[bar % 8][v === 1 ? (step + 1) % 4 : v === 3 ? 3 - step : step];
-    if (v === 2 && step === 0) p = chords[bar % 8][1] + 24;
-    return Math.min(84, p);
-  }
-  const original = {
-    tempo,
-    beat,
-    bars,
-    length,
-    duration: length * beat,
-    chords,
-    noteAtBeat,
-  };
-  function compose(title, tempo, motifs, chords, voice, bass) {
-    const beat = 60 / tempo,
-      bars = 16,
-      length = bars * 4;
+  function compose(title, tempo, tonic, motifs, lead, bars = 24) {
+    const beatsPerBar = 3,
+      beat = 60 / tempo,
+      length = bars * beatsPerBar;
+    const chords = harmony.map((c) => c.map((n) => tonic + n));
     return {
       title,
       tempo,
       beat,
       bars,
+      beatsPerBar,
       length,
       duration: length * beat,
       chords,
-      voice,
-      bass,
+      lead,
       noteAtBeat(index) {
-        const i = ((Math.floor(index) % length) + length) % length;
-        const bar = Math.floor(i / 4),
-          step = i % 4;
-        if (step === 3 && bar % 4 === 3) return null;
-        const motif = motifs[bar % motifs.length];
-        return motif[(step + (bar >= 8 ? 1 : 0)) % 4];
+        const i = ((Math.floor(index) % length) + length) % length,
+          bar = Math.floor(i / 3),
+          step = i % 3,
+          phrase = Math.floor(bar / 8) % 5;
+        if (step === 2 && bar % 4 === 3) return null;
+        const motif = motifs[bar % 8];
+        let degree =
+          motif[phrase === 1 ? (step + 1) % 3 : phrase === 3 ? 2 - step : step];
+        if (phrase === 2 && bar % 4 === 0 && step === 0)
+          degree = chords[bar % 8][1] - tonic;
+        if (phrase === 4 && bar % 8 === 7 && step === 1) degree = 0;
+        return tonic + 24 + degree;
       },
     };
   }
-  original.title = "Moonlit Lounge";
-  original.voice = "sine";
-  original.bass = "sine";
   const songs = [
-    original,
+    compose(
+      "Moonlit Lounge",
+      84,
+      50,
+      [
+        [0, 3, 7],
+        [8, 7, 3],
+        [2, 5, 8],
+        [11, 7, 2],
+        [0, 7, 3],
+        [5, 8, 7],
+        [8, 5, 2],
+        [11, 2, 0],
+      ],
+      "celesta",
+      40,
+    ),
     compose(
       "Pumpkin Parade",
       96,
+      48,
       [
-        [72, 75, 79, 75],
-        [70, 74, 77, 74],
-        [68, 72, 75, 79],
-        [67, 71, 74, 77],
+        [7, 3, 0],
+        [12, 8, 7],
+        [5, 2, 8],
+        [11, 7, 2],
+        [3, 7, 12],
+        [8, 5, 0],
+        [2, 8, 5],
+        [7, 11, 0],
       ],
-      [
-        [48, 51, 55, 58],
-        [46, 50, 53, 57],
-        [44, 48, 51, 55],
-        [43, 47, 50, 53],
-      ],
-      "triangle",
-      "sine",
+      "pizzicato",
     ),
     compose(
       "Witchlight Waltz",
       104,
+      52,
       [
-        [76, 79, 83, 81],
-        [74, 78, 81, 78],
-        [72, 76, 79, 76],
-        [71, 75, 78, 83],
+        [0, 7, 12],
+        [8, 3, 7],
+        [2, 8, 5],
+        [11, 14, 7],
+        [12, 7, 3],
+        [5, 12, 8],
+        [8, 11, 5],
+        [11, 7, 0],
       ],
-      [
-        [52, 55, 59, 62],
-        [50, 54, 57, 60],
-        [48, 52, 55, 59],
-        [47, 51, 54, 57],
-      ],
-      "sine",
-      "triangle",
+      "celesta",
     ),
     compose(
       "Ghost Train Groove",
       112,
+      45,
       [
-        [69, 72, 76, 79],
-        [67, 71, 74, 77],
-        [65, 69, 72, 76],
-        [64, 68, 71, 74],
+        [0, 3, 0],
+        [8, 7, 3],
+        [2, 5, 2],
+        [7, 11, 2],
+        [7, 3, 12],
+        [5, 8, 5],
+        [8, 5, 2],
+        [11, 7, 0],
       ],
-      [
-        [45, 48, 52, 55],
-        [43, 47, 50, 53],
-        [41, 45, 48, 52],
-        [40, 44, 47, 50],
-      ],
-      "triangle",
-      "triangle",
+      "reed",
     ),
     compose(
       "Monster Masquerade",
       120,
+      54,
       [
-        [78, 81, 85, 83],
-        [76, 80, 83, 80],
-        [74, 78, 81, 85],
-        [73, 77, 80, 83],
+        [12, 7, 3],
+        [8, 12, 7],
+        [5, 8, 2],
+        [11, 14, 7],
+        [3, 12, 7],
+        [12, 8, 5],
+        [8, 11, 2],
+        [11, 2, 0],
       ],
-      [
-        [54, 57, 61, 64],
-        [52, 56, 59, 62],
-        [50, 54, 57, 61],
-        [49, 53, 56, 59],
-      ],
-      "sine",
-      "sine",
+      "celesta",
     ),
   ];
   function getSong(stage = 0) {
@@ -162,7 +140,7 @@
     ArrowUp: "↑",
     ArrowRight: "→",
   };
-  const api = { ...original, songs, getSong, lanesFor, arrows };
+  const api = { ...songs[0], songs, getSong, lanesFor, arrows };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.MidnightScore = api;
 })(globalThis);

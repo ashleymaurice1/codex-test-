@@ -16,7 +16,8 @@
     "test:rhythm-browser": "node scripts/rhythm-songs-browser-check.cjs",
     "test:scenes-browser": "node scripts/scenes-browser-check.cjs",
     "test:journey-browser": "node scripts/journey-browser-check.cjs",
-    "test:faces-browser": "node scripts/faces-browser-check.cjs"
+    "test:faces-browser": "node scripts/faces-browser-check.cjs",
+    "test:music-browser": "node scripts/music-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"
