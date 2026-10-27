@@ -22,9 +22,12 @@ for slug,title,artist,mood,play_seconds in songs:
  record={'slug':slug,'title':title,'artist':artist,'mood':mood,'tempo':round(float(np.ravel(tempo)[0])),'duration':round(duration,3),'playSeconds':play_seconds,'file':'/assets/audio/recordings/'+slug+'.mp3','chart':chart}
  out.append(record);print(title,'BPM',record['tempo'],'beats',len(chart),'first',chart[:2],flush=True)
 home=[]
-for slug,title,artist in [('witch-waltz','Witch Waltz','Kevin MacLeod'),('isolation-waltz','Isolation Waltz','Bryan Teoh')]:
+for slug,title,artist in [('creepy-hallow','Creepy Hallow','Alexander Nakarada'),('witch-waltz','Witch Waltz','Kevin MacLeod')]:
  p=pathlib.Path('public/assets/audio/recordings')/(slug+'.mp3')
  duration=float(json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_format','-of','json',str(p)]))['format']['duration'])
  home.append({'slug':slug,'title':title,'artist':artist,'duration':round(duration,3),'file':'/assets/audio/recordings/'+slug+'.mp3'})
-library={'songs':out,'homeSongs':home}
+p=pathlib.Path('public/assets/audio/recordings/del-rio-bravo.mp3')
+duration=float(json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_format','-of','json',str(p)]))['format']['duration'])
+jump=[{'slug':'del-rio-bravo','title':'Del Rio Bravo','artist':'Kevin MacLeod','duration':round(duration,3),'file':'/assets/audio/recordings/del-rio-bravo.mp3'}]
+library={'songs':out,'homeSongs':home,'jumpSongs':jump}
 pathlib.Path('public/recordings.js').write_text('/* Separate home-page recordings and rhythm songs, with detected beat times. */\n(function(root){const library='+json.dumps(library,separators=(',',':'))+';if(typeof module!=="undefined"&&module.exports)module.exports=library;else root.MidnightRecordings=library;})(globalThis);\n')

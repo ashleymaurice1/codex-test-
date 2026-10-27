@@ -103,4 +103,11 @@ test("home-page music and the five rhythm songs never share a recording", () => 
   assert.ok(S.homeSongs.length >= 1);
   assert.ok(S.songs.every((song) => !home.has(fingerprint(song))));
   assert.equal(new Set(S.songs.map(fingerprint)).size, 5);
+  assert.ok(S.jumpSongs.length >= 1);
+  const rhythm = new Set(S.songs.map(fingerprint));
+  assert.ok(
+    S.jumpSongs.every(
+      (song) => !home.has(fingerprint(song)) && !rhythm.has(fingerprint(song)),
+    ),
+  );
 });

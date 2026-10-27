@@ -37,6 +37,7 @@
     ...songs[0],
     songs,
     homeSongs,
+    jumpSongs: recordings.jumpSongs,
     getSong,
     getHomeSong,
     lanesFor,

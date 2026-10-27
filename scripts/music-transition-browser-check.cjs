@@ -25,11 +25,11 @@ const assert = require("node:assert/strict");
     );
     await p.locator("#home-music").selectOption("1");
     await p.waitForFunction(
-      () => MidnightMusic.status().source === "Isolation Waltz",
+      () => MidnightMusic.status().source === "Witch Waltz",
     );
     await p.locator("#home-music").selectOption("0");
     await p.waitForFunction(
-      () => MidnightMusic.status().source === "Witch Waltz",
+      () => MidnightMusic.status().source === "Creepy Hallow",
     );
     await p.locator("#music-volume").evaluate((e) => {
       e.value = 20;
@@ -56,13 +56,13 @@ const assert = require("node:assert/strict");
     assert.equal(await p.evaluate(() => MidnightMusic.status().mode), "rhythm");
     await p.locator("[data-arcade=home]").click();
     await p.waitForFunction(
-      () => MidnightMusic.status().source === "Witch Waltz",
+      () => MidnightMusic.status().source === "Creepy Hallow",
     );
     assert.ok(
       await p.evaluate(() => MidnightMusic.status().recordingOffset > 0),
     );
     for (const [mode, title] of [
-      ["jump", "Fright Night Twist"],
+      ["jump", "Del Rio Bravo"],
       ["maze", "Midnight in the Green House"],
     ]) {
       await p.locator("[data-action=quick]").click();
@@ -76,7 +76,7 @@ const assert = require("node:assert/strict");
       assert.ok((await p.locator("audio[controls]").count()) === 0);
       await p.locator("[data-arcade=home]").click();
       await p.waitForFunction(
-        () => MidnightMusic.status().source === "Witch Waltz",
+        () => MidnightMusic.status().source === "Creepy Hallow",
       );
     }
     await p.locator("[data-action=mute]").click();

@@ -37,9 +37,10 @@ try {
   profile = { ...defaults };
 }
 MidnightEconomy.normalize(profile);
-if (!profile.separateMusicPools) {
+if (!profile.separateMusicPools || !profile.halloweenMusicV2) {
   profile.homeSong = 0;
   profile.separateMusicPools = true;
+  profile.halloweenMusicV2 = true;
 }
 localStorage.setItem("midnight-profile", JSON.stringify(profile));
 if (!colors[profile.team]) profile.team = "Mach";
@@ -341,6 +342,7 @@ function resetPlayer() {
   profile.musicVolume = musicVolume;
   profile.homeSong = homeSong;
   profile.separateMusicPools = true;
+  profile.halloweenMusicV2 = true;
   save();
   document.querySelector("dialog")?.remove();
   home();

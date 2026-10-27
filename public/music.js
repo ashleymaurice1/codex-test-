@@ -16,8 +16,13 @@
     transportPaused = false,
     generation = 0,
     ambientStage = 0;
-  const tracks = [...root.MidnightScore.homeSongs, ...root.MidnightScore.songs],
-    homeCount = root.MidnightScore.homeSongs.length;
+  const tracks = [
+      ...root.MidnightScore.homeSongs,
+      ...root.MidnightScore.songs,
+      ...root.MidnightScore.jumpSongs,
+    ],
+    homeCount = root.MidnightScore.homeSongs.length,
+    jumpStart = homeCount + root.MidnightScore.songs.length;
   const buffers = new Map(),
     loading = new Map();
   function ensure() {
@@ -117,7 +122,9 @@
     const expected = scene,
       token = ++generation;
     const gameIndex =
-      homeCount + ((ambientStage + (scene === "maze" ? 3 : 2)) % 5);
+      scene === "jump"
+        ? jumpStart + (ambientStage % root.MidnightScore.jumpSongs.length)
+        : homeCount + ((ambientStage + (scene === "maze" ? 3 : 2)) % 5);
     try {
       const buffer = await loadTrack(gameIndex);
       if (
