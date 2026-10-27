@@ -1,7 +1,12 @@
+Home-page recordings:
 Witch Waltz — Kevin MacLeod (2018)
+Isolation Waltz — Bryan Teoh
+
+Rhythm game recordings:
 Magic in the Garden — Rafael Krux (2018)
-Fright Night Twist — Bryan Teoh (2020)
 Creepy Comedy — Rafael Krux / CinematicWaves.com (2014)
+Fright Night Twist — Bryan Teoh (2020)
+Midnight in the Green House — Kevin MacLeod (2015)
 Night in the Castle — Kevin MacLeod (2015)
 
 Source: https://github.com/SoundSafari/CC0-1.0-Music/tree/main/freepd.com

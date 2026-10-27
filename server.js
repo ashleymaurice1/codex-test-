@@ -45,6 +45,9 @@ const server = http.createServer((req, res) => {
           ".webp": "image/webp",
         }[path.extname(file)] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
+      "Cache-Control": [".html", ".js", ".json"].includes(path.extname(file))
+        ? "no-cache"
+        : "public, max-age=3600",
     });
     res.end(data);
   });

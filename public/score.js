@@ -4,7 +4,19 @@
     typeof module !== "undefined" && module.exports
       ? require("./recordings")
       : root.MidnightRecordings;
-  const songs = recordings.map((song) => ({ ...song, beat: 60 / song.tempo }));
+  const songs = recordings.songs.map((song) => ({
+    ...song,
+    beat: 60 / song.tempo,
+  }));
+  const homeSongs = recordings.homeSongs.map((song) => ({
+    ...song,
+    beat: 60 / (song.tempo || 84),
+  }));
+  function getHomeSong(index = 0) {
+    return homeSongs[
+      Math.max(0, Math.min(homeSongs.length - 1, Math.floor(index) || 0))
+    ];
+  }
   function getSong(stage = 0) {
     return songs[Math.max(0, Math.min(4, Math.floor(stage) || 0))];
   }
@@ -21,7 +33,15 @@
     ArrowUp: "↑",
     ArrowRight: "→",
   };
-  const api = { ...songs[0], songs, getSong, lanesFor, arrows };
+  const api = {
+    ...songs[0],
+    songs,
+    homeSongs,
+    getSong,
+    getHomeSong,
+    lanesFor,
+    arrows,
+  };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.MidnightScore = api;
 })(globalThis);

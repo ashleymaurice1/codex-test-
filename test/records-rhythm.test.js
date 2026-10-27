@@ -89,3 +89,18 @@ test("five full recordings each have valid beat charts and are winnable on their
     assert.equal(s.hits, s.target);
   }
 });
+
+test("home-page music and the five rhythm songs never share a recording", () => {
+  const fs = require("node:fs"),
+    path = require("node:path"),
+    crypto = require("node:crypto");
+  const fingerprint = (song) =>
+    crypto
+      .createHash("sha256")
+      .update(fs.readFileSync(path.join(__dirname, "../public", song.file)))
+      .digest("hex");
+  const home = new Set(S.homeSongs.map(fingerprint));
+  assert.ok(S.homeSongs.length >= 1);
+  assert.ok(S.songs.every((song) => !home.has(fingerprint(song))));
+  assert.equal(new Set(S.songs.map(fingerprint)).size, 5);
+});

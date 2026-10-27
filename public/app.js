@@ -37,6 +37,10 @@ try {
   profile = { ...defaults };
 }
 MidnightEconomy.normalize(profile);
+if (!profile.separateMusicPools) {
+  profile.homeSong = 0;
+  profile.separateMusicPools = true;
+}
 localStorage.setItem("midnight-profile", JSON.stringify(profile));
 if (!colors[profile.team]) profile.team = "Mach";
 profile.unlockedLevel = Math.max(
@@ -272,7 +276,7 @@ function highScores(mode = "all") {
 }
 function musicOptions() {
   modal(
-    `<h2>Halloween music</h2><p>Full instrumental recordings. Listen before choosing your background music.</p><label>HOME-PAGE MUSIC<select id="home-music">${MidnightScore.songs.map((song, i) => `<option value="${i}" ${Number(profile.homeSong) === i ? "selected" : ""}>${song.title} · ${song.artist}</option>`).join("")}</select></label><audio class="music-preview" controls preload="none" src="${MidnightScore.getSong(profile.homeSong).file}" aria-label="Preview background music"></audio><label for="music-volume">MUSIC VOLUME · <span id="music-volume-value">${Math.round(profile.musicVolume * 100)}%</span></label><input id="music-volume" type="range" min="0" max="100" value="${Math.round(profile.musicVolume * 100)}"><p class="muted">The music button in the top corner mutes all sound.</p><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`,
+    `<h2>Halloween music</h2><p>Home-page themes are separate from all five rhythm-game songs. Listen before choosing your background music.</p><label>HOME-PAGE MUSIC<select id="home-music">${MidnightScore.homeSongs.map((song, i) => `<option value="${i}" ${Number(profile.homeSong) === i ? "selected" : ""}>${song.title} · ${song.artist}</option>`).join("")}</select></label><button type="button" class="text-btn music-preview-toggle">▶ Listen</button><audio class="music-preview" hidden preload="none" controlslist="nodownload" src="${MidnightScore.getHomeSong(profile.homeSong).file}" aria-label="Preview background music"></audio><label for="music-volume">MUSIC VOLUME · <span id="music-volume-value">${Math.round(profile.musicVolume * 100)}%</span></label><input id="music-volume" type="range" min="0" max="100" value="${Math.round(profile.musicVolume * 100)}"><p class="muted">The music button in the top corner mutes all sound.</p><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`,
   );
   $("#home-music").onchange = (e) => {
     profile.homeSong = Number(e.target.value);
@@ -280,7 +284,7 @@ function musicOptions() {
     MidnightMusic.setHomeSong(profile.homeSong);
     const audio = $("dialog audio");
     audio.pause();
-    audio.src = MidnightScore.getSong(profile.homeSong).file;
+    audio.src = MidnightScore.getHomeSong(profile.homeSong).file;
   };
   $("#music-volume").oninput = (e) => {
     profile.musicVolume = Number(e.target.value) / 100;
@@ -336,6 +340,7 @@ function resetPlayer() {
   profile.mute = mute;
   profile.musicVolume = musicVolume;
   profile.homeSong = homeSong;
+  profile.separateMusicPools = true;
   save();
   document.querySelector("dialog")?.remove();
   home();
@@ -422,7 +427,7 @@ function arcadeMenu(
                   .map((k) => MidnightScore.arrows[k])
                   .join(
                     " ",
-                  )}</small></button><audio class="music-preview" controls preload="none" src="${song.file}" aria-label="Listen to ${song.title}"></audio></li>`,
+                  )}</small></button><button type="button" class="text-btn music-preview-toggle">▶ Listen</button><audio class="music-preview" hidden preload="none" controlslist="nodownload" src="${song.file}" aria-label="Listen to ${song.title}"></audio></li>`,
             )
             .join(
               "",
@@ -492,15 +497,26 @@ function modal(content) {
   d.showModal();
   const previews = [...d.querySelectorAll("audio.music-preview")];
   previews.forEach((audio) => {
+    const toggle = audio.previousElementSibling;
+    toggle.onclick = () => {
+      if (audio.paused)
+        audio
+          .play()
+          .catch(() => toast("Tap Listen again to start the preview."));
+      else audio.pause();
+    };
     audio.volume = profile.musicVolume;
     audio.onplay = () => {
+      toggle.textContent = "Ⅱ Pause preview";
       previews.forEach((a) => {
         if (a !== audio) a.pause();
       });
       MidnightMusic.setPreviewing(true);
     };
-    const resume = () =>
+    const resume = () => {
+      toggle.textContent = "▶ Listen";
       MidnightMusic.setPreviewing(previews.some((a) => !a.paused && !a.ended));
+    };
     audio.onpause = resume;
     audio.onended = resume;
   });
@@ -816,6 +832,7 @@ function lobby() {
     transmit({ type: "bots", value: e.target.checked });
 }
 function raceView() {
+  MidnightMusic.setScene("race", state.level);
   view = "race";
   hudKey = "";
   const c = state.challenge;

@@ -14,7 +14,10 @@
     homeStage = 0,
     homePosition = 0,
     transportPaused = false,
-    generation = 0;
+    generation = 0,
+    ambientStage = 0;
+  const tracks = [...root.MidnightScore.homeSongs, ...root.MidnightScore.songs],
+    homeCount = root.MidnightScore.homeSongs.length;
   const buffers = new Map(),
     loading = new Map();
   function ensure() {
@@ -37,12 +40,11 @@
         0.35,
       );
   }
-  async function ready(stage = 0) {
-    stage = Math.max(0, Math.min(4, Number(stage) || 0));
+  async function loadTrack(stage) {
     if (buffers.has(stage)) return buffers.get(stage);
     if (loading.has(stage)) return loading.get(stage);
     const promise = (async () => {
-      const r = await fetch(root.MidnightScore.getSong(stage).file);
+      const r = await fetch(tracks[stage].file);
       if (!r.ok) throw Error("Music recording could not load");
       const decoder = new OfflineAudioContext(2, 1, 22050),
         buffer = await decoder.decodeAudioData(await r.arrayBuffer());
@@ -58,6 +60,9 @@
     })().finally(() => loading.delete(stage));
     loading.set(stage, promise);
     return promise;
+  }
+  function ready(stage = 0) {
+    return loadTrack(homeCount + Math.max(0, Math.min(4, Number(stage) || 0)));
   }
   function stopSource(fade = 0.35) {
     if (!source || !ctx) return;
@@ -99,24 +104,45 @@
   async function playHome() {
     const token = ++generation;
     try {
-      const buffer = await ready(homeStage);
-      if (token !== generation || scene === "rhythm" || !ctx) return;
+      const buffer = await loadTrack(homeStage);
+      if (token !== generation || scene !== "menu" || !ctx) return;
       playBuffer(homeStage, buffer, homePosition, 0.05, () => {
         homePosition = 0;
-        homeStage = (homeStage + 1) % 5;
+        homeStage = (homeStage + 1) % homeCount;
         playHome();
       });
     } catch {}
   }
+  async function playGameBackground() {
+    const expected = scene,
+      token = ++generation;
+    const gameIndex =
+      homeCount + ((ambientStage + (scene === "maze" ? 3 : 2)) % 5);
+    try {
+      const buffer = await loadTrack(gameIndex);
+      if (
+        token !== generation ||
+        scene !== expected ||
+        scene === "menu" ||
+        scene === "rhythm" ||
+        !ctx
+      )
+        return;
+      playBuffer(gameIndex, buffer, 0, 0.05, () => playGameBackground());
+    } catch {}
+  }
+  function playBackground() {
+    return scene === "menu" ? playHome() : playGameBackground();
+  }
   function rememberHome() {
-    if (source && scene !== "rhythm" && ctx)
+    if (source && scene === "menu" && playingStage < homeCount && ctx)
       homePosition = Math.max(0, sourceOffset + ctx.currentTime - origin);
   }
   function start() {
     ensure();
     muted = false;
     if (ctx && !transportPaused) ctx.resume().catch(() => {});
-    if (!source && scene !== "rhythm") playHome();
+    if (!source && scene !== "rhythm") playBackground();
     updateVolume();
   }
   function setMuted(value) {
@@ -133,9 +159,9 @@
       updateVolume();
     },
     setHomeSong(stage) {
-      homeStage = Math.max(0, Math.min(4, Number(stage) || 0));
+      homeStage = Math.max(0, Math.min(homeCount - 1, Number(stage) || 0));
       homePosition = 0;
-      if (ctx && scene !== "rhythm") playHome();
+      if (ctx && scene === "menu") playHome();
     },
     setPreviewing(value) {
       previewing = !!value;
@@ -149,21 +175,21 @@
     },
     selectSong(stage = 0, lead = 0.1) {
       ensure();
-      const buffer = buffers.get(stage);
+      const index = homeCount + Math.max(0, Math.min(4, Number(stage) || 0));
+      const buffer = buffers.get(index);
       if (!buffer) throw Error("The music is still loading");
       ++generation;
-      playBuffer(stage, buffer, 0, lead);
+      playBuffer(index, buffer, 0, lead);
     },
-    setScene(value) {
-      if (value === scene) return;
-      const previous = scene;
-      if (value === "rhythm") {
-        rememberHome();
-        ++generation;
-        stopSource();
-      }
+    setScene(value, stage = 0) {
+      stage = Math.max(0, Math.min(4, Number(stage) || 0));
+      if (value === scene && stage === ambientStage) return;
+      rememberHome();
+      ++generation;
+      stopSource();
       scene = value;
-      if (previous === "rhythm" && value !== "rhythm" && ctx) playHome();
+      ambientStage = stage;
+      if (value !== "rhythm" && ctx) playBackground();
       updateVolume();
     },
     setPaused(value) {
@@ -175,12 +201,12 @@
     clock: () => ({
       time: ctx?.currentTime || 0,
       origin,
-      beat: root.MidnightScore.getSong(playingStage).beat,
+      beat: tracks[playingStage].beat,
       running: ctx?.state === "running",
     }),
     status: () => ({
-      source: root.MidnightScore.getSong(playingStage).title,
-      artist: root.MidnightScore.getSong(playingStage).artist,
+      source: tracks[playingStage].title,
+      artist: tracks[playingStage].artist,
       mode: scene,
       recordingReady: buffers.has(playingStage),
       recordingOffset: sourceOffset,
@@ -188,8 +214,8 @@
       volume,
       previewing,
       state: ctx?.state || "not-started",
-      tempo: root.MidnightScore.getSong(playingStage).tempo,
-      themeSeconds: root.MidnightScore.getSong(playingStage).duration,
+      tempo: tracks[playingStage].tempo,
+      themeSeconds: tracks[playingStage].duration,
       transportPaused,
     }),
     async renderPreview(stage = 0, seconds = 12) {
