@@ -109,6 +109,83 @@
         )
           grid[y][x] = 0;
       }
+    // A chasing enemy must not seal the only route out of a pocket.
+    // Add real connecting corridors until no walkable tile is a chokepoint.
+    function bottleneck() {
+      const seen = new Map(),
+        low = new Map();
+      let clock = 0,
+        found = null;
+      function visit(x, y, parent) {
+        const key = x + "," + y;
+        seen.set(key, ++clock);
+        low.set(key, clock);
+        let children = 0;
+        for (const [dx, dy] of Object.values(DIRS)) {
+          const nx = x + dx,
+            ny = y + dy,
+            next = nx + "," + ny;
+          if (grid[ny]?.[nx] !== 0 || next === parent) continue;
+          if (!seen.has(next)) {
+            children++;
+            visit(nx, ny, key);
+            low.set(key, Math.min(low.get(key), low.get(next)));
+            if (parent !== null && low.get(next) >= seen.get(key))
+              found = [x, y];
+          } else low.set(key, Math.min(low.get(key), seen.get(next)));
+        }
+        if (parent === null && children > 1) found = [x, y];
+      }
+      visit(1, 1, null);
+      return found;
+    }
+    for (let attempt = 0; attempt < width * height; attempt++) {
+      const blocked = bottleneck();
+      if (!blocked) break;
+      const groups = new Map();
+      let group = 0;
+      for (let y = 1; y < height - 1; y++)
+        for (let x = 1; x < width - 1; x++) {
+          const key = x + "," + y;
+          if (
+            grid[y][x] ||
+            groups.has(key) ||
+            (x === blocked[0] && y === blocked[1])
+          )
+            continue;
+          const queue = [[x, y]];
+          groups.set(key, group);
+          for (let i = 0; i < queue.length; i++)
+            for (const [dx, dy] of Object.values(DIRS)) {
+              const nx = queue[i][0] + dx,
+                ny = queue[i][1] + dy,
+                next = nx + "," + ny;
+              if (
+                grid[ny]?.[nx] === 0 &&
+                !groups.has(next) &&
+                !(nx === blocked[0] && ny === blocked[1])
+              ) {
+                groups.set(next, group);
+                queue.push([nx, ny]);
+              }
+            }
+          group++;
+        }
+      const bridges = [];
+      for (let y = 1; y < height - 1; y++)
+        for (let x = 1; x < width - 1; x++) {
+          if (!grid[y][x]) continue;
+          const adjacent = new Set(
+            Object.values(DIRS)
+              .map(([dx, dy]) => groups.get(x + dx + "," + (y + dy)))
+              .filter((n) => n !== undefined),
+          );
+          if (adjacent.size > 1) bridges.push([x, y]);
+        }
+      if (!bridges.length) break;
+      const [x, y] = bridges[Math.floor(rng() * bridges.length)];
+      grid[y][x] = 0;
+    }
     return grid;
   }
   function path(grid, from, to) {
@@ -233,18 +310,26 @@
       s.direction = direction;
     } else if (
       m.elapsed / s.moveInterval < 0.15 &&
+      m.fromX === s.player.x &&
+      m.fromY === s.player.y &&
       open(s, s.player.x + d[0], s.player.y + d[1])
     ) {
+      // A slightly late junction input returns along the corridor to its center,
+      // then takes the queued turn; it never moves diagonally through a wall.
       s.player.motion = {
-        fromX: s.player.px,
-        fromY: s.player.py,
-        toX: s.player.x + d[0],
-        toY: s.player.y + d[1],
-        elapsed: 0,
+        fromX: m.toX,
+        fromY: m.toY,
+        toX: m.fromX,
+        toY: m.fromY,
+        elapsed: s.moveInterval - m.elapsed,
       };
-      s.direction = direction;
+      s.direction = Object.keys(DIRS).find(
+        (key) => DIRS[key][0] === -old[0] && DIRS[key][1] === -old[1],
+      );
     }
+    // Perpendicular turns remain queued until a tile center. Never cut a corner.
   }
+
   function open(s, x, y) {
     return s.grid[y]?.[x] === 0;
   }
@@ -363,14 +448,20 @@
       remaining -= n;
     }
   }
-  function createJump(stage = 0, profile = {}, difficulty = 0) {
+  function createJump(stage = 0, profile = {}, difficulty = 0, options = {}) {
     const s = base("jump", stage, profile, difficulty);
     s.width = 900;
     s.height = 540;
     s.ground = 425;
     s.player = { x: 155, y: 0, vy: 0, width: 75, height: 57 };
-    s.speed = 180 + s.stage * 28 + s.difficulty * 85;
-    s.target = 6 + s.stage * 2 + s.difficulty * 3;
+    s.baseSpeed = 180 + s.stage * 28 + s.difficulty * 85;
+    s.speed = s.baseSpeed;
+    s.runLength = Math.max(1, Math.min(8, Math.floor(options.runLength) || 1));
+    s.endless = options.endless === true;
+    s.wave = 1;
+    s.target = s.endless
+      ? Infinity
+      : 6 + s.stage * 2 + s.difficulty * 3 + (s.runLength - 1) * 12;
     s.passed = 0;
     s.distance = 0;
     s.startX = s.player.x;
@@ -389,7 +480,19 @@
     s.events.push({ type: "jump" });
     return true;
   }
+  function jumpSpeed(s, clears) {
+    return Math.min(
+      560,
+      s.baseSpeed +
+        (s.endless || s.runLength > 1 ? Math.floor(clears / 5) * 32 : 0),
+    );
+  }
   function jumpSlice(s, dt) {
+    const wave = 1 + Math.floor(s.passed / 5);
+    if (wave !== s.wave && (s.endless || s.runLength > 1))
+      s.events.push({ type: "wave", wave });
+    s.wave = wave;
+    s.speed = jumpSpeed(s, s.passed);
     s.elapsed += dt;
     s.player.x += s.speed * dt;
     s.distance = s.player.x - s.startX;
@@ -414,8 +517,15 @@
     }
     if (s.spawned < s.target && s.player.x + s.width >= s.nextSpawn) {
       const kind = ["root", "pumpkin", "tombstone"][(s.spawned + 1) % 3];
-      const height =
-        53 + s.difficulty * 10 + Math.floor(s.rng() * (14 + s.stage * 5));
+      const height = Math.min(
+        105,
+        53 +
+          s.difficulty * 10 +
+          (s.endless || s.runLength > 1
+            ? Math.min(20, Math.floor(s.spawned / 5) * 3)
+            : 0) +
+          Math.floor(s.rng() * (14 + s.stage * 5)),
+      );
       s.obstacles.push({
         id: s.spawned++,
         x: s.nextSpawn,
@@ -432,7 +542,7 @@
       s.nextSpawn +=
         Math.max(
           370 - s.stage * 18 - s.difficulty * 45,
-          s.speed * (1.5 - s.difficulty * 0.12),
+          jumpSpeed(s, s.spawned + 5) * (1.5 - s.difficulty * 0.12),
         ) +
         s.rng() * (70 + s.difficulty * 45);
     }

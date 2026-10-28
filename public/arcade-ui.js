@@ -72,8 +72,15 @@
       save();
     }
   }
-  function launch(mode, stage = 0, difficulty = 0, playMode = "adventure") {
+  function launch(
+    mode,
+    stage = 0,
+    difficulty = 0,
+    playMode = "adventure",
+    runOptions = {},
+  ) {
     stop();
+    if (playMode === "journey") runOptions = {};
     MidnightVictory.stop();
     view = "arcade";
     state = null;
@@ -90,7 +97,7 @@
         ? MidnightArcade.createMaze(stage, profile, difficulty)
         : mode === "rhythm"
           ? MidnightArcade.createRhythm(stage, profile, difficulty)
-          : MidnightArcade.createJump(stage, profile, difficulty);
+          : MidnightArcade.createJump(stage, profile, difficulty, runOptions);
     if (mode === "maze") current.scene = mazeScenes[current.stage].name;
     if (mode === "jump")
       current.scene = "Día de los Muertos · Candlelit woodland";
@@ -322,7 +329,7 @@
     if (key === lastDisplay) return;
     lastDisplay = key;
     document.getElementById("arcade-stats").innerHTML =
-      `<span class="hearts" aria-label="${s.lives} hearts remaining">${"♥".repeat(s.lives)}<i>${"♡".repeat(3 - s.lives)}</i></span><span>${s.mode === "maze" ? `Candy ${s.collected}/${s.target}` : s.mode === "rhythm" ? `Notes ${s.hits}/${s.target}` : `Obstacles ${s.passed}/${s.target}`}<small>Level ${s.stage + 1}</small></span><span>Score ${s.totalScore}<small>♥ ${s.reserveLives} spare · ${MidnightEconomy.scorePerLife - (s.totalScore % MidnightEconomy.scorePerLife)} to bonus</small></span>`;
+      `<span class="hearts" aria-label="${s.lives} hearts remaining">${"♥".repeat(s.lives)}<i>${"♡".repeat(3 - s.lives)}</i></span><span>${s.mode === "maze" ? `Candy ${s.collected}/${s.target}` : s.mode === "rhythm" ? `Notes ${s.hits}/${s.target}` : s.endless ? `Obstacles ${s.passed} · Wave ${s.wave}` : `Obstacles ${s.passed}/${s.target}`}<small>${s.mode === "jump" && (s.endless || s.runLength > 1) ? `${s.endless ? "Endless" : "Marathon"} · Wave ${s.wave}` : `Level ${s.stage + 1}`}</small></span><span>Score ${s.totalScore}<small>♥ ${s.reserveLives} spare · ${MidnightEconomy.scorePerLife - (s.totalScore % MidnightEconomy.scorePerLife)} to bonus</small></span>`;
   }
   function sprite(c, img, x, y, w, h, alpha = 1, angle = 0) {
     if (!img) return;
@@ -378,6 +385,10 @@
       : lantern
         ? ["#ffc57a", "#ffac67"]
         : ["#83ccff"];
+    c.fillStyle = "#07152299";
+    for (let y = 0; y < s.height; y++)
+      for (let x = 0; x < s.width; x++)
+        if (!s.grid[y][x]) c.fillRect(x * tile, y * tile, tile, tile);
     for (let y = 0; y < s.height; y++)
       for (let x = 0; x < s.width; x++) {
         if (s.grid[y][x]) {
@@ -488,20 +499,20 @@
         sprite(
           c,
           images[e.kind],
-          (e.px ?? e.x) * 32 - 7,
-          (e.py ?? e.y) * 32 - 4,
-          46,
+          (e.px ?? e.x) * 32 - 3,
+          (e.py ?? e.y) * 32 + 1,
           38,
+          30,
           0.95,
         );
     }
     sprite(
       c,
       images.player,
-      (s.player.px ?? s.player.x) * 32 - 8,
-      (s.player.py ?? s.player.y) * 32 - 3,
-      48,
-      38,
+      (s.player.px ?? s.player.x) * 32 - 4,
+      (s.player.py ?? s.player.y) * 32,
+      40,
+      32,
       s.invulnerable > 0 && Math.floor(s.elapsed * 8) % 2 ? 0.4 : 1,
     );
   }
@@ -804,7 +815,9 @@
       drawJump(c);
     }
     for (const e of current.events.splice(0)) {
-      if (e.type === "bonus-life")
+      if (e.type === "wave")
+        hint = `Wave ${e.wave}—the course is getting faster!`;
+      else if (e.type === "bonus-life")
         hint = "2,500 score—an extra life! Spellbinding!";
       else if (e.type === "saved") hint = "A spare life saved your glow!";
       else if (e.type === "hit")
@@ -858,6 +871,8 @@
       score: s.runScore,
       seconds: s.elapsed,
       won,
+      runLength: s.runLength,
+      endless: s.endless,
     });
     save();
     if (won) {
@@ -887,7 +902,7 @@
     if (abort) abort.abort();
     abort = null;
     document.getElementById("app").innerHTML =
-      `<div class="game-shell">${header()}<main class="result arcade-result"><div class="eyebrow" style="justify-content:center">${titles[s.mode]} · LEVEL ${s.stage + 1}${s.mode === "rhythm" ? " · " + esc(s.song) : ""}</div>${ghost(s.team, "victory-spirit")}<h1>${won ? (s.mode === "maze" ? "A-maze-ing!" : s.mode === "rhythm" ? "Spellbinding rhythm!" : "A leap of moonlight!") : s.reason === "accuracy" ? "One more encore?" : "Out of glow!"}</h1><p class="muted">${won ? "A well-earned win. Your ghost looks rather proud." : "Three fresh hearts are waiting on your next try."}</p>${personalBest ? '<p class="personal-best">★ NEW PERSONAL HIGH SCORE</p>' : ""}<div class="result-rewards"><div>◈ ${won ? "+" + (45 + s.stage * 10 + s.lives * 5) : "0"}<small>COINS</small></div><div>+${s.runScore}<small>SCORE THIS RUN</small></div><div>♥ ${s.reserveLives}<small>SPARE LIVES</small></div></div><div class="arcade-result-actions">${won && s.playMode === "journey" ? '<button class="btn" data-arcade-result="journey">Continue journey →</button>' : ""}${won && s.mode === "rhythm" && s.stage < 4 && s.playMode !== "journey" ? '<button class="btn" data-arcade-result="next-song">Next song · Level ' + (s.stage + 2) + " →</button>" : ""}${won && s.difficulty < 2 ? '<button class="btn" data-arcade-result="harder">Make this style harder →</button>' : ""}${won && s.stage < 4 && s.playMode !== "quick" && s.playMode !== "journey" ? '<button class="btn secondary" data-arcade-result="next">Next level · choose any style →</button>' : ""}<button class="btn secondary" data-arcade-result="retry">${won ? "Play this level again" : "Try again"}</button><button class="btn secondary" data-arcade-result="styles">${s.playMode === "journey" ? "View journey route" : s.playMode === "quick" ? "Choose another single game" : "Choose a style at this level"}</button><button class="text-btn" data-action="highscores">High scores</button><button class="text-btn" data-arcade-result="home">Home</button></div></main></div>`;
+      `<div class="game-shell">${header()}<main class="result arcade-result"><div class="eyebrow" style="justify-content:center">${titles[s.mode]} · LEVEL ${s.stage + 1}${s.mode === "rhythm" ? " · " + esc(s.song) : ""}</div>${ghost(s.team, "victory-spirit")}<h1>${won ? (s.mode === "maze" ? "A-maze-ing!" : s.mode === "rhythm" ? "Spellbinding rhythm!" : "A leap of moonlight!") : s.reason === "accuracy" ? "One more encore?" : "Out of glow!"}</h1><p class="muted">${won ? "A well-earned win. Your ghost looks rather proud." : "Three fresh hearts are waiting on your next try."}</p>${personalBest ? '<p class="personal-best">★ NEW PERSONAL HIGH SCORE</p>' : ""}<div class="result-rewards"><div>◈ ${won ? "+" + (45 + s.stage * 10 + s.lives * 5) : "0"}<small>COINS</small></div><div>+${s.runScore}<small>SCORE THIS RUN</small></div><div>♥ ${s.reserveLives}<small>SPARE LIVES</small></div></div><div class="arcade-result-actions">${s.mode === "jump" ? '<button class="btn secondary" data-arcade-result="longer">Longer run →</button><button class="btn secondary" data-arcade-result="endless">Endless run →</button>' : ""}${won && s.playMode === "journey" ? '<button class="btn" data-arcade-result="journey">Continue journey →</button>' : ""}${won && s.mode === "rhythm" && s.stage < 4 && s.playMode !== "journey" ? '<button class="btn" data-arcade-result="next-song">Next song · Level ' + (s.stage + 2) + " →</button>" : ""}${won && s.difficulty < 2 ? '<button class="btn" data-arcade-result="harder">Make this style harder →</button>' : ""}${won && s.stage < 4 && s.playMode !== "quick" && s.playMode !== "journey" ? '<button class="btn secondary" data-arcade-result="next">Next level · choose any style →</button>' : ""}<button class="btn secondary" data-arcade-result="retry">${won ? "Play this level again" : "Try again"}</button><button class="btn secondary" data-arcade-result="styles">${s.playMode === "journey" ? "View journey route" : s.playMode === "quick" ? "Choose another single game" : "Choose a style at this level"}</button><button class="text-btn" data-action="highscores">High scores</button><button class="text-btn" data-arcade-result="home">Home</button></div></main></div>`;
     document.querySelectorAll("[data-arcade-result]").forEach(
       (b) =>
         (b.onclick = () => {
@@ -903,12 +918,19 @@
             stop();
             home();
             arcadeHub(a === "next" ? s.stage + 1 : s.stage, s.playMode);
+          } else if (a === "longer" || a === "endless") {
+            launch("jump", s.stage, s.difficulty, "quick", {
+              runLength:
+                a === "longer" ? Math.min(8, (s.runLength || 1) + 2) : 1,
+              endless: a === "endless",
+            });
           } else
             launch(
               s.mode,
               a === "next-song" ? s.stage + 1 : s.stage,
               a === "harder" ? s.difficulty + 1 : s.difficulty,
               s.playMode,
+              { runLength: s.runLength, endless: s.endless },
             );
         }),
     );

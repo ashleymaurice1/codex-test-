@@ -417,6 +417,18 @@ UP|ARRIBA
 DOWN|ABAJO
 `;
   const extra = `
+Endless|Sin fin
+Marathon|Maratón
+the course is getting faster!|¡el recorrido va más rápido!
+
+RUN LENGTH|DURACIÓN DE LA PARTIDA
+Classic · short course|Clásico · recorrido corto
+Marathon · longer and faster|Maratón · más largo y más rápido
+Endless · keep going|Sin fin · sigue saltando
+Longer run →|Recorrido más largo →
+Endless run →|Partida sin fin →
+Wave|Etapa
+
 ROUND|RONDA
 CORRECT TAPS TO FINISH|ACIERTOS PARA LLEGAR A LA META
 TO THE BASH|HASTA LA FIESTA

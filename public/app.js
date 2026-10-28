@@ -278,7 +278,7 @@ function highScores(mode = "all") {
       )
       .join(
         "",
-      )}</div>${rows.length ? `<div class="score-table-wrap"><table class="score-table"><thead><tr><th>#</th><th>Run</th><th>Score</th><th>Time</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${i + 1}</td><td><strong>${esc(r.name || "You")}</strong><small>${labels[r.mode]} · L${r.level} · ${["Chill", "Spooky", "Fiendish"][r.difficulty || 0]}</small></td><td>${r.score}</td><td>${r.seconds.toFixed(1)}s</td></tr>`).join("")}</tbody></table></div>` : '<p class="empty-scores">Your first high score is waiting. Play a game to set it!</p>'}`,
+      )}</div>${rows.length ? `<div class="score-table-wrap"><table class="score-table"><thead><tr><th>#</th><th>Run</th><th>Score</th><th>Time</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td>${i + 1}</td><td><strong>${esc(r.name || "You")}</strong><small>${labels[r.mode]} · L${r.level} · ${["Chill", "Spooky", "Fiendish"][r.difficulty || 0]}${r.mode === "jump" ? (r.endless ? " · Endless" : r.runLength > 1 ? " · Marathon" : "") : ""}</small></td><td>${r.score}</td><td>${r.seconds.toFixed(1)}s</td></tr>`).join("")}</tbody></table></div>` : '<p class="empty-scores">Your first high score is waiting. Play a game to set it!</p>'}`,
   );
 }
 function musicOptions() {
@@ -441,7 +441,7 @@ function arcadeMenu(
               "",
             )}</ol><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`
         : ""
-    }${mode === "maze" ? `<div class="maze-scene-preview"><img id="maze-scene-image" src="${MidnightArcadeUI.mazeScenes[stage].asset}" alt="${MidnightArcadeUI.mazeScenes[stage].name}"><b id="maze-scene-name">${MidnightArcadeUI.mazeScenes[stage].name}</b><p id="maze-scene-description">${MidnightArcadeUI.mazeScenes[stage].description || "Follow the woodland glow to the Monster Bash."}</p></div>` : ""}<form id="arcade-form">${characterPicker()}${nicknameField()}<div class="arcade-options">${playMode === "journey" ? `<input type="hidden" name="stage" value="${stage}">` : playMode === "quick" && !["rhythm", "maze"].includes(mode) ? '<input type="hidden" name="stage" value="0">' : `<label>${mode === "rhythm" ? "SONG" : "LEVEL"}<select name="stage">${Array.from({ length: playMode === "quick" ? 5 : Math.min(4, profile.arcadeUnlocked || 0) + 1 }, (_, i) => `<option value="${i}" ${stage === i ? "selected" : ""}>${mode === "rhythm" ? "Song" : "Level"} ${i + 1}${mode === "rhythm" ? " · " + MidnightScore.getSong(i).title : mode === "maze" ? " · " + MidnightArcadeUI.mazeScenes[i].name : ""}</option>`).join("")}</select></label>`}<label>DIFFICULTY<select name="difficulty"><option value="0">Chill · start easy</option><option value="1">Spooky · a little faster</option><option value="2">Fiendish · a real challenge</option></select></label></div><div class="actions"><button class="btn" type="submit">${playMode === "quick" ? (mode === "rhythm" ? "Play selected song" : "Play this game") : "Start this adventure level"} →</button></div></form>`,
+    }${mode === "maze" ? `<div class="maze-scene-preview"><img id="maze-scene-image" src="${MidnightArcadeUI.mazeScenes[stage].asset}" alt="${MidnightArcadeUI.mazeScenes[stage].name}"><b id="maze-scene-name">${MidnightArcadeUI.mazeScenes[stage].name}</b><p id="maze-scene-description">${MidnightArcadeUI.mazeScenes[stage].description || "Follow the woodland glow to the Monster Bash."}</p></div>` : ""}<form id="arcade-form">${characterPicker()}${nicknameField()}<div class="arcade-options">${playMode === "journey" ? `<input type="hidden" name="stage" value="${stage}">` : playMode === "quick" && !["rhythm", "maze"].includes(mode) ? '<input type="hidden" name="stage" value="0">' : `<label>${mode === "rhythm" ? "SONG" : "LEVEL"}<select name="stage">${Array.from({ length: playMode === "quick" ? 5 : Math.min(4, profile.arcadeUnlocked || 0) + 1 }, (_, i) => `<option value="${i}" ${stage === i ? "selected" : ""}>${mode === "rhythm" ? "Song" : "Level"} ${i + 1}${mode === "rhythm" ? " · " + MidnightScore.getSong(i).title : mode === "maze" ? " · " + MidnightArcadeUI.mazeScenes[i].name : ""}</option>`).join("")}</select></label>`}${mode === "jump" && playMode !== "journey" ? `<label>RUN LENGTH<select name="run-mode"><option value="classic" ${profile.jumpRunMode === "classic" ? "selected" : ""}>Classic · short course</option><option value="marathon" ${!profile.jumpRunMode || profile.jumpRunMode === "marathon" ? "selected" : ""}>Marathon · longer and faster</option><option value="endless" ${profile.jumpRunMode === "endless" ? "selected" : ""}>Endless · keep going</option></select></label>` : ""}<label>DIFFICULTY<select name="difficulty"><option value="0">Chill · start easy</option><option value="1">Spooky · a little faster</option><option value="2">Fiendish · a real challenge</option></select></label></div><div class="actions"><button class="btn" type="submit">${playMode === "quick" ? (mode === "rhythm" ? "Play selected song" : "Play this game") : "Start this adventure level"} →</button></div></form>`,
   );
   if (mode === "rhythm" && playMode === "quick") {
     const select = $("#arcade-form select[name=stage]");
@@ -479,6 +479,8 @@ function arcadeMenu(
         .trim()
         .slice(0, 18) || "Grave guest";
     profile.chosen = true;
+    if (mode === "jump" && playMode !== "journey")
+      profile.jumpRunMode = f.get("run-mode") || "marathon";
     save();
     document.querySelector("dialog").close();
     MidnightArcadeUI.launch(
@@ -486,6 +488,10 @@ function arcadeMenu(
       Number(f.get("stage")),
       Number(f.get("difficulty")),
       playMode,
+      {
+        runLength: f.get("run-mode") === "marathon" ? 4 : 1,
+        endless: f.get("run-mode") === "endless",
+      },
     );
   };
 }
