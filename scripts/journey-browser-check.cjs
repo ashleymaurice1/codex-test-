@@ -18,7 +18,7 @@ const assert = require("node:assert/strict");
             chosen: true,
             name: "Journey ghost",
             mute: true,
-            journeyStep: 2,
+            journeyStep: 0,
           }),
         );
     });
@@ -49,47 +49,18 @@ const assert = require("node:assert/strict");
       await p.evaluate(() => MidnightArcadeUI.getState().status),
       "won",
     );
-    assert.equal(await p.evaluate(() => profile.journeyStep), 3);
+    assert.equal(await p.evaluate(() => profile.journeyStep), 1);
     await p.locator("[data-arcade-result=journey]").click();
     assert.equal(await p.locator("#nickname").count(), 0);
-    await p.locator("#play-form button[type=submit]").click();
-    await p.waitForSelector(".choices");
-    let answered;
-    const end = Date.now() + 35000;
-    while (Date.now() < end) {
-      if (await p.locator(".result").count()) break;
-      const d = await p.evaluate(() => ({
-        id: state.challenge.id,
-        kind: state.challenge.kind,
-        choices: state.challenge.choices,
-      }));
-      if (d.id !== answered) {
-        const good = { 0: "pumpkin", 6: "moon", 7: "potion-blue", 9: "ghost" }[
-          d.kind
-        ];
-        await p
-          .locator(
-            `[data-action=answer][data-value="${d.choices.indexOf(good)}"]`,
-          )
-          .click();
-        answered = d.id;
-      }
-      await p.waitForTimeout(100);
-    }
-    await p.waitForSelector(".result");
-    assert.equal(await p.evaluate(() => profile.journeyStep), 4);
-    await p.locator("[data-action=journey-next]").click();
-    assert.equal(await p.locator("input[name=stage]").inputValue(), "1");
-    assert.match(
-      await p.locator(".journey-order").innerText(),
-      /Chapter 2\/5.*Moonlit Leap/,
-    );
+    assert.match(await p.locator(".journey-order").innerText(), /Moonlit Leap/);
+    assert.equal(await p.locator("input[name=stage]").inputValue(), "0");
     await p.reload();
     await p.locator("[data-action=solo]").click();
-    assert.equal(await p.locator("input[name=stage]").inputValue(), "1");
+    assert.match(await p.locator(".journey-order").innerText(), /Moonlit Leap/);
+    assert.equal(await p.evaluate(() => profile.journeyStep), 1);
     assert.deepEqual(errors, []);
     console.log(
-      "Journey rhythm → tap race → next chapter Jump, saved progress, nickname reused: passed",
+      "Journey Melody → Jump, saved progress, nickname reused: passed",
     );
   } finally {
     await b.close();

@@ -6,7 +6,7 @@ test("journey visits all four styles in each of five chapters without skipping o
   const p = { journeyStep: 0 };
   for (let i = 0; i < 20; i++) {
     const n = J.current(p);
-    assert.equal(n.mode, ["jump", "maze", "rhythm", "race"][i % 4]);
+    assert.equal(n.mode, ["rhythm", "jump", "maze", "race"][i % 4]);
     assert.equal(n.chapter, Math.floor(i / 4));
     assert.equal(J.complete(p, "wrong", 0), false);
     assert.equal(J.complete(p, n.mode, n.stage), true);

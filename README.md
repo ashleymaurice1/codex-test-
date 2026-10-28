@@ -109,11 +109,11 @@ Life balance now uses shared rules in `public/economy.js`: a spare every **2,500
 Facial animation blends only small, feathered eyelid patches onto the registered idle pose, with a gentle half-second blink about every seven seconds. Character bodies stay fixed; happy and disappointed faces remain distinct at results. Reduced-motion preferences disable blinking.
 
 
-**Start Journey / Continue Journey** now follows a fixed sequence: Jump → Maze → Rhythm → Tap Race in each of five chapters (20 games total). The next result button opens the next style automatically; nickname and journey position persist. Quick Play remains a standalone choice of style and level. Replaying a completed game cannot skip journey stops. The fifth chapter reuses the final Tap Race course.
+**Start Journey / Continue Journey** now follows a fixed sequence: Melody → Jump → Maze → Tap Race in each of five chapters (20 games total). The next result button opens the next style automatically; nickname and journey position persist. Quick Play remains a standalone choice of style and level. Replaying a completed game cannot skip journey stops. The fifth chapter reuses the final Tap Race course.
 
 Maze pursuers now follow actual paths toward the player during chase phases, with shorter scatter breaks, earlier visible encounters, and increasing speed/count on later stages and difficulties. An exclamation mark identifies an active pursuer. Contact costs a heart and disperses pursuers while preserving collected candy and offering a short invulnerable escape window.
 
-`npm run test:journey-browser` checks the rhythm-to-race-to-next-chapter transition with actual inputs and persistence; `npm run test:faces-browser` verifies that only localized facial pixels animate while all body poses remain fixed. The arcade browser suite checks Jump → Maze progression with real keyboard input.
+`npm run test:journey-browser` checks the Melody-to-Jump transition with actual inputs and persistence; `npm run test:faces-browser` verifies that only localized facial pixels animate while all body poses remain fixed. The arcade browser suite checks Jump → Maze progression with real keyboard input.
 
 
 `public/music.js` plays the finished recordings through Web Audio buffer sources. It loads a song before the countdown, keeps at most two decoded recordings cached, and resumes the home-page recording at its previous position after a rhythm round. Background tracks rotate only when the full recording ends. There are no oscillator-generated music parts or single-note sample loops.

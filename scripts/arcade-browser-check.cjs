@@ -16,6 +16,7 @@ const assert = require("node:assert/strict");
           tutorial: true,
           chosen: true,
           team: "Mach",
+          journeyStep: 1,
           mute: true,
         }),
       );
