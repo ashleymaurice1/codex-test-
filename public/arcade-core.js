@@ -413,15 +413,20 @@
       if (s.player.y === 0) s.player.vy = 0;
     }
     if (s.spawned < s.target && s.player.x + s.width >= s.nextSpawn) {
+      const kind = ["root", "pumpkin", "tombstone"][(s.spawned + 1) % 3];
+      const height =
+        53 + s.difficulty * 10 + Math.floor(s.rng() * (14 + s.stage * 5));
       s.obstacles.push({
         id: s.spawned++,
         x: s.nextSpawn,
-        width: 34 + s.stage * 2,
-        height:
-          53 + s.difficulty * 10 + Math.floor(s.rng() * (14 + s.stage * 5)),
+        height,
+        width: Math.round(
+          height *
+            (kind === "root" ? 0.875 : kind === "pumpkin" ? 0.727 : 0.65),
+        ),
         hit: false,
         passed: false,
-        kind: ["root", "pumpkin", "tombstone"][s.spawned % 3],
+        kind,
       });
       if (s.spawned === s.target) s.finishX = s.nextSpawn + 80;
       s.nextSpawn +=

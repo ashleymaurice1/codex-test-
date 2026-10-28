@@ -1,3 +1,16 @@
+Original rhythm-game recordings:
+Ghostlight Parade — original theatrical Halloween march, 108 BPM
+Midnight Spell — original witchy house groove, 122 BPM
+Lantern Lullaby — original eerie 3/4 lullaby, 76 BPM
+Velvet Cathedral — original gothic instrumental, 96 BPM
+Arranged for Midnight Ghost Arcade; original score in scripts/compose-originals.py.
+Rendered offline with FluidSynth and GeneralUser GS by S. Christian Collins.
+No reference-song audio, vocal samples, MIDI or melodies are used.
+Instrument library: https://github.com/mrbumpy409/GeneralUser-GS
+License permits private and commercial music creation; see GeneralUser-GS-license.txt.
+Original recordings use 128 kbps MP3, gentle loudness normalization and fades.
+
+Existing and archived recordings from the FreePD collection:
 Home-page recordings:
 Creepy Hallow — Alexander Nakarada (2018)
 Witch Waltz — Kevin MacLeod (2018)
@@ -18,4 +31,4 @@ Original collection: https://freepd.com/
 License: CC0 1.0 Universal; see CC0-1.0.txt.
 Repository license: https://github.com/SoundSafari/CC0-1.0-Music/blob/main/LICENSE
 Copies normalized to a gentle playback level, re-encoded as 96 kbps MP3,
-and stripped of cover images. No synthesized instrumental layers are added.
+and stripped of cover images. Originals are rendered offline; all tracks play as finished recordings.

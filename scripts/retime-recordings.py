@@ -7,7 +7,17 @@ from scipy import signal
 p = pathlib.Path('public/recordings.js')
 source = p.read_text(); start = source.index('{"songs"'); end = source.index(';if(typeof module', start)
 library = json.loads(source[start:end])
+authored = json.loads(pathlib.Path('scripts/original-note-charts.json').read_text())
 for song in library['songs']:
+    if song['slug'] in authored:
+        candidates = [n for n in authored[song['slug']] if 2.5 <= n['time'] < song['playSeconds']-.6]
+        chart=[]
+        for n in candidates:
+            if not chart or n['time']-chart[-1]['time'] >= .45: chart.append(n)
+        song['chart']=chart
+        song['chartMethod']='authored-melody-cues-v1'
+        print(song['title'],len(chart),'authored melody notes; first:',chart[:2])
+        continue
     raw = subprocess.check_output(['ffmpeg','-v','quiet','-i','public'+song['file'],'-t',str(song['playSeconds']),'-f','f32le','-ar','22050','-ac','1','-'])
     y = np.frombuffer(raw, dtype=np.float32)
     _, times, spectrum = signal.stft(y, fs=22050, nperseg=1024, noverlap=804)

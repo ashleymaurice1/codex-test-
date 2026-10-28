@@ -1,4 +1,4 @@
-/* Finished, full-length instrumental recordings. No synthesized music or short-note loops. */
+/* Full-length recordings, including original sampled-instrument arrangements. No runtime synthesis. */
 (function (root) {
   let ctx,
     master,
@@ -128,7 +128,7 @@
       scene === "jump"
         ? jumpStart + (ambientStage % root.MidnightScore.jumpSongs.length)
         : scene === "maze"
-          ? homeCount + [1, 2, 4][ambientStage % 3]
+          ? homeCount + [3, 0, 4][ambientStage % 3]
           : homeCount + ((ambientStage + 2) % 5);
     try {
       const buffer = await loadTrack(gameIndex);

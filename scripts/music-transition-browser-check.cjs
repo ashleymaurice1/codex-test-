@@ -51,7 +51,7 @@ const assert = require("node:assert/strict");
     await p.waitForFunction(() => MidnightArcadeUI.getState()?.ready);
     assert.equal(
       await p.evaluate(() => MidnightMusic.status().source),
-      "Creepy Comedy",
+      "Midnight Spell",
     );
     assert.equal(await p.evaluate(() => MidnightMusic.status().mode), "rhythm");
     await p.locator("[data-arcade=home]").click();
@@ -63,7 +63,7 @@ const assert = require("node:assert/strict");
     );
     for (const [mode, title] of [
       ["jump", "Del Rio Bravo"],
-      ["maze", "Creepy Comedy"],
+      ["maze", "Velvet Cathedral"],
     ]) {
       await p.locator("[data-action=quick]").click();
       await p.locator(`dialog [data-value=${mode}]`).click();

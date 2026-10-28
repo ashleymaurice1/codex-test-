@@ -259,10 +259,13 @@
       image("/assets/arcade/witch.webp"),
       image("/assets/arcade/zombie.webp"),
       mode === "rhythm" ? MidnightMusic.ready(stage) : Promise.resolve(),
+      mode === "jump"
+        ? image("/assets/arcade/memorial-props.webp")
+        : Promise.resolve(null),
     ])
-      .then(([player, forest, witch, zombie]) => {
+      .then(([player, forest, witch, zombie, recording, props]) => {
         if (current !== owner) return;
-        images = { player, forest, witch, zombie };
+        images = { player, forest, witch, zombie, props };
         current.paused = true;
         current.countdown = 3;
         countdownLabel = "";
@@ -502,45 +505,79 @@
       s.invulnerable > 0 && Math.floor(s.elapsed * 8) % 2 ? 0.4 : 1,
     );
   }
-  function marigold(c, x, y, r, color = "#ffa32e") {
+  // Anchor each glimmer to a painted light on a gravestone, not the running lane.
+  const memorialLights = [
+    [0.056, 0.287],
+    [0.063, 0.285],
+    [0.073, 0.286],
+    [0.08, 0.303],
+    [0.081, 0.327],
+    [0.045, 0.337],
+    [0.065, 0.349],
+    [0.107, 0.331],
+    [0.129, 0.339],
+    [0.143, 0.342],
+    [0.171, 0.349],
+    [0.183, 0.331],
+    [0.197, 0.358],
+    [0.211, 0.374],
+    [0.223, 0.39],
+    [0.269, 0.358],
+    [0.28, 0.343],
+    [0.292, 0.349],
+    [0.3, 0.362],
+    [0.337, 0.34],
+    [0.352, 0.359],
+    [0.373, 0.374],
+    [0.409, 0.383],
+    [0.423, 0.376],
+    [0.435, 0.394],
+    [0.499, 0.381],
+    [0.509, 0.365],
+    [0.524, 0.386],
+    [0.558, 0.381],
+    [0.574, 0.405],
+    [0.614, 0.349],
+    [0.636, 0.367],
+    [0.657, 0.39],
+    [0.683, 0.4],
+    [0.719, 0.387],
+    [0.735, 0.355],
+    [0.772, 0.369],
+    [0.797, 0.376],
+    [0.829, 0.378],
+    [0.845, 0.358],
+    [0.865, 0.38],
+    [0.889, 0.405],
+    [0.923, 0.338],
+    [0.945, 0.373],
+    [0.97, 0.404],
+  ];
+  function twinkleMemorial(c, s, w, h) {
+    const pan = Math.min(160, s.cameraX * 0.06),
+      palette = ["#ffbc6b", "#f7a5d5", "#86e8de", "#c5b2ff"],
+      still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     c.save();
-    c.fillStyle = color;
-    for (let petal = 0; petal < 8; petal++) {
-      const angle = (petal * Math.PI) / 4;
+    for (const [i, point] of memorialLights.entries()) {
+      const x = point[0] * (w + 180) - pan,
+        y = point[1] * h,
+        glow = still
+          ? 0.45
+          : 0.2 +
+            0.65 *
+              Math.pow(
+                (Math.sin(s.elapsed * (0.62 + (i % 4) * 0.055) + i * 2.1) + 1) /
+                  2,
+                2,
+              );
+      c.globalAlpha = glow;
+      c.fillStyle = palette[i % palette.length];
+      c.shadowColor = c.fillStyle;
+      c.shadowBlur = 7 + glow * 7;
       c.beginPath();
-      c.arc(
-        x + Math.cos(angle) * r * 0.52,
-        y + Math.sin(angle) * r * 0.52,
-        r * 0.48,
-        0,
-        7,
-      );
+      c.arc(x, y, 1.2 + glow * 0.8, 0, 7);
       c.fill();
     }
-    c.fillStyle = "#b85e22";
-    c.beginPath();
-    c.arc(x, y, r * 0.28, 0, 7);
-    c.fill();
-    c.restore();
-  }
-  function candle(c, x, bottom, height, time) {
-    c.save();
-    c.fillStyle = "#f6d69e";
-    c.fillRect(x - 4, bottom - height, 8, height);
-    c.fillStyle = "#ffe0a0";
-    c.shadowColor = "#ffb84d";
-    c.shadowBlur = 12;
-    c.beginPath();
-    c.ellipse(
-      x,
-      bottom - height - 5,
-      3,
-      5 + Math.sin(time * 2 + x) * 0.5,
-      0,
-      0,
-      7,
-    );
-    c.fill();
     c.restore();
   }
   function drawJump(c) {
@@ -548,6 +585,7 @@
       w = s.width,
       h = s.height;
     forest(c, w, h);
+    twinkleMemorial(c, s, w, h);
     c.save();
     c.translate(-s.cameraX, 0);
     const path = c.createLinearGradient(0, s.ground, 0, h);
@@ -580,94 +618,20 @@
       c.restore();
     }
     for (const o of s.obstacles) {
-      const y = s.ground - o.height;
-      c.save();
-      if (o.kind === "pumpkin") {
-        // Decorated calavera: warm ivory, flower eyes, painted flourishes.
-        c.fillStyle = "#f8e7c6";
-        c.strokeStyle = "#be667e";
-        c.lineWidth = 2;
-        c.beginPath();
-        c.roundRect(o.x, y, o.width, o.height * 0.78, [16, 16, 9, 9]);
-        c.fill();
-        c.stroke();
-        c.fillStyle = "#f8e7c6";
-        c.fillRect(
-          o.x + o.width * 0.2,
-          y + o.height * 0.65,
-          o.width * 0.6,
-          o.height * 0.35,
-        );
-        for (const [fraction, color] of [
-          [0.28, "#d94c91"],
-          [0.72, "#3cb9bf"],
-        ]) {
-          marigold(
-            c,
-            o.x + o.width * fraction,
-            y + o.height * 0.4,
-            o.width * 0.19,
-            color,
-          );
-          c.fillStyle = "#31344d";
-          c.beginPath();
-          c.arc(o.x + o.width * fraction, y + o.height * 0.4, 3, 0, 7);
-          c.fill();
-        }
-        c.fillStyle = "#794570";
-        c.beginPath();
-        c.moveTo(o.x + o.width / 2, y + o.height * 0.53);
-        c.lineTo(o.x + o.width * 0.42, y + o.height * 0.64);
-        c.lineTo(o.x + o.width * 0.58, y + o.height * 0.64);
-        c.fill();
-        c.strokeStyle = "#794570";
-        c.lineWidth = 1.5;
-        c.beginPath();
-        c.moveTo(o.x + 9, y + o.height * 0.84);
-        c.lineTo(o.x + o.width - 9, y + o.height * 0.84);
-        c.stroke();
-        for (let j = 0; j < 3; j++)
-          c.strokeRect(o.x + 11 + j * 5, y + o.height * 0.8, 4, 6);
-        marigold(c, o.x + o.width / 2, y + 8, 5);
-      } else if (o.kind === "tombstone") {
-        // A painted lantern, rather than asking players to jump on a grave.
-        c.fillStyle = "#603b76";
-        c.strokeStyle = "#eeb366";
-        c.lineWidth = 2;
-        c.beginPath();
-        c.roundRect(o.x, y, o.width, o.height, [9, 9, 3, 3]);
-        c.fill();
-        c.stroke();
-        c.fillStyle = "#ffcc7755";
-        c.fillRect(o.x + 5, y + 9, o.width - 10, o.height - 16);
-        candle(c, o.x + o.width / 2, s.ground - 7, o.height * 0.42, s.elapsed);
-        c.strokeStyle = "#eeb366";
-        c.strokeRect(o.x + 5, y + 8, o.width - 10, o.height - 14);
-        c.fillStyle = "#eeb366";
-        c.fillRect(o.x + 2, s.ground - 5, o.width - 4, 5);
-      } else {
-        c.fillStyle = "#b45d69";
-        c.beginPath();
-        c.roundRect(
-          o.x,
-          y + o.height * 0.43,
-          o.width,
-          o.height * 0.57,
-          [3, 3, 8, 8],
-        );
-        c.fill();
-        c.strokeStyle = "#efbc6d";
-        c.lineWidth = 3;
-        c.strokeRect(o.x + 2, y + o.height * 0.48, o.width - 4, 7);
-        marigold(c, o.x + o.width * 0.28, y + o.height * 0.34, o.width * 0.27);
-        marigold(c, o.x + o.width * 0.72, y + o.height * 0.34, o.width * 0.27);
-        marigold(c, o.x + o.width / 2, y + o.width * 0.27, o.width * 0.27);
-        c.fillStyle = "#53c7c0";
-        c.beginPath();
-        c.arc(o.x + o.width / 2, y + o.height * 0.8, 4, 0, 7);
-        c.fill();
-      }
-      c.restore();
+      const crop =
+        o.kind === "pumpkin"
+          ? [0, 190, 498, 685]
+          : o.kind === "tombstone"
+            ? [1075, 175, 455, 700]
+            : [498, 235, 560, 640];
+      c.drawImage(
+        images.props,
+        ...crop,
+        o.x,
+        s.ground - o.height,
+        o.width,
+        o.height,
+      );
     }
     if (s.finishX) {
       c.strokeStyle = "#e9b86f";
@@ -816,6 +780,7 @@
         MidnightMusic.setScene("rhythm", current.stage);
         MidnightMusic.selectSong(current.stage, 1);
         MidnightArcade.prepareRhythm(current, MidnightMusic.clock());
+        hint = "Listen to the intro—the arrows begin with the melody.";
       }
       document.getElementById("arcade-pause").classList.add("hide");
     }
@@ -823,6 +788,11 @@
       MidnightArcade.stepMaze(current, dt);
       drawMaze(c);
     } else if (current.mode === "rhythm") {
+      if (
+        hint === "Listen to the intro—the arrows begin with the melody." &&
+        MidnightMusic.clock().time >= current.notes[0].time - 3
+      )
+        hint = "Follow the arrows. Tap as they meet the glowing line.";
       MidnightArcade.stepRhythm(current, MidnightMusic.clock().time);
       drawRhythm(c);
     } else {

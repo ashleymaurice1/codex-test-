@@ -19,7 +19,7 @@ test("bonus lives require 2500 points and stop at three, without banking surplus
   }
   assert.equal(s.reserveLives, 3);
   assert.equal(s.events.filter((e) => e.type === "bonus-life").length, 0);
-  const t = A.createRhythm(0, { totalScore: 0 });
+  const t = A.createRhythm(0, { totalScore: 0 }, 2);
   A.prepareRhythm(t, { time: 0, origin: 2 });
   for (const n of t.notes.slice(0, 20)) {
     A.stepRhythm(t, n.time);

@@ -46,4 +46,4 @@ Current arcade update: Adventure offers a series of progressively harder Jump, M
 
 Latest update adds five licensed full-length instrumental recordings with arrow-key controls, three illustrated maze environments (Mexican Graveyard inspired by Día de los Muertos, American Graveyard, and a Japanese Obon-inspired lantern river garden), stable portraits with subtle facial blinks, and rarer spare lives capped at three.
 
-Music now uses finished CC0 recordings from FreePD, credited by artist, with real beat charts, native previews and saved background-volume preferences. Generated music and repetitive sample loops have been removed.
+Music combines four original sampled-instrument arrangements with existing FreePD recordings. Original melody cue times drive the new charts; existing recordings use measured audible attacks. Listen/Pause previews and saved volume preferences are included. Credits document the original arrangements, GeneralUser GS instrument-library permission, and the CC0 source for existing recordings.
