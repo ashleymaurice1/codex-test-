@@ -215,6 +215,9 @@ function sound(ok = true) {
 function music() {
   if (!profile.mute) MidnightMusic.start();
 }
+// Safari can require touchend to unlock sound; pointer controls can suppress click.
+document.addEventListener("touchend", music, { capture: true, passive: true });
+document.addEventListener("pointerup", music, { capture: true, passive: true });
 function mute() {
   profile.mute = !profile.mute;
   save();

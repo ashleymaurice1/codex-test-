@@ -3502,3 +3502,35 @@ footer {
   flex-wrap: wrap;
   gap: 12px;
 }
+
+/* Phone game controls are touch targets, including their nested labels. */
+.jump-control,
+.jump-control *,
+.maze-controls,
+.maze-controls *,
+.rhythm-controls,
+.rhythm-controls *,
+.arcade-board {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.jump-control,
+.maze-controls button,
+.rhythm-controls button {
+  touch-action: none;
+}
+.jump-control small,
+.rhythm-controls small {
+  pointer-events: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .jump-control small {
+    font-size: 0;
+  }
+  .jump-control small::after {
+    content: "TAP ANYWHERE ON THIS BUTTON";
+    font-size: 8px;
+  }
+}

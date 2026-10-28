@@ -128,3 +128,5 @@ Home-page music is a separate pool (Creepy Hallow by default, plus Witch Waltz);
 The jumping course uses a dark Día de los Muertos-inspired cemetery with rows of gravestones draped in colorful lights, with painted calaveras, marigold pots and lantern obstacles, with a clear running lane and softly twinkling blue and amber lights below it. Maze backgrounds rotate Creepy Comedy, Fright Night Twist and Night in the Castle rather than the quieter greenhouse theme.
 
 Spooky/Fiendish jumping runs increase speed, obstacle count and height, with closer but jumpable varied spacing. The path lights gently twinkle on an approximately eight-second cycle.
+
+Phone controls jump immediately on pointer contact and disable text selection/callouts on control labels. Music unlocks its output synchronously on touchend/pointerup before asynchronous recording loading; mute preferences remain respected. Touch regression checks use phone emulation; physical iOS device verification is still useful.

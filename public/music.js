@@ -30,6 +30,9 @@
     const AC = root.AudioContext || root.webkitAudioContext;
     if (!AC) return;
     ctx = new AC();
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = "playback";
+    } catch {}
     master = ctx.createGain();
     master.gain.value = 0;
     master.connect(ctx.destination);
@@ -150,7 +153,14 @@
   function start() {
     ensure();
     muted = false;
-    if (ctx && !transportPaused) ctx.resume().catch(() => {});
+    if (ctx && !transportPaused) {
+      ctx.resume().catch(() => {});
+      // Unlock the output during the gesture, before a recording finishes loading.
+      const unlock = ctx.createBufferSource();
+      unlock.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      unlock.connect(ctx.destination);
+      unlock.start();
+    }
     if (!source && scene !== "rhythm") playBackground();
     updateVolume();
   }

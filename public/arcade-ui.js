@@ -41,7 +41,7 @@
     maze: "Collect every candy, dodge the pursuers, then reach the glowing house. Arrows / WASD, swipe, or use the arrows below.",
     rhythm:
       "Hit the matching glowing notes on the line. Use the matching arrow keys (← ↓ ↑ →). Touch arrows work on phones too.",
-    jump: "Run forward and jump over the obstacles. Press Space / ↑ or tap JUMP once per jump.",
+    jump: "Tap the JUMP button to clear each obstacle. Keyboard: Space / ↑.",
   };
   function stop() {
     document.body.classList.remove("arcade-active");
@@ -142,6 +142,14 @@
         { signal },
       ),
     );
+    document.querySelector('[data-arcade="jump"]')?.addEventListener(
+      "pointerdown",
+      (e) => {
+        e.preventDefault();
+        if (current) MidnightArcade.jump(current);
+      },
+      { signal },
+    );
     document.querySelectorAll("[data-lane]").forEach((b) =>
       b.addEventListener(
         "pointerdown",
@@ -160,6 +168,7 @@
     canvas.addEventListener(
       "pointerdown",
       (e) => {
+        e.preventDefault();
         down = { x: e.clientX, y: e.clientY };
         if (mode === "jump") MidnightArcade.jump(current);
       },

@@ -18,7 +18,8 @@
     "test:journey-browser": "node scripts/journey-browser-check.cjs",
     "test:faces-browser": "node scripts/faces-browser-check.cjs",
     "test:music-browser": "node scripts/music-browser-check.cjs",
-    "test:music-transitions-browser": "node scripts/music-transition-browser-check.cjs"
+    "test:music-transitions-browser": "node scripts/music-transition-browser-check.cjs",
+    "test:mobile-touch-browser": "node scripts/mobile-touch-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"
