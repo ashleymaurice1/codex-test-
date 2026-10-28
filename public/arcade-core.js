@@ -369,8 +369,8 @@
     s.height = 540;
     s.ground = 425;
     s.player = { x: 155, y: 0, vy: 0, width: 75, height: 57 };
-    s.speed = 180 + s.stage * 28 + s.difficulty * 35;
-    s.target = 6 + s.stage * 2;
+    s.speed = 180 + s.stage * 28 + s.difficulty * 85;
+    s.target = 6 + s.stage * 2 + s.difficulty * 3;
     s.passed = 0;
     s.distance = 0;
     s.startX = s.player.x;
@@ -417,13 +417,19 @@
         id: s.spawned++,
         x: s.nextSpawn,
         width: 34 + s.stage * 2,
-        height: 53 + Math.floor(s.rng() * (14 + s.stage * 5)),
+        height:
+          53 + s.difficulty * 10 + Math.floor(s.rng() * (14 + s.stage * 5)),
         hit: false,
         passed: false,
         kind: ["root", "pumpkin", "tombstone"][s.spawned % 3],
       });
       if (s.spawned === s.target) s.finishX = s.nextSpawn + 80;
-      s.nextSpawn += Math.max(370 - s.stage * 18, s.speed * 1.5) + s.rng() * 70;
+      s.nextSpawn +=
+        Math.max(
+          370 - s.stage * 18 - s.difficulty * 45,
+          s.speed * (1.5 - s.difficulty * 0.12),
+        ) +
+        s.rng() * (70 + s.difficulty * 45);
     }
     for (const o of s.obstacles) {
       const overlap =
@@ -465,7 +471,11 @@
     s.misses = 0;
     s.combo = 0;
     s.laneCount = s.keys.length;
-    s.hitWindow = Math.max(0.12, 0.25 - s.stage * 0.018 - s.difficulty * 0.035);
+    s.hitWindow =
+      s.difficulty === 0
+        ? 0.4
+        : Math.max(0.14, 0.28 - s.stage * 0.014 - (s.difficulty - 1) * 0.035);
+    s.missedInRow = 0;
     s.notes = [];
     s.ready = false;
     s.lastAudio = 0;
@@ -475,9 +485,14 @@
   }
   function prepareRhythm(s, clock) {
     const song = SCORE.getSong(s.stage);
-    const stride = s.difficulty === 0 && s.stage < 2 ? 2 : 1;
+    const gap = s.difficulty === 0 ? 1.5 : s.difficulty === 1 ? 0.75 : 0.45;
+    let previous = -Infinity;
     s.notes = song.chart
-      .filter((_, i) => i % stride === 0)
+      .filter((n) => {
+        if (n.time - previous < gap) return false;
+        previous = n.time;
+        return true;
+      })
       .map((n, i) => ({
         beat: i,
         time: clock.origin + n.time,
@@ -488,7 +503,7 @@
     s.startedAudio = clock.time;
     s.lastAudio = clock.time;
     s.endAudio = Math.max(
-      s.notes.at(-1).time + s.hitWindow + 0.3,
+      (s.notes.at(-1)?.time ?? clock.origin) + s.hitWindow + 0.3,
       clock.origin + song.playSeconds,
     );
     s.ready = true;
@@ -498,7 +513,8 @@
     n.status = "miss";
     s.misses++;
     s.combo = 0;
-    hit(s);
+    s.missedInRow++;
+    if (s.difficulty > 0 || s.missedInRow % 3 === 0) hit(s);
     s.events.push({ type: "miss" });
   }
   function hitRhythm(s, lane, time) {
@@ -510,6 +526,7 @@
     if (n && Math.abs(n.time - time) <= s.hitWindow) {
       n.status = "hit";
       s.hits++;
+      s.missedInRow = 0;
       s.combo++;
       s.lastHitTime = time;
       s.lastHitLane = lane;

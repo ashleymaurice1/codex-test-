@@ -21,7 +21,7 @@
     return songs[Math.max(0, Math.min(4, Math.floor(stage) || 0))];
   }
   function lanesFor(stage, difficulty = 0) {
-    return stage === 0 && difficulty === 0
+    return difficulty === 0
       ? ["ArrowLeft", "ArrowRight"]
       : stage < 3
         ? ["ArrowLeft", "ArrowUp", "ArrowRight"]

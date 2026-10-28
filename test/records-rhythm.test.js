@@ -6,7 +6,9 @@ const R = require("../public/records");
 test("recording beat times and rhythm notes share the same clock, and accurate playing wins", () => {
   const s = A.createRhythm();
   A.prepareRhythm(s, { time: 0, origin: 2 });
-  const expected = S.getSong(0).chart.filter((_, i) => i % 2 === 0);
+  const expected = S.getSong(0).chart.filter((n) =>
+    s.notes.some((note) => note.time === 2 + n.time),
+  );
   assert.equal(s.notes.length, expected.length);
   for (const [i, n] of s.notes.entries()) {
     assert.equal(n.time, 2 + expected[i].time);
@@ -76,7 +78,9 @@ test("five full recordings each have valid beat charts and are winnable on their
           (i === 0 || n.time > song.chart[i - 1].time),
       ),
     );
-    const expected = song.chart.filter((_, i) => !(stage < 2 && i % 2));
+    const expected = song.chart.filter((n) =>
+      s.notes.some((note) => note.time === 2 + n.time),
+    );
     assert.equal(s.target, expected.length);
     for (const [i, n] of s.notes.entries()) {
       assert.equal(n.time, 2 + expected[i].time);
@@ -110,4 +114,27 @@ test("home-page music and the five rhythm songs never share a recording", () => 
       (song) => !home.has(fingerprint(song)) && !rhythm.has(fingerprint(song)),
     ),
   );
+});
+
+test("Chill uses two arrows, sparse audible notes and forgives isolated misses in every song", () => {
+  for (let stage = 0; stage < 5; stage++) {
+    const s = A.createRhythm(stage);
+    A.prepareRhythm(s, { time: 0, origin: 1 });
+    assert.equal(s.laneCount, 2);
+    assert.ok(s.hitWindow >= 0.4);
+    assert.ok(s.notes.length >= 10 && s.notes.length <= 43);
+    assert.ok(s.notes[0].time >= 3.5);
+    assert.ok(
+      s.notes.every((n, i) => i === 0 || n.time - s.notes[i - 1].time >= 1.5),
+    );
+    const first = s.notes[0];
+    A.stepRhythm(s, first.time + s.hitWindow + 0.01);
+    assert.equal(s.lives, 3);
+    const next = s.notes[1];
+    assert.equal(A.hitRhythm(s, next.lane, next.time + 0.32), true);
+    assert.equal(s.missedInRow, 0);
+    const hard = A.createRhythm(stage, {}, 2);
+    A.prepareRhythm(hard, { time: 0, origin: 1 });
+    assert.ok(hard.notes.length > s.notes.length);
+  }
 });

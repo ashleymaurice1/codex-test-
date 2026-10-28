@@ -31,3 +31,6 @@ duration=float(json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show
 jump=[{'slug':'del-rio-bravo','title':'Del Rio Bravo','artist':'Kevin MacLeod','duration':round(duration,3),'file':'/assets/audio/recordings/del-rio-bravo.mp3'}]
 library={'songs':out,'homeSongs':home,'jumpSongs':jump}
 pathlib.Path('public/recordings.js').write_text('/* Separate home-page recordings and rhythm songs, with detected beat times. */\n(function(root){const library='+json.dumps(library,separators=(',',':'))+';if(typeof module!=="undefined"&&module.exports)module.exports=library;else root.MidnightRecordings=library;})(globalThis);\n')
+
+# Refine tracked beats to real audible attacks; never fill silent sections.
+subprocess.run([sys.executable, "scripts/retime-recordings.py"], check=True)

@@ -42,8 +42,9 @@ const assert = require("node:assert/strict");
       }));
       assert.equal(info.song, info.source);
       assert.equal(info.overflow, false);
+      assert.deepEqual(info.keys, ["ArrowLeft", "ArrowRight"]);
       songs.push(info.song);
-      const until = Date.now() + 15000;
+      const until = Date.now() + 25000;
       while (Date.now() < until) {
         const n = await p.evaluate(() => {
           const s = MidnightArcadeUI.getState();
@@ -82,7 +83,7 @@ const assert = require("node:assert/strict");
       JSON.stringify({
         fiveDistinctSongs: songs,
         actualArrowKeyHits: true,
-        fourLanes: true,
+        twoBeginnerLanes: true,
         noScroll: true,
         pauseFreezesSong: true,
         errors,

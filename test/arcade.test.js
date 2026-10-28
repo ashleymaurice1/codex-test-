@@ -67,6 +67,8 @@ test("higher difficulties increase challenge and every obstacle gap remains jump
     const easy = A.createJump(stage, {}, 0),
       hard = A.createJump(stage, {}, 2);
     assert.ok(hard.speed > easy.speed);
+    assert.ok(hard.speed >= easy.speed * 1.5);
+    assert.ok(hard.target > easy.target);
     assert.ok(
       A.createMaze(stage, {}, 2).enemyInterval <
         A.createMaze(stage, {}, 0).enemyInterval,

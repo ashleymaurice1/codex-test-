@@ -106,7 +106,7 @@
     abort = new AbortController();
     const signal = abort.signal;
     document.getElementById("app").innerHTML =
-      `<div class="game-shell arcade-shell">${header()}<div class="race-top"><button class="text-btn" data-arcade="home">← Home</button><span>${playMode === "quick" ? "QUICK PLAY" : "ADVENTURE · LEVEL " + (stage + 1)} · ${["CHILL", "SPOOKY", "FIENDISH"][difficulty]}</span><button class="text-btn" data-arcade="pause">Pause Ⅱ</button></div><main><div class="arcade-heading"><div><span class="eyebrow">${esc(profile.name || "Grave guest")} · ${profile.team}</span><h1>${titles[mode]}</h1>${mode === "rhythm" ? `<span class="rhythm-song">Song ${stage + 1}/5 · ${esc(current.song)} · ${esc(MidnightScore.getSong(stage).artist)}</span>` : mode === "maze" ? `<span class="rhythm-song">${esc(current.scene)}${mazeScenes[stage].credit ? " · " + mazeScenes[stage].credit : ""}</span>` : mode === "jump" ? `<span class="rhythm-song">${esc(current.scene)}</span>` : ""}</div>${ghost(profile.team)}</div><p class="arcade-instruction">${playMode === "journey" ? "Journey · Game " + (profile.journeyStep + 1) + "/20. " : ""}${tips[mode]}${mode === "rhythm" ? ` Level ${stage + 1}: ${current.keys.map((k) => MidnightScore.arrows[k]).join(" ")}.` : ""}</p><div class="arcade-stats" id="arcade-stats"></div><div class="arcade-board-wrap"><canvas id="arcade-board" class="arcade-board ${mode === "maze" ? "maze-board" : "jump-board"}" width="${mode === "maze" ? 544 : 900}" height="${mode === "maze" ? 480 : 540}" tabindex="0" aria-label="${titles[mode]} game board. ${tips[mode]}"></canvas><div class="arcade-pause" id="arcade-pause"><h2>Gathering moonlight…</h2></div></div><div class="arcade-hint" id="arcade-hint" role="status" aria-live="polite">${hint}</div>${mode === "maze" ? '<div class="maze-controls" aria-label="Maze direction controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-arcade="pause" aria-label="Pause to plan your route">Ⅱ</button><button data-dir="right" aria-label="Move right">→</button><button data-dir="down" aria-label="Move down">↓</button></div>' : mode === "rhythm" ? `<div class="rhythm-controls" aria-label="Rhythm note pads">${Array.from({ length: current.laneCount }, (_, i) => `<button data-lane="${i}" style="--note:${["#B8D4FF", "#F28C28", "#B396E2", "#9BD14B"][i]}">${MidnightScore.arrows[current.keys[i]]}<small>${current.keys[i].replace("Arrow", "").toUpperCase()}</small></button>`).join("")}</div>` : '<button class="jump-control" data-arcade="jump">JUMP <small>SPACE / ↑</small></button>'}<p class="arcade-footer-note">Three hearts · spare lives save your glow · +1 life every 2,500 score</p></main></div>`;
+      `<div class="game-shell arcade-shell">${header()}<div class="race-top"><button class="text-btn" data-arcade="home">← Home</button><span>${playMode === "quick" ? "QUICK PLAY" : "ADVENTURE · LEVEL " + (stage + 1)} · ${["CHILL", "SPOOKY", "FIENDISH"][difficulty]}</span><button class="text-btn" data-arcade="pause">Pause Ⅱ</button></div><main><div class="arcade-heading"><div><span class="eyebrow">${esc(profile.name || "Grave guest")} · ${profile.team}</span><h1>${titles[mode]}</h1>${mode === "rhythm" ? `<span class="rhythm-song">Song ${stage + 1}/5 · ${esc(current.song)} · ${esc(MidnightScore.getSong(stage).artist)}</span>` : mode === "maze" ? `<span class="rhythm-song">${esc(current.scene)}${mazeScenes[stage].credit ? " · " + mazeScenes[stage].credit : ""}</span>` : mode === "jump" ? `<span class="rhythm-song">${esc(current.scene)}</span>` : ""}</div>${ghost(profile.team)}</div><p class="arcade-instruction">${playMode === "journey" ? "Journey · Game " + (profile.journeyStep + 1) + "/20. " : ""}${tips[mode]}${mode === "rhythm" ? ` ${difficulty === 0 ? "Chill: two arrows, fewer notes, forgiving timing. " : ""}Level ${stage + 1}: ${current.keys.map((k) => MidnightScore.arrows[k]).join(" ")}.` : ""}</p><div class="arcade-stats" id="arcade-stats"></div><div class="arcade-board-wrap"><canvas id="arcade-board" class="arcade-board ${mode === "maze" ? "maze-board" : "jump-board"}" width="${mode === "maze" ? 544 : 900}" height="${mode === "maze" ? 480 : 540}" tabindex="0" aria-label="${titles[mode]} game board. ${tips[mode]}"></canvas><div class="arcade-pause" id="arcade-pause"><h2>Gathering moonlight…</h2></div></div><div class="arcade-hint" id="arcade-hint" role="status" aria-live="polite">${hint}</div>${mode === "maze" ? '<div class="maze-controls" aria-label="Maze direction controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-arcade="pause" aria-label="Pause to plan your route">Ⅱ</button><button data-dir="right" aria-label="Move right">→</button><button data-dir="down" aria-label="Move down">↓</button></div>' : mode === "rhythm" ? `<div class="rhythm-controls" aria-label="Rhythm note pads">${Array.from({ length: current.laneCount }, (_, i) => `<button data-lane="${i}" style="--note:${["#B8D4FF", "#F28C28", "#B396E2", "#9BD14B"][i]}">${MidnightScore.arrows[current.keys[i]]}<small>${current.keys[i].replace("Arrow", "").toUpperCase()}</small></button>`).join("")}</div>` : '<button class="jump-control" data-arcade="jump">JUMP <small>SPACE / ↑</small></button>'}<p class="arcade-footer-note">Three hearts · spare lives save your glow · +1 life every 2,500 score</p></main></div>`;
     if (mode === "maze") {
       const shell = document.querySelector(".arcade-shell");
       shell.classList.add("maze-scene-shell");
@@ -244,7 +244,7 @@
         mode === "maze"
           ? mazeScenes[stage].asset
           : mode === "jump"
-            ? mazeScenes[1].asset
+            ? "/assets/arcade/candlelit-graveyard.webp"
             : "/assets/moonlit-woodland.webp",
       ),
       image("/assets/arcade/witch.webp"),
@@ -559,7 +559,7 @@
       i++
     ) {
       const x = i * 83;
-      const pulse = 0.65 + Math.sin(s.elapsed * 2 + i * 1.7) * 0.25;
+      const pulse = 0.65 + Math.sin(s.elapsed * 0.8 + i * 1.7) * 0.25;
       c.save();
       c.globalAlpha = pulse;
       c.fillStyle = i % 2 ? "#90d3ff" : "#e9b067";
@@ -751,7 +751,8 @@
       }
     }
     for (const note of s.notes) {
-      if (note.status !== "pending") continue;
+      if (note.status !== "pending" || now < MidnightMusic.clock().origin)
+        continue;
       const y =
         hitY - (note.time - now) * (125 + s.stage * 13 + s.difficulty * 12);
       if (y < 20 || y > hitY + 40) continue;
