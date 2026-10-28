@@ -552,32 +552,23 @@
     c.moveTo(s.cameraX, s.ground);
     c.lineTo(s.cameraX + w, s.ground);
     c.stroke();
-    // World-anchored petals and memorial lights reinforce forward travel.
+    // Decorative lights stay below the collision lane; only obstacles sit on it.
     for (
-      let i = Math.floor(s.cameraX / 55);
-      i < (s.cameraX + w) / 55 + 1;
+      let i = Math.floor(s.cameraX / 83);
+      i < (s.cameraX + w) / 83 + 1;
       i++
     ) {
-      const x = i * 55;
+      const x = i * 83;
+      const pulse = 0.65 + Math.sin(s.elapsed * 2 + i * 1.7) * 0.25;
       c.save();
-      c.translate(x, s.ground + 18 + ((i * 17) % 76));
-      c.rotate(i * 2.4);
-      c.fillStyle = i % 3 ? "#ef9a37" : "#ec74af";
-      c.globalAlpha = 0.7;
+      c.globalAlpha = pulse;
+      c.fillStyle = i % 2 ? "#90d3ff" : "#e9b067";
+      c.shadowColor = c.fillStyle;
+      c.shadowBlur = 9 + pulse * 5;
       c.beginPath();
-      c.ellipse(0, 0, 4, 2, 0, 0, Math.PI * 2);
+      c.arc(x, s.ground + 24 + ((i * 17) % 68), 3, 0, 7);
       c.fill();
       c.restore();
-    }
-    // Small offerings sit beside the path, above the playable ground.
-    for (
-      let i = Math.floor(s.cameraX / 230);
-      i < (s.cameraX + w) / 230 + 1;
-      i++
-    ) {
-      const x = i * 230 + 95;
-      marigold(c, x, s.ground - 14, 10);
-      candle(c, x + 23, s.ground - 8, 17, s.elapsed);
     }
     for (const o of s.obstacles) {
       const y = s.ground - o.height;
