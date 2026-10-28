@@ -19,7 +19,8 @@
     "test:faces-browser": "node scripts/faces-browser-check.cjs",
     "test:music-browser": "node scripts/music-browser-check.cjs",
     "test:music-transitions-browser": "node scripts/music-transition-browser-check.cjs",
-    "test:mobile-touch-browser": "node scripts/mobile-touch-browser-check.cjs"
+    "test:mobile-touch-browser": "node scripts/mobile-touch-browser-check.cjs",
+    "test:spanish-browser": "node scripts/spanish-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

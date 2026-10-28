@@ -6,7 +6,7 @@
     race: "Tap Race",
   };
   const route = Array.from({ length: 5 }, (_, chapter) =>
-    ["rhythm", "jump", "maze", "race"].map((mode) => ({
+    ["jump", "rhythm", "maze", "race"].map((mode) => ({
       mode,
       stage: mode === "race" ? Math.min(3, chapter) : chapter,
       chapter,

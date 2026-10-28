@@ -18,7 +18,7 @@ const assert = require("node:assert/strict");
             chosen: true,
             name: "Journey ghost",
             mute: true,
-            journeyStep: 0,
+            journeyStep: 1,
           }),
         );
     });
@@ -49,18 +49,24 @@ const assert = require("node:assert/strict");
       await p.evaluate(() => MidnightArcadeUI.getState().status),
       "won",
     );
-    assert.equal(await p.evaluate(() => profile.journeyStep), 1);
+    assert.equal(await p.evaluate(() => profile.journeyStep), 2);
     await p.locator("[data-arcade-result=journey]").click();
     assert.equal(await p.locator("#nickname").count(), 0);
-    assert.match(await p.locator(".journey-order").innerText(), /Moonlit Leap/);
+    assert.match(
+      await p.locator(".journey-order").innerText(),
+      /Ghostlight Maze/,
+    );
     assert.equal(await p.locator("input[name=stage]").inputValue(), "0");
     await p.reload();
     await p.locator("[data-action=solo]").click();
-    assert.match(await p.locator(".journey-order").innerText(), /Moonlit Leap/);
-    assert.equal(await p.evaluate(() => profile.journeyStep), 1);
+    assert.match(
+      await p.locator(".journey-order").innerText(),
+      /Ghostlight Maze/,
+    );
+    assert.equal(await p.evaluate(() => profile.journeyStep), 2);
     assert.deepEqual(errors, []);
     console.log(
-      "Journey Melody → Jump, saved progress, nickname reused: passed",
+      "Journey Melody → Maze, saved progress, nickname reused: passed",
     );
   } finally {
     await b.close();
