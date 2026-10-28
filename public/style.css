@@ -3534,3 +3534,17 @@ footer {
     font-size: 8px;
   }
 }
+
+.hero h1 span {
+  font-size: 0.78em;
+}
+@media (max-width: 700px) {
+  .hero h1 span {
+    font-size: clamp(32px, 10.5vw, 58px);
+  }
+  .brand {
+    font-size: clamp(16px, 4.8vw, 23px);
+    gap: 6px;
+  }
+  .header-right { gap: 8px; }
+}

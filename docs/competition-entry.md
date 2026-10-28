@@ -1,8 +1,8 @@
-# Midnight Zombies — competition entry draft
+# Midnight Ghost Arcade — competition entry draft
 
 ## Project title
 
-Midnight Zombies
+Midnight Ghost Arcade
 
 ## Project URL
 
@@ -14,7 +14,7 @@ Use `midnight-zombies-cover.png` in this directory.
 
 ## Project description
 
-Midnight Zombies is a creepy-cute Halloween arcade built with OpenAI, combining jumping, maze exploration, and multiplayer tap racing. Play as Mach the ghost falcon, Slink the ghost serpent, Ember the ghost wolf, or Misty the tiny ghost bat in an enchanted bioluminescent woodland. Twelve one-tap challenge types keep each run varied. Fast, correct taps move you forward; wrong taps make your ghost flicker out for a moment. Earn candy boosts and mischievous items, and race as Mach the falcon, Slink the serpent, Ember the wolf, or Misty the bat.
+Midnight Ghost Arcade is a creepy-cute Halloween arcade built with OpenAI, combining jumping, maze exploration, and multiplayer tap racing. Play as Mach the ghost falcon, Slink the ghost serpent, Ember the ghost wolf, or Misty the tiny ghost bat in an enchanted bioluminescent woodland. Twelve one-tap challenge types keep each run varied. Fast, correct taps move you forward; wrong taps make your ghost flicker out for a moment. Earn candy boosts and mischievous items, and race as Mach the falcon, Slink the serpent, Ember the wolf, or Misty the bat.
 
 Start with the one-button Moonlit Leap course, then explore Ghostlight Maze, or play original tap races against personality-driven rivals. After a win, increase the difficulty of that style or advance and switch styles. Share a four-letter room code with friends for a live multiplayer tap race on their own phones. The server keeps challenges, positions, items, and the winner synchronized. The original tap-race campaign progresses through four unlockable courses: Spiral-Hill Graveyard, Crooked Pumpkin Patch, Leaning Haunted House, and Monster Bash Bell Tower. The first level takes only five easy taps; later levels introduce more challenge types, faster timers, and tougher rivals. Completed solo challenges advance automatically after a short celebration. Choose your ghost before racing. Earn medals, coins, and cosmetic rewards saved in your browser. Solo starts with three hearts; buy spare lives with earned coins or receive one automatically every 500 score points. A compact live leaderboard stays visible during races. Nicknames are entered once across styles; winners make one gentle color-trailing swirl and settle proudly while other podium characters stay still.
 

@@ -496,7 +496,7 @@ const heartbeat = setInterval(() => {
   }
 }, 15000);
 server.listen(process.env.PORT || 3000, "0.0.0.0", () =>
-  console.log(`Midnight Zombies listening on ${server.address().port}`),
+  console.log(`Midnight Ghost Arcade listening on ${server.address().port}`),
 );
 function close() {
   clearInterval(tick);

@@ -1,4 +1,4 @@
-# Midnight Zombies
+# Midnight Ghost Arcade
 
 A moonlit Halloween arcade with four play styles and four original flowing ghost characters. Play Solo starts with the one-button Moonlit Leap course. Ghostlight Maze adds candy collection and roaming creatures. The original tap races support solo rivals and private multiplayer rooms with up to six humans.
 
