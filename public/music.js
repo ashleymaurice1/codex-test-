@@ -54,7 +54,11 @@
     const promise = (async () => {
       const r = await fetch(tracks[stage].file);
       if (!r.ok) throw Error("Music recording could not load");
-      const decoder = new OfflineAudioContext(2, 1, 22050),
+      const decoder = new OfflineAudioContext(
+          2,
+          1,
+          tracks[stage].sampleRate || 22050,
+        ),
         buffer = await decoder.decodeAudioData(await r.arrayBuffer());
       buffers.set(stage, buffer);
       while (buffers.size > 2) {
@@ -169,6 +173,25 @@
     if (ctx && !muted && !transportPaused) ctx.resume().catch(() => {});
     updateVolume();
   }
+  function playbackTime() {
+    if (!ctx) return 0;
+    if (ctx.state === "running" && ctx.getOutputTimestamp) {
+      try {
+        const stamp = ctx.getOutputTimestamp();
+        const heard =
+          stamp.contextTime +
+          (performance.now() - stamp.performanceTime) / 1000;
+        if (
+          stamp.contextTime > 0 &&
+          stamp.performanceTime > 0 &&
+          heard <= ctx.currentTime + 0.01 &&
+          heard >= ctx.currentTime - 0.5
+        )
+          return Math.min(heard, ctx.currentTime);
+      } catch {}
+    }
+    return ctx.currentTime;
+  }
   root.MidnightMusic = {
     start,
     setMuted,
@@ -218,7 +241,7 @@
       else ctx.resume().catch(() => {});
     },
     clock: () => ({
-      time: ctx?.currentTime || 0,
+      time: playbackTime(),
       origin,
       beat: tracks[playingStage].beat,
       running: ctx?.state === "running",
@@ -235,6 +258,7 @@
       state: ctx?.state || "not-started",
       tempo: tracks[playingStage].tempo,
       themeSeconds: tracks[playingStage].duration,
+      decodedSampleRate: buffers.get(playingStage)?.sampleRate,
       transportPaused,
     }),
     async renderPreview(stage = 0, seconds = 12) {

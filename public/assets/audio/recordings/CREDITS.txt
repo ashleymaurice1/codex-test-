@@ -1,4 +1,12 @@
-Original rhythm-game recordings:
+Creator-supplied recording:
+La Mesa Puesta Para Ti — supplied by the creator for Midnight Ghost Arcade.
+Source: uploaded 48 kHz stereo WAV, 89.96 seconds. The original WAV is retained privately.
+Game copy: 192 kbps stereo MP3, 44.1 kHz, loudness normalized to -18 LUFS.
+Played in full; no pitch/speed change or synthesized layers added.
+Separate audio-derived beat charts for Chill, Spooky and Fiendish.
+This recording is not part of the FreePD/CC0 collection.
+
+Original sampled-instrument recordings (including archived versions):
 Ghostlight Parade — original piano-and-strings Halloween theme, 108 BPM
 Revoiced with grand piano, violin, bowed/pizzicato strings, cello and light celesta.
 Midnight Spell — original witchy house groove, 122 BPM

@@ -1,4 +1,4 @@
-/* Full instrumental recordings and their detected beat charts share the playback clock. */
+/* Full recordings and their synchronized charts share the playback clock. */
 (function (root) {
   const recordings =
     typeof module !== "undefined" && module.exports
@@ -21,6 +21,8 @@
     return songs[Math.max(0, Math.min(4, Math.floor(stage) || 0))];
   }
   function lanesFor(stage, difficulty = 0) {
+    if (getSong(stage).charts && difficulty === 2)
+      return ["ArrowLeft", "ArrowDown", "ArrowUp", "ArrowRight"];
     return difficulty === 0
       ? ["ArrowLeft", "ArrowRight"]
       : stage < 3

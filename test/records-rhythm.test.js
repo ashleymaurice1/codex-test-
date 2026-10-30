@@ -6,8 +6,8 @@ const R = require("../public/records");
 test("recording beat times and rhythm notes share the same clock, and accurate playing wins", () => {
   const s = A.createRhythm();
   A.prepareRhythm(s, { time: 0, origin: 2 });
-  const expected = S.getSong(0).chart.filter((n) =>
-    s.notes.some((note) => note.time === 2 + n.time),
+  const expected = (S.getSong(0).charts?.[0] || S.getSong(0).chart).filter(
+    (n) => s.notes.some((note) => note.time === 2 + n.time),
   );
   assert.equal(s.notes.length, expected.length);
   for (const [i, n] of s.notes.entries()) {
@@ -18,7 +18,7 @@ test("recording beat times and rhythm notes share the same clock, and accurate p
   A.stepRhythm(s, s.endAudio);
   assert.equal(s.status, "won");
   assert.equal(s.hits, s.target);
-  assert.ok(S.duration > 120);
+  assert.ok(S.duration > 60);
 });
 test("rhythm pauses and missed notes cannot win", () => {
   const s = A.createRhythm();
@@ -65,7 +65,7 @@ test("five full recordings each have valid beat charts and are winnable on their
     const song = S.getSong(stage),
       s = A.createRhythm(stage);
     A.prepareRhythm(s, { time: 0, origin: 2 });
-    assert.ok(song.duration > 120);
+    assert.ok(song.duration > 60);
     assert.ok(
       fs.statSync(path.join(__dirname, "../public", song.file)).size > 1000000,
     );
@@ -78,7 +78,7 @@ test("five full recordings each have valid beat charts and are winnable on their
           (i === 0 || n.time > song.chart[i - 1].time),
       ),
     );
-    const expected = song.chart.filter((n) =>
+    const expected = (song.charts?.[0] || song.chart).filter((n) =>
       s.notes.some((note) => note.time === 2 + n.time),
     );
     assert.equal(s.target, expected.length);
@@ -164,17 +164,52 @@ test("every song uses every active arrow, with balanced counts and no long singl
       // Balancing changes only the arrow assignment, never the musical cue times.
       let last = -Infinity;
       const gap = difficulty === 0 ? 1.5 : difficulty === 1 ? 0.75 : 0.45;
-      const times = require("../public/score")
-        .getSong(stage)
-        .chart.filter((n) => {
-          if (n.time - last < gap) return false;
-          last = n.time;
-          return true;
-        })
-        .map((n) => n.time + 3);
+      const song = S.getSong(stage);
+      const times = song.charts?.[difficulty]
+        ? song.charts[difficulty].map((n) => n.time + 3)
+        : song.chart
+            .filter((n) => {
+              if (n.time - last < gap) return false;
+              last = n.time;
+              return true;
+            })
+            .map((n) => n.time + 3);
       assert.deepEqual(
         s.notes.map((n) => n.time),
         times,
       );
     }
+});
+
+test("creator song uses its full recording and separate audio-derived difficulty charts", () => {
+  const song = S.getSong(0);
+  assert.equal(song.title, "La Mesa Puesta Para Ti");
+  assert.equal(song.creatorSupplied, true);
+  assert.equal(song.sampleRate, 44100);
+  assert.ok(song.playSeconds > 89 && song.playSeconds < 91);
+  const counts = [];
+  for (let difficulty = 0; difficulty < 3; difficulty++) {
+    const state = A.createRhythm(0, {}, difficulty);
+    A.prepareRhythm(state, { time: 0, origin: 2 });
+    const chart = song.charts[difficulty];
+    counts.push(chart.length);
+    assert.equal(state.target, chart.length);
+    assert.deepEqual(
+      state.notes.map((n) => n.time),
+      chart.map((n) => n.time + 2),
+    );
+    assert.ok(
+      chart.every(
+        (n) => n.time >= 2.5 && n.time < song.playSeconds - 1 && n.strength > 0,
+      ),
+    );
+    for (const note of state.notes) {
+      A.stepRhythm(state, note.time);
+      assert.equal(A.hitRhythm(state, note.lane, note.time), true);
+    }
+    A.stepRhythm(state, state.endAudio);
+    assert.equal(state.status, "won");
+  }
+  assert.ok(counts[0] < counts[1] && counts[1] < counts[2]);
+  assert.equal(A.createRhythm(0, {}, 2).laneCount, 4);
 });

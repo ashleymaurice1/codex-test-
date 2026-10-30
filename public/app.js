@@ -432,7 +432,7 @@ function arcadeMenu(
       jump: "Run forward through the woods and jump over obstacles. Space or the Jump button.",
       maze: "Collect the candy, avoid woodland creatures, and enter the glowing house. Arrows / WASD or swipe.",
       rhythm:
-        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five different Halloween instrumentals.",
+        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five different Halloween songs.",
     }[mode];
   modal(
     `<div class="play-mode-label">${playMode === "quick" ? "QUICK PLAY · ONE STANDALONE GAME" : "ADVENTURE · SERIES OF LEVELS"}</div><h2>${title}</h2><p>${description}</p>${playMode === "journey" ? journeyProgress() : ""}${

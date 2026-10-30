@@ -602,11 +602,13 @@
     const song = SCORE.getSong(s.stage);
     const gap = s.difficulty === 0 ? 1.5 : s.difficulty === 1 ? 0.75 : 0.45;
     let previous = -Infinity;
-    const chart = song.chart.filter((n) => {
-      if (n.time - previous < gap) return false;
-      previous = n.time;
-      return true;
-    });
+    const chart =
+      song.charts?.[s.difficulty] ||
+      song.chart.filter((n) => {
+        if (n.time - previous < gap) return false;
+        previous = n.time;
+        return true;
+      });
     const low = Math.min(...chart.map((n) => n.tone)),
       high = Math.max(...chart.map((n) => n.tone)),
       counts = Array(s.laneCount).fill(0);

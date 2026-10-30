@@ -9,6 +9,9 @@ source = p.read_text(); start = source.index('{"songs"'); end = source.index(';i
 library = json.loads(source[start:end])
 authored = json.loads(pathlib.Path('scripts/original-note-charts.json').read_text())
 for song in library['songs']:
+    if song.get('charts'):
+        print(song['title'], 'preserved difficulty-specific recording charts')
+        continue
     if song['slug'] in authored:
         candidates = [n for n in authored[song['slug']] if 2.5 <= n['time'] < song['playSeconds']-.6]
         chart=[]

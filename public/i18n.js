@@ -144,7 +144,7 @@ Collect the candy, avoid woodland creatures, and enter the glowing house. Arrows
 Tap the JUMP button to clear each obstacle. Keyboard: Space / ↑.|Toca SALTAR para superar cada obstáculo. Teclado: Espacio / ↑.
 Run forward through the woods and jump over obstacles. Space or the Jump button.|Avanza por el bosque y salta los obstáculos. Usa Espacio o el botón SALTAR.
 Hit the matching glowing notes on the line. Use the matching arrow keys (← ↓ ↑ →). Touch arrows work on phones too.|Toca cada nota cuando llegue a la línea. Usa las flechas correspondientes (← ↓ ↑ →). En el teléfono, toca los botones de flecha.
-Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five different Halloween instrumentals.|Toca cada nota en la línea al ritmo de la melodía. Usa las flechas (← ↓ ↑ →) o toca los botones en el teléfono. Cinco niveles y cinco temas de Halloween.
+Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five different Halloween songs.|Toca cada nota en la línea al ritmo de la melodía. Usa las flechas (← ↓ ↑ →) o toca los botones en el teléfono. Cinco niveles y cinco temas de Halloween.
 Chill: two arrows, fewer notes, forgiving timing.|Tranquilo: dos flechas, menos notas y más margen de tiempo.
 JUMP|SALTAR
 SPACE / ↑|ESPACIO / ↑
@@ -417,6 +417,12 @@ UP|ARRIBA
 DOWN|ABAJO
 `;
   const extra = `
+Midnight Ghost Arcade uses these finished recordings from the game soundtrack:|Midnight Ghost Arcade utiliza estas grabaciones de su banda sonora:
+original song supplied by the game creator|canción original proporcionada para el juego
+“La Mesa Puesta Para Ti” is the creator’s supplied recording, used as a complete song. It is separate from the FreePD collection and the sampled-instrument arrangements below.|“La Mesa Puesta Para Ti” es una grabación original proporcionada para el juego y se reproduce completa. Es independiente de la colección FreePD y de los arreglos instrumentales que aparecen abajo.
+
+Original song for Midnight Ghost Arcade|Canción original para Midnight Ghost Arcade
+
 Read the target each round. The colors can change!|Lee el objetivo de cada ronda. ¡Los colores pueden cambiar!
 
 Difficulty changes reaction time, race length and rival speed. Each race mixes a fresh set of challenges.|La dificultad cambia el tiempo para reaccionar, la duración y la velocidad de los rivales. Cada carrera mezcla retos nuevos.
@@ -584,7 +590,7 @@ license text|texto de la licencia
 permits private and commercial music creation.|permite crear música para uso privado y comercial.
 Midnight Ghost Arcade uses these finished instrumental recordings from the game soundtrack:|Midnight Ghost Arcade utiliza estas grabaciones instrumentales de su banda sonora:
 A Mexican-inspired instrumental selected for the Día de los Muertos mood; not a traditional ceremonial recording.|Un tema instrumental de inspiración mexicana elegido para el ambiente de Día de los Muertos; no es una grabación ceremonial tradicional.
-The four originals were arranged for Midnight Ghost Arcade and rendered with sampled virtual instruments from GeneralUser GS by S. Christian Collins. They use original melodies, without samples or melodies from the reference film songs.|Los cuatro temas originales se crearon para Midnight Ghost Arcade con instrumentos virtuales de GeneralUser GS, de S. Christian Collins. Sus melodías son originales y no contienen muestras ni melodías de las canciones de referencia.
+The three instrumental originals were arranged for Midnight Ghost Arcade and rendered with sampled virtual instruments from GeneralUser GS by S. Christian Collins. They use original melodies, without samples or melodies from the reference film songs.|Los tres temas instrumentales originales se crearon para Midnight Ghost Arcade con instrumentos virtuales de GeneralUser GS, de S. Christian Collins. Sus melodías son originales y no contienen muestras ni melodías de las canciones de referencia.
 The game copies use gentle loudness normalization and MP3 re-encoding. Rhythm charts use original melody cue times or measured audible attacks; the music itself is played as a full recording rather than synthesized note loops.|Las grabaciones del juego tienen el volumen equilibrado y están en formato MP3. Las notas siguen los tiempos de las melodías originales o los ataques audibles de las grabaciones. La música se reproduce como pistas completas.
 `;
   const exactCatalog = new Map(

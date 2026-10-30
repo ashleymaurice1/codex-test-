@@ -42,7 +42,7 @@ const assert = require("node:assert/strict");
       return out;
     });
     for (const r of rendered) {
-      assert.ok(r.duration > 120);
+      assert.ok(r.duration > 60);
       assert.ok(r.artist.length > 3);
       assert.ok(r.peak < 0.6 && r.peak > 0.02);
       assert.ok(r.rms > 0.002 && r.rms < 0.15);
@@ -51,7 +51,7 @@ const assert = require("node:assert/strict");
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({
-        fullInstrumentalRecordings: rendered,
+        fullSongRecordings: rendered,
         noClipping: true,
         noShortExactRepeat: true,
         errors,
