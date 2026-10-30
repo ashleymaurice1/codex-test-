@@ -18,3 +18,9 @@ Cempasúchil en la Puerta — creator-supplied MP3, 211.2 seconds.
 Game copy: full song, 192 kbps stereo MP3 at 44.1 kHz, -18 LUFS.
 Audio-derived Chill / Spooky / Fiendish charts: 86 / 170 / 364 notes.
 Not designated CC0 or public domain.
+
+Restored background recordings (FreePD / CC0):
+Creepy Hallow — Alexander Nakarada; Witch Waltz — Kevin MacLeod (homepage).
+Del Rio Bravo — Kevin MacLeod (jumping game).
+Source: https://github.com/SoundSafari/CC0-1.0-Music/tree/main/freepd.com
+Creator-supplied songs are used in Melody only.

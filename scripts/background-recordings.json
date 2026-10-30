@@ -1,0 +1,27 @@
+{
+  "homeSongs": [
+    {
+      "slug": "creepy-hallow",
+      "title": "Creepy Hallow",
+      "artist": "Alexander Nakarada",
+      "duration": 120.085,
+      "file": "/assets/audio/recordings/creepy-hallow.mp3"
+    },
+    {
+      "slug": "witch-waltz",
+      "title": "Witch Waltz",
+      "artist": "Kevin MacLeod",
+      "duration": 185.704,
+      "file": "/assets/audio/recordings/witch-waltz.mp3"
+    }
+  ],
+  "jumpSongs": [
+    {
+      "slug": "del-rio-bravo",
+      "title": "Del Rio Bravo",
+      "artist": "Kevin MacLeod",
+      "duration": 204.095,
+      "file": "/assets/audio/recordings/del-rio-bravo.mp3"
+    }
+  ]
+}

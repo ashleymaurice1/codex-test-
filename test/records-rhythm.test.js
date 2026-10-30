@@ -94,11 +94,13 @@ test("the soundtrack has valid beat charts across five journey chapters and are 
   }
 });
 
-test("only selected creator recordings are used throughout the arcade", () => {
+test("creator songs stay separate from the restored homepage and jumping recordings", () => {
   assert.equal(S.songs.length, 4);
+  const melody = new Set(S.songs.map((song) => song.file));
   for (const song of [...S.homeSongs, ...S.jumpSongs])
-    assert.ok(S.songs.some((track) => track.file === song.file));
-  assert.equal(S.getSong(4).file, S.getSong(3).file);
+    assert.ok(!melody.has(song.file));
+  assert.equal(S.homeSongs[0].title, "Creepy Hallow");
+  assert.equal(S.jumpSongs[0].title, "Del Rio Bravo");
 });
 
 test("Chill uses two arrows, sparse audible notes and forgives isolated misses in every song", () => {

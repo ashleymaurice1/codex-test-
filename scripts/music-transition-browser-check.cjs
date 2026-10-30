@@ -25,16 +25,16 @@ const assert = require("node:assert/strict");
     );
     await p.locator("#home-music").selectOption("0");
     await p.waitForFunction(
-      () => MidnightMusic.status().source === "Four Strange Footsteps",
+      () => MidnightMusic.status().source === "Creepy Hallow",
     );
     await p.locator("#music-volume").evaluate((e) => {
       e.value = 20;
       e.dispatchEvent(new Event("input", { bubbles: true }));
     });
     assert.equal(await p.evaluate(() => profile.musicVolume), 0.2);
-    await p.locator("dialog .music-preview-toggle").click();
+    await p.locator("dialog .music-preview-toggle").first().click();
     await p.waitForFunction(() => MidnightMusic.status().previewing);
-    await p.locator("dialog .music-preview-toggle").click();
+    await p.locator("dialog .music-preview-toggle").first().click();
     await p.waitForFunction(() => !MidnightMusic.status().previewing);
     await p.getByRole("button", { name: "Close dialog" }).click();
     await p.locator("[data-action=quick]").click();
@@ -52,14 +52,14 @@ const assert = require("node:assert/strict");
     assert.equal(await p.evaluate(() => MidnightMusic.status().mode), "rhythm");
     await p.locator("[data-arcade=home]").click();
     await p.waitForFunction(
-      () => MidnightMusic.status().source === "Four Strange Footsteps",
+      () => MidnightMusic.status().source === "Creepy Hallow",
     );
     assert.ok(
       await p.evaluate(() => MidnightMusic.status().recordingOffset > 0),
     );
     for (const [mode, title] of [
-      ["jump", "Four Strange Footsteps"],
-      ["maze", "Four Strange Footsteps"],
+      ["jump", "Del Rio Bravo"],
+      ["maze", "Creepy Hallow"],
     ]) {
       await p.locator("[data-action=quick]").click();
       await p.locator(`dialog [data-value=${mode}]`).click();
@@ -72,7 +72,7 @@ const assert = require("node:assert/strict");
       assert.ok((await p.locator("audio[controls]").count()) === 0);
       await p.locator("[data-arcade=home]").click();
       await p.waitForFunction(
-        () => MidnightMusic.status().source === "Four Strange Footsteps",
+        () => MidnightMusic.status().source === "Creepy Hallow",
       );
     }
     await p.locator("[data-action=mute]").click();

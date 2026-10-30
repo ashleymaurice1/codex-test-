@@ -137,9 +137,7 @@
     const gameIndex =
       scene === "jump"
         ? jumpStart + (ambientStage % root.MidnightScore.jumpSongs.length)
-        : scene === "maze"
-          ? homeCount + (ambientStage % root.MidnightScore.songs.length)
-          : homeCount + (ambientStage % root.MidnightScore.songs.length);
+        : ambientStage % homeCount;
     try {
       const buffer = await loadTrack(gameIndex);
       if (
