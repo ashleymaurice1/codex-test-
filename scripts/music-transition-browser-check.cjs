@@ -39,9 +39,9 @@ const assert = require("node:assert/strict");
     await p.getByRole("button", { name: "Close dialog" }).click();
     await p.locator("[data-action=quick]").click();
     await p.locator("dialog [data-value=rhythm]").click();
-    assert.equal(await p.locator("dialog audio").count(), 4);
+    assert.equal(await p.locator("dialog audio").count(), 5);
     assert.equal(await p.locator("dialog audio[controls]").count(), 0);
-    assert.equal(await p.locator("dialog .music-preview-toggle").count(), 4);
+    assert.equal(await p.locator("dialog .music-preview-toggle").count(), 5);
     await p.locator('[data-song="0"]').click();
     await p.locator("#arcade-form button[type=submit]").click();
     await p.waitForFunction(() => MidnightArcadeUI.getState()?.ready);
@@ -82,7 +82,7 @@ const assert = require("node:assert/strict");
     assert.equal(await p.evaluate(() => profile.musicVolume), 0.2);
     assert.deepEqual(errors, []);
     console.log(
-      "Finished recordings, four Listen/Pause previews, background choice, saved volume/mute, beat-clock playback, and home recording resumes: passed",
+      "Finished recordings, five Listen/Pause previews, background choice, saved volume/mute, beat-clock playback, and home recording resumes: passed",
     );
   } finally {
     await b.close();

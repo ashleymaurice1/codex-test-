@@ -23,10 +23,10 @@ const assert = require("node:assert/strict");
         );
     });
     await p.goto("http://localhost:3000");
-    for (let stage = 0; stage < 4; stage++) {
+    for (let stage = 0; stage < 5; stage++) {
       await p.locator("[data-action=quick]").click();
       await p.locator("dialog [data-value=rhythm]").click();
-      assert.equal(await p.locator(".rhythm-song-list li").count(), 4);
+      assert.equal(await p.locator(".rhythm-song-list li").count(), 5);
       await p.locator(`[data-song="${stage}"]`).click();
       assert.equal(
         await p.locator("select[name=stage]").inputValue(),
@@ -38,10 +38,14 @@ const assert = require("node:assert/strict");
         song: MidnightArcadeUI.getState().song,
         source: MidnightMusic.status().source,
         keys: MidnightArcadeUI.getState().keys,
-        overflow: document.documentElement.scrollHeight > innerHeight + 2,
+        overflow: document.documentElement.scrollWidth > innerWidth + 2,
+        padsBottom: document
+          .querySelector(".rhythm-controls")
+          .getBoundingClientRect().bottom,
       }));
       assert.equal(info.song, info.source);
       assert.equal(info.overflow, false);
+      assert.ok(info.padsBottom < 582);
       assert.deepEqual(info.keys, ["ArrowLeft", "ArrowRight"]);
       songs.push(info.song);
       const until = Date.now() + 25000;
@@ -77,14 +81,14 @@ const assert = require("node:assert/strict");
       }
       await p.locator("[data-arcade=home]").click();
     }
-    assert.equal(new Set(songs).size, 4);
+    assert.equal(new Set(songs).size, 5);
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({
         selectedSoundtrack: songs,
         actualArrowKeyHits: true,
         twoBeginnerLanes: true,
-        noScroll: true,
+        controlsWithinReach: true,
         pauseFreezesSong: true,
         errors,
       }),

@@ -1,8 +1,8 @@
 # Current soundtrack
 
-The homepage retains Creepy Hallow / Witch Waltz; Jump retains Del Rio Bravo. The creator’s four uploads are exclusive to Melody.
+The homepage retains Creepy Hallow / Witch Waltz; Jump retains Del Rio Bravo. The creator’s five uploads play in Melody and the optional homepage playlist.
 
-Four Strange Footsteps, Halloween Belongs to Our Crew, Halloween Has Teeth and Cempasúchil en la Puerta are the four selected recordings for Melody only. Earlier recordings were removed at the creator’s request; historical soundtrack descriptions below refer to prior versions. The full 144.8-second song has audio-derived Chill / Spooky / Fiendish charts (80 / 159 / 317 notes). Rebuild metadata with `python scripts/analyze-recordings.py`; analyze the recording with `PYTHONPATH=/tmp/ghost-song-analysis python scripts/chart-four-strange-footsteps.py`.
+Four Strange Footsteps, Halloween Belongs to Our Crew, Halloween Has Teeth, Cempasúchil en la Puerta and Halloween’s Loose are the five selected recordings for Melody and the optional playlist. Earlier recordings were removed at the creator’s request; historical soundtrack descriptions below refer to prior versions. The full 144.8-second song has audio-derived Chill / Spooky / Fiendish charts (80 / 159 / 317 notes). Rebuild metadata with `python scripts/analyze-recordings.py`; analyze the recording with `PYTHONPATH=/tmp/ghost-song-analysis python scripts/chart-four-strange-footsteps.py`.
 
 # Midnight Ghost Arcade
 

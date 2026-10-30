@@ -59,8 +59,8 @@ test("jump advances through stationary obstacles and has a higher arc", () => {
 test("the soundtrack has valid beat charts across five journey chapters and are winnable on their recording clock", () => {
   const fs = require("node:fs"),
     path = require("node:path");
-  assert.equal(S.songs.length, 4);
-  assert.equal(new Set(S.songs.map((s) => s.file)).size, 4);
+  assert.equal(S.songs.length, 5);
+  assert.equal(new Set(S.songs.map((s) => s.file)).size, 5);
   for (let stage = 0; stage < 5; stage++) {
     const song = S.getSong(stage),
       s = A.createRhythm(stage);
@@ -95,7 +95,7 @@ test("the soundtrack has valid beat charts across five journey chapters and are 
 });
 
 test("creator songs stay separate from the restored homepage and jumping recordings", () => {
-  assert.equal(S.songs.length, 4);
+  assert.equal(S.songs.length, 5);
   const melody = new Set(S.songs.map((song) => song.file));
   for (const song of [...S.homeSongs, ...S.jumpSongs])
     assert.ok(!melody.has(song.file));

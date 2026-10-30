@@ -24,3 +24,8 @@ Creepy Hallow — Alexander Nakarada; Witch Waltz — Kevin MacLeod (homepage).
 Del Rio Bravo — Kevin MacLeod (jumping game).
 Source: https://github.com/SoundSafari/CC0-1.0-Music/tree/main/freepd.com
 Creator-supplied songs are used in Melody only.
+
+Halloween’s Loose — creator-supplied WAV, 150 seconds.
+Game copy: full song, 192 kbps stereo MP3 at 44.1 kHz, -18 LUFS.
+Audio-derived Chill / Spooky / Fiendish charts: 75 / 152 / 311 notes.
+Used in Melody and the optional playlist; not designated CC0 or public domain.

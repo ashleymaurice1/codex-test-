@@ -100,7 +100,7 @@ const assert = require("node:assert/strict");
     await p.waitForTimeout(200);
     assert.equal(
       await p.evaluate(
-        () => document.documentElement.scrollHeight > innerHeight + 2,
+        () => document.documentElement.scrollWidth > innerWidth + 2,
       ),
       false,
     );
