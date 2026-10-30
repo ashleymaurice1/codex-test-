@@ -125,7 +125,12 @@ const assert = require("node:assert/strict");
     const image = p.locator("img");
     await image.waitFor();
     assert.ok(
-      await image.evaluate((e) => e.complete && e.naturalWidth === 941),
+      await image.evaluate(
+        (e) =>
+          e.complete &&
+          e.naturalWidth > 500 &&
+          Math.abs(e.naturalHeight / e.naturalWidth - 16 / 9) < 0.1,
+      ),
     );
     assert.equal(await p.locator("a[download]").count(), 1);
     assert.deepEqual(errors, []);
