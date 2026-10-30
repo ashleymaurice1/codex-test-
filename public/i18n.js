@@ -5,6 +5,13 @@
     language = localStorage.getItem("midnight-language") === "es" ? "es" : "en";
   } catch {}
   const entries = `
+THE MIDNIGHT MIX|LA MEZCLA DE MEDIANOCHE
+The Midnight Mix|La mezcla de medianoche
+Listen to the playlist|Escucha la lista de canciones
+Four songs from Melody. Press play whenever the mood strikes.|Cuatro canciones de Melodía. Escúchalas cuando quieras.
+♫ Open playlist|♫ Abrir lista
+Choose a song to listen. The playlist continues in order; close it to return to the homepage tune.|Elige una canción. La lista continúa en orden; ciérrala para volver a la música del inicio.
+
 Home-page music and the jumping tune are separate from your Melody songs.|La música del inicio y del juego de saltos es distinta de tus canciones de Melodía.
 Your creator-supplied soundtrack plays throughout the arcade.|Tu banda sonora original suena en todo el arcade.
 Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Play the soundtrack with three difficulty settings.|Toca cada nota brillante en la línea al ritmo de la música. Usa las flechas (← ↓ ↑ →) o los botones del teléfono. Elige entre tres dificultades.

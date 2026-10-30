@@ -3596,3 +3596,32 @@ html[lang="es"] .jump-control small::after {
     font-size: 10px;
   }
 }
+
+.home-playlist {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 28px 0;
+  padding: 26px;
+  border: 1px solid #7ab9d43b;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #13263b, #192238);
+}
+.home-playlist h2 {
+  margin: 8px 0;
+}
+.home-playlist p {
+  color: #b4c8d8;
+  margin: 0;
+}
+.home-playlist .btn {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .home-playlist {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px;
+  }
+}
