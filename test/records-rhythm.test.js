@@ -59,8 +59,8 @@ test("jump advances through stationary obstacles and has a higher arc", () => {
 test("the soundtrack has valid beat charts across five journey chapters and are winnable on their recording clock", () => {
   const fs = require("node:fs"),
     path = require("node:path");
-  assert.equal(S.songs.length, 3);
-  assert.equal(new Set(S.songs.map((s) => s.file)).size, 3);
+  assert.equal(S.songs.length, 4);
+  assert.equal(new Set(S.songs.map((s) => s.file)).size, 4);
   for (let stage = 0; stage < 5; stage++) {
     const song = S.getSong(stage),
       s = A.createRhythm(stage);
@@ -95,10 +95,10 @@ test("the soundtrack has valid beat charts across five journey chapters and are 
 });
 
 test("only selected creator recordings are used throughout the arcade", () => {
-  assert.equal(S.songs.length, 3);
+  assert.equal(S.songs.length, 4);
   for (const song of [...S.homeSongs, ...S.jumpSongs])
     assert.ok(S.songs.some((track) => track.file === song.file));
-  assert.equal(S.getSong(4).file, S.getSong(2).file);
+  assert.equal(S.getSong(4).file, S.getSong(3).file);
 });
 
 test("Chill uses two arrows, sparse audible notes and forgives isolated misses in every song", () => {
