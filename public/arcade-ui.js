@@ -44,7 +44,7 @@
     jump: "Tap the JUMP button to clear each obstacle. Keyboard: Space / ↑.",
   };
   function stop() {
-    document.body.classList.remove("arcade-active");
+    document.body.classList.remove("arcade-active", "rhythm-active");
     countdownUntil = 0;
     if (frame) cancelAnimationFrame(frame);
     frame = null;
@@ -106,6 +106,7 @@
     if (mode === "rhythm") MidnightMusic.ensureClock(profile.mute);
     current.paused = true;
     document.body.classList.add("arcade-active");
+    document.body.classList.toggle("rhythm-active", mode === "rhythm");
     MidnightMusic.setScene(mode, stage);
     rewarded = false;
     lastDisplay = "";
@@ -175,7 +176,7 @@
     canvas.addEventListener(
       "pointerdown",
       (e) => {
-        e.preventDefault();
+        if (mode !== "rhythm") e.preventDefault();
         down = { x: e.clientX, y: e.clientY };
         if (mode === "jump") MidnightArcade.jump(current);
       },
@@ -856,7 +857,7 @@
   }
   function result() {
     if (!current || rewarded) return;
-    document.body.classList.remove("arcade-active");
+    document.body.classList.remove("arcade-active", "rhythm-active");
     rewarded = true;
     const s = current,
       won = s.status === "won";
