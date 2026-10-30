@@ -3627,15 +3627,18 @@ html[lang="es"] .jump-control small::after {
 }
 
 /* Leave room to scroll Melody pads above phone browser bars and the home indicator. */
-@media (max-width: 700px) and (pointer: coarse) {
+@media (max-width: 900px) {
   body.arcade-active.rhythm-active {
     height: auto;
     overflow-y: auto;
   }
   .rhythm-active .arcade-shell {
-    margin-bottom: calc(max(140px, 20dvh) + env(safe-area-inset-bottom, 0px));
+    height: calc(100svh - 100px);
+    min-height: 480px;
+    margin-bottom: calc(max(260px, 30dvh) + env(safe-area-inset-bottom, 0px));
   }
-  .rhythm-active .arcade-board {
+  .rhythm-active .arcade-board,
+  .rhythm-active .rhythm-controls button {
     touch-action: pan-y;
   }
 }
