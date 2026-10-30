@@ -294,7 +294,7 @@ function highScores(mode = "all") {
 }
 function musicOptions() {
   modal(
-    `<h2>Halloween music</h2><p>Home-page themes are separate from all five rhythm-game songs. Listen before choosing your background music.</p><label>HOME-PAGE MUSIC<select id="home-music">${MidnightScore.homeSongs.map((song, i) => `<option value="${i}" ${Number(profile.homeSong) === i ? "selected" : ""}>${song.title} · ${song.artist}</option>`).join("")}</select></label><button type="button" class="text-btn music-preview-toggle">▶ Listen</button><audio class="music-preview" hidden preload="none" controlslist="nodownload" src="${MidnightScore.getHomeSong(profile.homeSong).file}" aria-label="Preview background music"></audio><label for="music-volume">MUSIC VOLUME · <span id="music-volume-value">${Math.round(profile.musicVolume * 100)}%</span></label><input id="music-volume" type="range" min="0" max="100" value="${Math.round(profile.musicVolume * 100)}"><p class="muted">The music button in the top corner mutes all sound.</p><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`,
+    `<h2>Halloween music</h2><p>Your creator-supplied soundtrack plays throughout the arcade.</p><label>HOME-PAGE MUSIC<select id="home-music">${MidnightScore.homeSongs.map((song, i) => `<option value="${i}" ${Number(profile.homeSong) === i ? "selected" : ""}>${song.title} · ${song.artist}</option>`).join("")}</select></label><button type="button" class="text-btn music-preview-toggle">▶ Listen</button><audio class="music-preview" hidden preload="none" controlslist="nodownload" src="${MidnightScore.getHomeSong(profile.homeSong).file}" aria-label="Preview background music"></audio><label for="music-volume">MUSIC VOLUME · <span id="music-volume-value">${Math.round(profile.musicVolume * 100)}%</span></label><input id="music-volume" type="range" min="0" max="100" value="${Math.round(profile.musicVolume * 100)}"><p class="muted">The music button in the top corner mutes all sound.</p><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`,
   );
   $("#home-music").onchange = (e) => {
     profile.homeSong = Number(e.target.value);
@@ -413,7 +413,13 @@ function arcadeMenu(
   const stage =
     playMode === "quick"
       ? ["rhythm", "maze"].includes(mode)
-        ? Math.max(0, Math.min(4, level))
+        ? Math.max(
+            0,
+            Math.min(
+              mode === "rhythm" ? MidnightScore.songs.length - 1 : 4,
+              level,
+            ),
+          )
         : 0
       : Math.max(
           0,
@@ -432,7 +438,7 @@ function arcadeMenu(
       jump: "Run forward through the woods and jump over obstacles. Space or the Jump button.",
       maze: "Collect the candy, avoid woodland creatures, and enter the glowing house. Arrows / WASD or swipe.",
       rhythm:
-        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Five levels, five different Halloween songs.",
+        "Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Play the soundtrack with three difficulty settings.",
     }[mode];
   modal(
     `<div class="play-mode-label">${playMode === "quick" ? "QUICK PLAY · ONE STANDALONE GAME" : "ADVENTURE · SERIES OF LEVELS"}</div><h2>${title}</h2><p>${description}</p>${playMode === "journey" ? journeyProgress() : ""}${
@@ -452,7 +458,7 @@ function arcadeMenu(
               "",
             )}</ol><a class="music-credit-link" href="/music-credits.html" target="_blank" rel="noopener">Music credits</a>`
         : ""
-    }${mode === "maze" ? `<div class="maze-scene-preview"><img id="maze-scene-image" src="${MidnightArcadeUI.mazeScenes[stage].asset}" alt="${MidnightArcadeUI.mazeScenes[stage].name}"><b id="maze-scene-name">${MidnightArcadeUI.mazeScenes[stage].name}</b><p id="maze-scene-description">${MidnightArcadeUI.mazeScenes[stage].description || "Follow the woodland glow to the Monster Bash."}</p></div>` : ""}<form id="arcade-form">${characterPicker()}${nicknameField()}<div class="arcade-options">${playMode === "journey" ? `<input type="hidden" name="stage" value="${stage}">` : playMode === "quick" && !["rhythm", "maze"].includes(mode) ? '<input type="hidden" name="stage" value="0">' : `<label>${mode === "rhythm" ? "SONG" : "LEVEL"}<select name="stage">${Array.from({ length: playMode === "quick" ? 5 : Math.min(4, profile.arcadeUnlocked || 0) + 1 }, (_, i) => `<option value="${i}" ${stage === i ? "selected" : ""}>${mode === "rhythm" ? "Song" : "Level"} ${i + 1}${mode === "rhythm" ? " · " + MidnightScore.getSong(i).title : mode === "maze" ? " · " + MidnightArcadeUI.mazeScenes[i].name : ""}</option>`).join("")}</select></label>`}${mode === "jump" && playMode !== "journey" ? `<label>RUN LENGTH<select name="run-mode"><option value="classic" ${profile.jumpRunMode === "classic" ? "selected" : ""}>Classic · short course</option><option value="marathon" ${!profile.jumpRunMode || profile.jumpRunMode === "marathon" ? "selected" : ""}>Marathon · longer and faster</option><option value="endless" ${profile.jumpRunMode === "endless" ? "selected" : ""}>Endless · keep going</option></select></label>` : ""}<label>DIFFICULTY<select name="difficulty"><option value="0">Chill · start easy</option><option value="1">Spooky · a little faster</option><option value="2">Fiendish · a real challenge</option></select></label></div><div class="actions"><button class="btn" type="submit">${playMode === "quick" ? (mode === "rhythm" ? "Play selected song" : "Play this game") : "Start this adventure level"} →</button></div></form>`,
+    }${mode === "maze" ? `<div class="maze-scene-preview"><img id="maze-scene-image" src="${MidnightArcadeUI.mazeScenes[stage].asset}" alt="${MidnightArcadeUI.mazeScenes[stage].name}"><b id="maze-scene-name">${MidnightArcadeUI.mazeScenes[stage].name}</b><p id="maze-scene-description">${MidnightArcadeUI.mazeScenes[stage].description || "Follow the woodland glow to the Monster Bash."}</p></div>` : ""}<form id="arcade-form">${characterPicker()}${nicknameField()}<div class="arcade-options">${playMode === "journey" ? `<input type="hidden" name="stage" value="${stage}">` : playMode === "quick" && !["rhythm", "maze"].includes(mode) ? '<input type="hidden" name="stage" value="0">' : `<label>${mode === "rhythm" ? "SONG" : "LEVEL"}<select name="stage">${Array.from({ length: playMode === "quick" ? (mode === "rhythm" ? MidnightScore.songs.length : 5) : Math.min(4, profile.arcadeUnlocked || 0) + 1 }, (_, i) => `<option value="${i}" ${stage === i ? "selected" : ""}>${mode === "rhythm" ? "Song" : "Level"} ${i + 1}${mode === "rhythm" ? " · " + MidnightScore.getSong(i).title : mode === "maze" ? " · " + MidnightArcadeUI.mazeScenes[i].name : ""}</option>`).join("")}</select></label>`}${mode === "jump" && playMode !== "journey" ? `<label>RUN LENGTH<select name="run-mode"><option value="classic" ${profile.jumpRunMode === "classic" ? "selected" : ""}>Classic · short course</option><option value="marathon" ${!profile.jumpRunMode || profile.jumpRunMode === "marathon" ? "selected" : ""}>Marathon · longer and faster</option><option value="endless" ${profile.jumpRunMode === "endless" ? "selected" : ""}>Endless · keep going</option></select></label>` : ""}<label>DIFFICULTY<select name="difficulty"><option value="0">Chill · start easy</option><option value="1">Spooky · a little faster</option><option value="2">Fiendish · a real challenge</option></select></label></div><div class="actions"><button class="btn" type="submit">${playMode === "quick" ? (mode === "rhythm" ? "Play selected song" : "Play this game") : "Start this adventure level"} →</button></div></form>`,
   );
   if (mode === "rhythm" && playMode === "quick") {
     const select = $("#arcade-form select[name=stage]");

@@ -29,14 +29,14 @@ const assert = require("node:assert/strict");
       await p.locator("dialog [data-value=rhythm]").tap();
       assert.match(
         await p.locator('[data-song="0"]').innerText(),
-        /La Mesa Puesta Para Ti/,
+        /Four Strange Footsteps/,
       );
       await p.locator("[name=difficulty]").selectOption(String(difficulty));
       await p.locator("#arcade-form button[type=submit]").tap();
       await p.waitForFunction(() => MidnightArcadeUI.getState()?.ready);
     }
     async function play(target) {
-      const deadline = Date.now() + 105000,
+      const deadline = Date.now() + 165000,
         seen = new Set();
       while (Date.now() < deadline) {
         const n = await p.evaluate((target) => {
@@ -110,7 +110,7 @@ const assert = require("node:assert/strict");
     assert.equal(await p.locator("[data-lane]").count(), 2);
     assert.equal(
       await p.evaluate(() => MidnightArcadeUI.getState().target),
-      36,
+      80,
     );
     const easyLanes = await play(1000);
     await p.waitForSelector(".arcade-result", { timeout: 15000 });
@@ -120,7 +120,9 @@ const assert = require("node:assert/strict");
     );
     assert.equal(await p.evaluate(() => MidnightArcadeUI.getState().misses), 0);
     assert.equal(easyLanes.size, 2);
-    assert.ok(await p.evaluate(() => MidnightArcadeUI.getState().elapsed > 89));
+    assert.ok(
+      await p.evaluate(() => MidnightArcadeUI.getState().elapsed > 144),
+    );
     await p.goto("http://localhost:3000/story.html");
     const image = p.locator("img");
     await image.waitFor();
@@ -135,7 +137,7 @@ const assert = require("node:assert/strict");
     assert.equal(await p.locator("a[download]").count(), 1);
     assert.deepEqual(errors, []);
     console.log(
-      "Creator song: 44.1kHz playback, four hard touch lanes, pause/resume clock, complete 90-second easy win with both lanes and zero misses; Story image loads in browser: passed.",
+      "Creator song: 44.1kHz playback, four hard touch lanes, pause/resume clock, complete 145-second easy win with both lanes and zero misses; Story image loads in browser: passed.",
     );
   } finally {
     await b.close();

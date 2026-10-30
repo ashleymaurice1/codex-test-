@@ -5,6 +5,10 @@
     language = localStorage.getItem("midnight-language") === "es" ? "es" : "en";
   } catch {}
   const entries = `
+Your creator-supplied soundtrack plays throughout the arcade.|Tu banda sonora original suena en todo el arcade.
+Hit each glowing note on the line, in time with the Halloween melody. Use the matching arrow keys (← ↓ ↑ →), or touch arrows on your phone. Play the soundtrack with three difficulty settings.|Toca cada nota brillante en la línea al ritmo de la música. Usa las flechas (← ↓ ↑ →) o los botones del teléfono. Elige entre tres dificultades.
+Creator-supplied Halloween song|Canción de Halloween proporcionada por la creadora
+
 A little spooky. A lot of silly.|Un poquito de miedo. Mucha diversión.
 A glowing woodland. Four little spirits.|Un bosque luminoso. Cuatro pequeños espíritus.
 Your kind of Halloween adventure.|Tu aventura de Halloween.

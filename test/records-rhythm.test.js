@@ -56,11 +56,11 @@ test("jump advances through stationary obstacles and has a higher arc", () => {
   assert.ok(s.player.x > x);
   assert.ok(peak > 165);
 });
-test("five full recordings each have valid beat charts and are winnable on their recording clock", () => {
+test("the soundtrack has valid beat charts across five journey chapters and are winnable on their recording clock", () => {
   const fs = require("node:fs"),
     path = require("node:path");
-  assert.equal(S.songs.length, 5);
-  assert.equal(new Set(S.songs.map((s) => s.file)).size, 5);
+  assert.equal(S.songs.length, 2);
+  assert.equal(new Set(S.songs.map((s) => s.file)).size, 2);
   for (let stage = 0; stage < 5; stage++) {
     const song = S.getSong(stage),
       s = A.createRhythm(stage);
@@ -94,26 +94,11 @@ test("five full recordings each have valid beat charts and are winnable on their
   }
 });
 
-test("home-page music and the five rhythm songs never share a recording", () => {
-  const fs = require("node:fs"),
-    path = require("node:path"),
-    crypto = require("node:crypto");
-  const fingerprint = (song) =>
-    crypto
-      .createHash("sha256")
-      .update(fs.readFileSync(path.join(__dirname, "../public", song.file)))
-      .digest("hex");
-  const home = new Set(S.homeSongs.map(fingerprint));
-  assert.ok(S.homeSongs.length >= 1);
-  assert.ok(S.songs.every((song) => !home.has(fingerprint(song))));
-  assert.equal(new Set(S.songs.map(fingerprint)).size, 5);
-  assert.ok(S.jumpSongs.length >= 1);
-  const rhythm = new Set(S.songs.map(fingerprint));
-  assert.ok(
-    S.jumpSongs.every(
-      (song) => !home.has(fingerprint(song)) && !rhythm.has(fingerprint(song)),
-    ),
-  );
+test("only selected creator recordings are used throughout the arcade", () => {
+  assert.equal(S.songs.length, 2);
+  for (const song of [...S.homeSongs, ...S.jumpSongs])
+    assert.ok(S.songs.some((track) => track.file === song.file));
+  assert.equal(S.getSong(4).file, S.getSong(1).file);
 });
 
 test("Chill uses two arrows, sparse audible notes and forgives isolated misses in every song", () => {
@@ -122,7 +107,10 @@ test("Chill uses two arrows, sparse audible notes and forgives isolated misses i
     A.prepareRhythm(s, { time: 0, origin: 1 });
     assert.equal(s.laneCount, 2);
     assert.ok(s.hitWindow >= 0.4);
-    assert.ok(s.notes.length >= 10 && s.notes.length <= 43);
+    assert.ok(
+      s.notes.length >= 10 &&
+        s.notes.length <= Math.ceil(S.getSong(stage).playSeconds / 1.5),
+    );
     assert.ok(s.notes[0].time >= 3.5);
     assert.ok(
       s.notes.every((n, i) => i === 0 || n.time - s.notes[i - 1].time >= 1.5),
@@ -183,10 +171,10 @@ test("every song uses every active arrow, with balanced counts and no long singl
 
 test("creator song uses its full recording and separate audio-derived difficulty charts", () => {
   const song = S.getSong(0);
-  assert.equal(song.title, "La Mesa Puesta Para Ti");
+  assert.equal(song.title, "Four Strange Footsteps");
   assert.equal(song.creatorSupplied, true);
   assert.equal(song.sampleRate, 44100);
-  assert.ok(song.playSeconds > 89 && song.playSeconds < 91);
+  assert.ok(song.playSeconds > 140 && song.playSeconds < 150);
   const counts = [];
   for (let difficulty = 0; difficulty < 3; difficulty++) {
     const state = A.createRhythm(0, {}, difficulty);

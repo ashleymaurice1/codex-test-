@@ -18,7 +18,7 @@ const assert = require("node:assert/strict");
     await p.goto("http://localhost:3000");
     const rendered = await p.evaluate(async () => {
       const out = [];
-      for (let stage = 0; stage < 5; stage++) {
+      for (let stage = 0; stage < MidnightScore.songs.length; stage++) {
         const b = await MidnightMusic.renderPreview(stage, 18),
           d = b.getChannelData(0);
         let peak = 0,

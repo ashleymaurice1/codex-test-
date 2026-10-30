@@ -18,7 +18,9 @@
     ];
   }
   function getSong(stage = 0) {
-    return songs[Math.max(0, Math.min(4, Math.floor(stage) || 0))];
+    return songs[
+      Math.max(0, Math.min(songs.length - 1, Math.floor(stage) || 0))
+    ];
   }
   function lanesFor(stage, difficulty = 0) {
     if (getSong(stage).charts && difficulty === 2)

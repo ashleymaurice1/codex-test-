@@ -1,3 +1,7 @@
+# Current soundtrack
+
+Four Strange Footsteps and Halloween Belongs to Our Crew are the two selected recordings throughout the arcade. Earlier recordings were removed at the creator’s request; historical soundtrack descriptions below refer to prior versions. The full 144.8-second song has audio-derived Chill / Spooky / Fiendish charts (80 / 159 / 317 notes). Rebuild metadata with `python scripts/analyze-recordings.py`; analyze the recording with `PYTHONPATH=/tmp/ghost-song-analysis python scripts/chart-four-strange-footsteps.py`.
+
 # Midnight Ghost Arcade
 
 A moonlit Halloween arcade with four play styles and four original flowing ghost characters. Play Solo starts with the one-button Moonlit Leap course. Ghostlight Maze adds candy collection and roaming creatures. The original tap races support solo rivals and private multiplayer rooms with up to six humans.

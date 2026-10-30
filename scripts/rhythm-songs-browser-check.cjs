@@ -23,10 +23,10 @@ const assert = require("node:assert/strict");
         );
     });
     await p.goto("http://localhost:3000");
-    for (let stage = 0; stage < 5; stage++) {
+    for (let stage = 0; stage < 2; stage++) {
       await p.locator("[data-action=quick]").click();
       await p.locator("dialog [data-value=rhythm]").click();
-      assert.equal(await p.locator(".rhythm-song-list li").count(), 5);
+      assert.equal(await p.locator(".rhythm-song-list li").count(), 2);
       await p.locator(`[data-song="${stage}"]`).click();
       assert.equal(
         await p.locator("select[name=stage]").inputValue(),
@@ -64,7 +64,7 @@ const assert = require("node:assert/strict");
         0,
       );
       assert.equal(await p.evaluate(() => scrollY), 0);
-      if (stage === 4) {
+      if (stage === 0) {
         await p.locator("[data-arcade=pause]").click();
         const before = await p.evaluate(() => MidnightMusic.clock().time);
         await p.waitForTimeout(350);
@@ -77,11 +77,11 @@ const assert = require("node:assert/strict");
       }
       await p.locator("[data-arcade=home]").click();
     }
-    assert.equal(new Set(songs).size, 5);
+    assert.equal(new Set(songs).size, 2);
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({
-        fiveDistinctSongs: songs,
+        selectedSoundtrack: songs,
         actualArrowKeyHits: true,
         twoBeginnerLanes: true,
         noScroll: true,

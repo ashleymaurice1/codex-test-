@@ -74,7 +74,13 @@
     return promise;
   }
   function ready(stage = 0) {
-    return loadTrack(homeCount + Math.max(0, Math.min(4, Number(stage) || 0)));
+    return loadTrack(
+      homeCount +
+        Math.max(
+          0,
+          Math.min(root.MidnightScore.songs.length - 1, Number(stage) || 0),
+        ),
+    );
   }
   function stopSource(fade = 0.35) {
     if (!source || !ctx) return;
@@ -132,8 +138,8 @@
       scene === "jump"
         ? jumpStart + (ambientStage % root.MidnightScore.jumpSongs.length)
         : scene === "maze"
-          ? homeCount + [3, 0, 4][ambientStage % 3]
-          : homeCount + ((ambientStage + 2) % 5);
+          ? homeCount + (ambientStage % root.MidnightScore.songs.length)
+          : homeCount + (ambientStage % root.MidnightScore.songs.length);
     try {
       const buffer = await loadTrack(gameIndex);
       if (
@@ -217,14 +223,22 @@
     },
     selectSong(stage = 0, lead = 0.1) {
       ensure();
-      const index = homeCount + Math.max(0, Math.min(4, Number(stage) || 0));
+      const index =
+        homeCount +
+        Math.max(
+          0,
+          Math.min(root.MidnightScore.songs.length - 1, Number(stage) || 0),
+        );
       const buffer = buffers.get(index);
       if (!buffer) throw Error("The music is still loading");
       ++generation;
       playBuffer(index, buffer, 0, lead);
     },
     setScene(value, stage = 0) {
-      stage = Math.max(0, Math.min(4, Number(stage) || 0));
+      stage = Math.max(
+        0,
+        Math.min(root.MidnightScore.songs.length - 1, Number(stage) || 0),
+      );
       if (value === scene && stage === ambientStage) return;
       rememberHome();
       ++generation;
