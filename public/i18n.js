@@ -417,6 +417,9 @@ UP|ARRIBA
 DOWN|ABAJO
 `;
   const extra = `
+Moonlit piano and strings|Piano y cuerdas bajo la luna
+original piano-and-strings Halloween theme|tema original de Halloween con piano y cuerdas
+
 Endless|Sin fin
 Marathon|Maratón
 the course is getting faster!|¡el recorrido va más rápido!

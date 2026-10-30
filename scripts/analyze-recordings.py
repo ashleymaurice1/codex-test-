@@ -2,12 +2,12 @@
 import json, pathlib, subprocess, sys
 folder=pathlib.Path('public/assets/audio/recordings')
 def track(slug,title,artist,**extra):
- path=folder/(slug+'.mp3')
+ path=folder/((slug+'-piano-strings' if slug=='ghostlight-parade' else slug)+'.mp3')
  duration=float(json.loads(subprocess.check_output(['ffprobe','-v','quiet','-show_format','-of','json',str(path)]))['format']['duration'])
- return dict(slug=slug,title=title,artist=artist,duration=round(duration,3),file='/assets/audio/recordings/'+slug+'.mp3',**extra)
+ return dict(slug=slug,title=title,artist=artist,duration=round(duration,3),file='/assets/audio/recordings/'+path.name,**extra)
 original='Midnight Ghost Arcade · Original'
 songs=[track(slug,title,artist,mood=mood,tempo=tempo,playSeconds=seconds,chart=[]) for slug,title,artist,mood,tempo,seconds in [
- ('ghostlight-parade','Ghostlight Parade',original,'Playful theatrical Halloween march',108,45),
+ ('ghostlight-parade','Ghostlight Parade',original,'Moonlit piano and strings',108,45),
  ('midnight-spell-house','Midnight Spell',original,'Witchy house groove',122,50),
  ('lantern-lullaby','Lantern Lullaby',original,'Gentle, eerie flute and choral lullaby',76,55),
  ('velvet-cathedral','Velvet Cathedral',original,'Dark gothic organ, strings and bells',96,60),

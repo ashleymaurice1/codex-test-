@@ -1,11 +1,12 @@
 """Original game arrangements, rendered offline with FluidSynth and GeneralUser GS.
-Usage: python scripts/compose-originals.py /path/to/GeneralUser-GS.sf2
+Usage: python scripts/compose-originals.py /path/to/GeneralUser-GS.sf2 [track-slug ...]
 Requires numpy, libfluidsynth and ffmpeg only for authoring. No runtime synthesis.
 No reference-song MIDI, melodies, recordings or vocal samples are used.
 """
 import ctypes as C, ctypes.util, json, pathlib, random, subprocess, sys, wave
 import numpy as np
 font=sys.argv[1]
+selected=set(sys.argv[2:])
 f=C.CDLL(ctypes.util.find_library('fluidsynth'))
 def api(name, result, *args):
  fn=getattr(f,name);fn.restype=result;fn.argtypes=list(args);return fn
@@ -26,13 +27,14 @@ rate=44100
 outdir=pathlib.Path('public/assets/audio/recordings')
 
 def render(slug,bpm,bars,style):
+ if selected and slug not in selected: return
  rng=random.Random(803 if style=='march' else 1901);events=[];beat=60/bpm
  def note(ch,p,t,d,v=65):
   at=max(0,t*beat+rng.uniform(-.007,.007));v=max(1,min(115,v+rng.randint(-4,4)))
   events.extend([(int(at*rate),1,ch,p,v),(int((at+d*beat)*rate),0,ch,p,0)])
  def chord(ch,notes,t,d,v):
   for p in notes:note(ch,p,t,d,v)
- programs=([71,45,48,70,8,60,68] if style=='march' else [73,46,48,70,8,52,11] if style=='lullaby' else [19,6,48,42,14,52,46] if style=='gothic' else [16,38,4,80,8,50,81])
+ programs=([0,45,48,42,8,48,40] if style=='march' else [73,46,48,70,8,52,11] if style=='lullaby' else [19,6,48,42,14,52,46] if style=='gothic' else [16,38,4,80,8,50,81])
  meter=3 if style=='lullaby' else 4
  for ch,p in enumerate(programs):
   alloff(synth,ch);prog(synth,ch,p);cc(synth,ch,10,[50,78,38,68,85,45,62][ch]);cc(synth,ch,7,100)
@@ -130,7 +132,7 @@ def render(slug,bpm,bars,style):
    write(synth,count,left.ctypes.data,0,1,right.ctypes.data,0,1)
    stereo=np.column_stack((left,right));wav.writeframes((np.clip(stereo,-1,1)*32767).astype('<i2').tobytes());position+=count
  for ch in list(range(7))+[9]:alloff(synth,ch)
- subprocess.run(['ffmpeg','-y','-v','error','-i',str(path),'-af',f'afade=t=in:d=1.2,afade=t=out:st={duration-5}:d=5,loudnorm=I=-20:TP=-3:LRA=9','-c:a','libmp3lame','-b:a','128k',str(outdir/(slug+'.mp3'))],check=True)
+ subprocess.run(['ffmpeg','-y','-v','error','-i',str(path),'-af',f'afade=t=in:d=1.2,afade=t=out:st={duration-5}:d=5,loudnorm=I=-20:TP=-3:LRA=9','-c:a','libmp3lame','-b:a','128k',str(outdir/((slug+'-piano-strings' if style=='march' else slug)+'.mp3'))],check=True)
  lead_channels={'march':{0,6},'house':{2,3},'lullaby':{0,6},'gothic':{6}}[style]
  lead=[{'time':round(e[0]/rate,4),'tone':round(((e[3]-48)%24)/24,3)} for e in events if e[1]==1 and e[2] in lead_channels and e[0]/rate>=2.5]
  charts_path=pathlib.Path('scripts/original-note-charts.json')
