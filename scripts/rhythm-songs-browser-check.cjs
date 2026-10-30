@@ -23,10 +23,15 @@ const assert = require("node:assert/strict");
         );
     });
     await p.goto("http://localhost:3000");
-    for (let stage = 0; stage < 5; stage++) {
+    const songCount = await p.evaluate(() => MidnightScore.songs.length);
+    const stages =
+      process.env.RHYTHM_STAGE === undefined
+        ? Array.from({ length: songCount }, (_, i) => i)
+        : [Number(process.env.RHYTHM_STAGE)];
+    for (const stage of stages) {
       await p.locator("[data-action=quick]").click();
       await p.locator("dialog [data-value=rhythm]").click();
-      assert.equal(await p.locator(".rhythm-song-list li").count(), 5);
+      assert.equal(await p.locator(".rhythm-song-list li").count(), songCount);
       await p.locator(`[data-song="${stage}"]`).click();
       assert.equal(
         await p.locator("select[name=stage]").inputValue(),
@@ -81,7 +86,7 @@ const assert = require("node:assert/strict");
       }
       await p.locator("[data-arcade=home]").click();
     }
-    assert.equal(new Set(songs).size, 5);
+    assert.equal(new Set(songs).size, stages.length);
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({

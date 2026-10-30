@@ -8,7 +8,7 @@
 THE MIDNIGHT MIX|LA MEZCLA DE MEDIANOCHE
 The Midnight Mix|La mezcla de medianoche
 Listen to the playlist|Escucha la lista de canciones
-Five songs from Melody. Press play whenever the mood strikes.|Cinco canciones de Melodía. Escúchalas cuando quieras.
+Six songs from Melody. Press play whenever the mood strikes.|Seis canciones de Melodía. Escúchalas cuando quieras.
 ♫ Open playlist|♫ Abrir lista
 Choose a song to listen. The playlist continues in order; close it to return to the homepage tune.|Elige una canción. La lista continúa en orden; ciérrala para volver a la música del inicio.
 

@@ -59,9 +59,9 @@ test("jump advances through stationary obstacles and has a higher arc", () => {
 test("the soundtrack has valid beat charts across five journey chapters and are winnable on their recording clock", () => {
   const fs = require("node:fs"),
     path = require("node:path");
-  assert.equal(S.songs.length, 5);
-  assert.equal(new Set(S.songs.map((s) => s.file)).size, 5);
-  for (let stage = 0; stage < 5; stage++) {
+  assert.equal(S.songs.length, 6);
+  assert.equal(new Set(S.songs.map((s) => s.file)).size, 6);
+  for (let stage = 0; stage < S.songs.length; stage++) {
     const song = S.getSong(stage),
       s = A.createRhythm(stage);
     A.prepareRhythm(s, { time: 0, origin: 2 });
@@ -95,7 +95,7 @@ test("the soundtrack has valid beat charts across five journey chapters and are 
 });
 
 test("creator songs stay separate from the restored homepage and jumping recordings", () => {
-  assert.equal(S.songs.length, 5);
+  assert.equal(S.songs.length, 6);
   const melody = new Set(S.songs.map((song) => song.file));
   for (const song of [...S.homeSongs, ...S.jumpSongs])
     assert.ok(!melody.has(song.file));
@@ -104,7 +104,7 @@ test("creator songs stay separate from the restored homepage and jumping recordi
 });
 
 test("Chill uses two arrows, sparse audible notes and forgives isolated misses in every song", () => {
-  for (let stage = 0; stage < 5; stage++) {
+  for (let stage = 0; stage < S.songs.length; stage++) {
     const s = A.createRhythm(stage);
     A.prepareRhythm(s, { time: 0, origin: 1 });
     assert.equal(s.laneCount, 2);
@@ -130,7 +130,7 @@ test("Chill uses two arrows, sparse audible notes and forgives isolated misses i
 });
 
 test("every song uses every active arrow, with balanced counts and no long single-lane streak", () => {
-  for (let stage = 0; stage < 5; stage++)
+  for (let stage = 0; stage < S.songs.length; stage++)
     for (let difficulty = 0; difficulty < 3; difficulty++) {
       const s = A.createRhythm(stage, {}, difficulty);
       A.prepareRhythm(s, { time: 0, origin: 3 });

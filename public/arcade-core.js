@@ -19,7 +19,13 @@
   function base(mode, stage, profile = {}, difficulty = 0) {
     return {
       mode,
-      stage: Math.max(0, Math.min(4, Math.floor(stage) || 0)),
+      stage: Math.max(
+        0,
+        Math.min(
+          mode === "rhythm" ? SCORE.songs.length - 1 : 4,
+          Math.floor(stage) || 0,
+        ),
+      ),
       difficulty: Math.max(0, Math.min(2, Math.floor(difficulty) || 0)),
       team: profile.team || "Mach",
       status: "playing",
