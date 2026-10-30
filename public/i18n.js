@@ -417,6 +417,15 @@ UP|ARRIBA
 DOWN|ABAJO
 `;
   const extra = `
+Read the target each round. The colors can change!|Lee el objetivo de cada ronda. ¡Los colores pueden cambiar!
+
+Difficulty changes reaction time, race length and rival speed. Each race mixes a fresh set of challenges.|La dificultad cambia el tiempo para reaccionar, la duración y la velocidad de los rivales. Cada carrera mezcla retos nuevos.
+Change difficulty →|Cambiar dificultad →
+Tap the SUN once—not the moon or star.|Toca UNA VEZ el SOL; no la luna ni la estrella.
+Tap the STAR once—not the moon or sun.|Toca UNA VEZ la ESTRELLA; no la luna ni el sol.
+Tap the ORANGE potion once.|Toca UNA VEZ la poción NARANJA.
+Tap the GREEN potion once.|Toca UNA VEZ la poción VERDE.
+
 Moonlit piano and strings|Piano y cuerdas bajo la luna
 original piano-and-strings Halloween theme|tema original de Halloween con piano y cuerdas
 

@@ -123,7 +123,10 @@ test("solo answers advance promptly while rival challenge clocks remain independ
     Date.now() - answeredAt < 2000,
     "A correct tap should not wait for the full round timer",
   );
-  assert.equal(next.challenge.kind, 6);
+  assert.notEqual(next.challenge.kind, 0);
+  assert.ok(
+    require("../engine").raceSettings(0).kinds.includes(next.challenge.kind),
+  );
   assert.deepEqual(
     room.players.filter((p) => p.bot).map((p) => p.botChallenge.id),
     botIds,
@@ -137,4 +140,21 @@ test("solo answers advance promptly while rival challenge clocks remain independ
     ["Ember", "Misty", "Slink"],
   );
   a.close();
+});
+
+test("race difficulty is clamped and the host setting is shared with joining players", async () => {
+  const a = await client(),
+    b = await client();
+  a.sendData({ type: "create", name: "Host", difficulty: 99 });
+  const j = await a.next((m) => m.type === "joined");
+  const initial = await a.next((m) => m.type === "state");
+  assert.equal(initial.difficulty, 2);
+  assert.equal(initial.finishHits, 21);
+  b.sendData({ type: "join", code: j.code, name: "Guest", difficulty: 0 });
+  await b.next((m) => m.type === "joined");
+  const joined = await b.next((m) => m.type === "state");
+  assert.equal(joined.difficulty, 2);
+  assert.equal(joined.finishHits, 21);
+  a.close();
+  b.close();
 });

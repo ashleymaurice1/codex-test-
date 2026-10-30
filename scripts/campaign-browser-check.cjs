@@ -63,16 +63,21 @@ const assert = require("node:assert/strict");
         await p.waitForTimeout(100);
         continue;
       }
+      const target = {
+        0: "pumpkin",
+        6: "moon",
+        7: "potion-blue",
+        8: "spider",
+        9: "ghost",
+        10: "lantern-lit",
+        11: "candy-corn",
+      }[d.kind];
       const index =
-        d.kind === 0
-          ? d.choices.indexOf("pumpkin")
-          : d.kind === 6
-            ? d.choices.indexOf("moon")
-            : d.kind === 7
-              ? d.choices.indexOf("potion-blue")
-              : d.kind === 9
-                ? d.choices.indexOf("ghost")
-                : 0;
+        d.kind === 4
+          ? d.choices.indexOf(Math.max(...d.choices))
+          : target
+            ? d.choices.indexOf(target)
+            : 0;
       const button = p.locator(`[data-action=answer][data-value="${index}"]`);
       if (await button.isEnabled()) {
         await button.click({ force: true });
@@ -82,9 +87,9 @@ const assert = require("node:assert/strict");
     await p.waitForTimeout(100);
   }
   await p.waitForSelector(".result");
-  assert.deepEqual(
-    [...seen].sort((a, b) => a - b),
-    [0, 6, 7, 9],
+  assert.equal(seen.size, 5);
+  assert.ok(
+    [...seen].every((kind) => [0, 4, 6, 7, 8, 9, 10, 11].includes(kind)),
   );
   assert.equal(await p.evaluate(() => profile.unlockedLevel), 1);
   assert.equal(await p.evaluate(() => profile.totalScore), 500);

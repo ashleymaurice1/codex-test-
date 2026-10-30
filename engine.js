@@ -10,14 +10,52 @@ const ITEMS = [
   "Brain Freeze",
   "Sunrise",
 ];
+function raceSettings(levelId = 0, difficulty = 0) {
+  const level = LEVELS[levelId] || LEVELS[0];
+  const d = Math.max(0, Math.min(2, Math.floor(Number(difficulty)) || 0));
+  const factor = [1, 0.82, 0.65][d];
+  const floor = Math.max(2200, Math.round(level.floor * factor));
+  return {
+    ...level,
+    difficulty: d,
+    floor,
+    pace: Math.max(floor, Math.round(level.pace * factor)),
+    finishHits: level.finishHits + d * 3,
+    botDelay: level.botDelay * [1, 0.8, 0.6][d],
+    botMiss: Math.max(0.03, level.botMiss - d * 0.08),
+    kinds: d ? Array.from({ length: 12 }, (_, i) => i) : level.kinds,
+  };
+}
+function challengeOrder(
+  levelId,
+  difficulty = 0,
+  random = Math.random,
+  previous = null,
+  tutorial = false,
+) {
+  const order = [...raceSettings(levelId, difficulty).kinds];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  if (tutorial) {
+    const at = order.indexOf(0);
+    [order[0], order[at]] = [order[at], order[0]];
+  } else if (order[0] === previous && order.length > 1)
+    [order[0], order[1]] = [order[1], order[0]];
+  return order;
+}
 function challenge(
   round,
   now,
   random = Math.random,
   levelId = null,
   order = null,
+  difficulty = 0,
 ) {
-  const level = Number.isInteger(levelId) ? LEVELS[levelId] : null;
+  const level = Number.isInteger(levelId)
+    ? raceSettings(levelId, difficulty)
+    : null;
   const pool = order || level?.kinds;
   const kind = pool ? pool[round % pool.length] : round % 12;
   const duration = level
@@ -29,9 +67,12 @@ function challenge(
     choices = Array.from({ length: 6 }, () =>
       random() < 0.5 ? "pumpkin" : "skull",
     );
-    if (levelId === 0)
+    if (levelId === 0 && difficulty === 0)
       choices = ["pumpkin", "pumpkin", "skull"].sort(() => random() - 0.5);
-    else choices[pick(6)] = "pumpkin";
+    else {
+      if (difficulty === 2) choices = Array(6).fill("skull");
+      choices[pick(6)] = "pumpkin";
+    }
     answer = choices
       .map((v, i) => (v === "pumpkin" ? i : -1))
       .filter((i) => i >= 0);
@@ -49,8 +90,12 @@ function challenge(
     answer = [pick(3)];
   }
   if (kind === 4) {
-    choices = [2, 4, 6].sort(() => random() - 0.5);
-    answer = [choices.indexOf(6)];
+    choices = (
+      difficulty > 0 || levelId > 0
+        ? [1 + pick(3), 4 + pick(2), 6 + pick(3)]
+        : [2, 4, 6]
+    ).sort(() => random() - 0.5);
+    answer = [choices.indexOf(Math.max(...choices))];
   }
   if (kind === 5) {
     choices = Array(6).fill("ghost");
@@ -74,6 +119,11 @@ function challenge(
     10: "lantern-lit",
     11: "candy-corn",
   };
+  if (difficulty > 0 || levelId > 0) {
+    if (kind === 6) winning[6] = ["moon", "sun", "star"][pick(3)];
+    if (kind === 7)
+      winning[7] = ["potion-blue", "potion-orange", "potion-green"][pick(3)];
+  }
   if (targets[kind]) {
     choices = [...targets[kind]];
     for (let i = choices.length - 1; i > 0; i--) {
@@ -87,6 +137,7 @@ function challenge(
   return {
     id: crypto.randomUUID(),
     kind,
+    target: winning[kind],
     choices,
     answer,
     round,
@@ -188,7 +239,9 @@ function answer(room, p, id, index, now = Date.now()) {
     p.progress = Math.min(
       100,
       p.progress +
-        (LEVELS[room.level] ? 100 / LEVELS[room.level].finishHits : 6.5) +
+        (LEVELS[room.level]
+          ? 100 / raceSettings(room.level, room.difficulty).finishHits
+          : 6.5) +
         Math.max(0, 1 - (now - c.opens) / (c.closes - c.opens)) * 0.7,
     );
     if (p.correct % 3 === 0 && !p.item && room.level !== 0)
@@ -227,7 +280,9 @@ function useItem(room, p, now = Date.now()) {
     p.progress = Math.min(
       100,
       p.progress +
-        (LEVELS[room.level] ? 200 / LEVELS[room.level].finishHits : 13),
+        (LEVELS[room.level]
+          ? 200 / raceSettings(room.level, room.difficulty).finishHits
+          : 13),
     );
     if (p.progress >= 100) p.finish = now;
   } else if (item === "Tombstone Drop") {
@@ -249,6 +304,8 @@ function useItem(room, p, now = Date.now()) {
 module.exports = {
   TEAMS,
   LEVELS,
+  raceSettings,
+  challengeOrder,
   RACERS,
   ITEMS,
   challenge,

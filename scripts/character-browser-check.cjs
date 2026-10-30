@@ -100,10 +100,18 @@ const assert = require("node:assert/strict");
   await p.waitForSelector(".choices");
   for (let miss = 0; miss < 5; miss++) {
     const c = await p.evaluate(() => state.challenge);
-    const good = { 0: "pumpkin", 6: "moon", 7: "potion-blue", 9: "ghost" }[
-      c.kind
-    ];
-    const wrong = c.choices.findIndex((x) => x !== good);
+    const good = {
+      0: "pumpkin",
+      6: "moon",
+      7: "potion-blue",
+      8: "spider",
+      9: "ghost",
+      10: "lantern-lit",
+      11: "candy-corn",
+    }[c.kind];
+    const wrong = c.choices.findIndex(
+      (x) => x !== (c.kind === 4 ? Math.max(...c.choices) : good),
+    );
     await p.locator(`[data-action=answer][data-value="${wrong}"]`).click();
     await p.waitForFunction(
       (id) => state.phase === "finished" || state.challenge.id !== id,
