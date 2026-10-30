@@ -663,19 +663,46 @@
       c.stroke();
       c.shadowBlur = 0;
     }
-    c.strokeStyle = colors[s.team];
-    c.lineWidth = 3;
-    c.globalAlpha = 0.25;
-    c.beginPath();
-    c.moveTo(s.player.x - 18, s.ground - s.player.y - 30);
-    c.quadraticCurveTo(
-      s.player.x - 50,
-      s.ground - s.player.y - 28,
-      s.player.x - 75,
-      s.ground - s.player.y - 15,
-    );
-    c.stroke();
-    c.globalAlpha = 1;
+    // A diffuse wake replaces the hard tail line; character sprites stay untouched.
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const trail = (s.jumpGlowTrail ||= []);
+      if (!trail.length || s.elapsed - trail[trail.length - 1].time >= 0.04)
+        trail.push({
+          x: s.player.x + 8,
+          y: s.ground - s.player.y - 30,
+          time: s.elapsed,
+        });
+      while (trail.length && s.elapsed - trail[0].time > 0.55) trail.shift();
+      const tint = {
+        Mach: "#65baff",
+        Slink: "#76d85b",
+        Ember: "#ff9f36",
+        Misty: "#b481ff",
+      }[s.team];
+      c.save();
+      for (const point of trail) {
+        const age = (s.elapsed - point.time) / 0.55;
+        if (age < 0.06) continue;
+        const radius = 9 + age * 7;
+        const glow = c.createRadialGradient(
+          point.x,
+          point.y,
+          0,
+          point.x,
+          point.y,
+          radius,
+        );
+        glow.addColorStop(0, tint + "60");
+        glow.addColorStop(0.45, tint + "25");
+        glow.addColorStop(1, tint + "00");
+        c.globalAlpha = (1 - age) * 0.6;
+        c.fillStyle = glow;
+        c.beginPath();
+        c.arc(point.x, point.y, radius, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.restore();
+    }
     sprite(
       c,
       images.player,
