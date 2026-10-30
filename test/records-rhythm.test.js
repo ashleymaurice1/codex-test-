@@ -138,3 +138,43 @@ test("Chill uses two arrows, sparse audible notes and forgives isolated misses i
     assert.ok(hard.notes.length > s.notes.length);
   }
 });
+
+test("every song uses every active arrow, with balanced counts and no long single-lane streak", () => {
+  for (let stage = 0; stage < 5; stage++)
+    for (let difficulty = 0; difficulty < 3; difficulty++) {
+      const s = A.createRhythm(stage, {}, difficulty);
+      A.prepareRhythm(s, { time: 0, origin: 3 });
+      const counts = Array(s.laneCount).fill(0);
+      let previous = -1,
+        streak = 0;
+      for (const note of s.notes) {
+        counts[note.lane]++;
+        streak = note.lane === previous ? streak + 1 : 1;
+        previous = note.lane;
+        assert.ok(
+          streak <= 2,
+          `${s.song} difficulty ${difficulty}: single-lane streak`,
+        );
+      }
+      assert.ok(counts.every((count) => count > 0));
+      assert.ok(
+        Math.max(...counts) - Math.min(...counts) <= 2,
+        `${s.song}: ${counts}`,
+      );
+      // Balancing changes only the arrow assignment, never the musical cue times.
+      let last = -Infinity;
+      const gap = difficulty === 0 ? 1.5 : difficulty === 1 ? 0.75 : 0.45;
+      const times = require("../public/score")
+        .getSong(stage)
+        .chart.filter((n) => {
+          if (n.time - last < gap) return false;
+          last = n.time;
+          return true;
+        })
+        .map((n) => n.time + 3);
+      assert.deepEqual(
+        s.notes.map((n) => n.time),
+        times,
+      );
+    }
+});

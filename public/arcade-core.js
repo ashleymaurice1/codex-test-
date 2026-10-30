@@ -602,18 +602,47 @@
     const song = SCORE.getSong(s.stage);
     const gap = s.difficulty === 0 ? 1.5 : s.difficulty === 1 ? 0.75 : 0.45;
     let previous = -Infinity;
-    s.notes = song.chart
-      .filter((n) => {
-        if (n.time - previous < gap) return false;
-        previous = n.time;
-        return true;
-      })
-      .map((n, i) => ({
-        beat: i,
-        time: clock.origin + n.time,
-        lane: Math.min(s.laneCount - 1, Math.floor(n.tone * s.laneCount)),
-        status: "pending",
-      }));
+    const chart = song.chart.filter((n) => {
+      if (n.time - previous < gap) return false;
+      previous = n.time;
+      return true;
+    });
+    const low = Math.min(...chart.map((n) => n.tone)),
+      high = Math.max(...chart.map((n) => n.tone)),
+      counts = Array(s.laneCount).fill(0);
+    let lastLane = -1,
+      streak = 0;
+    s.notes = chart.map((n, i) => {
+      // Pitch is relative to this chart, not an absolute range that can put
+      // a whole melody in one lane. Keep every active arrow in regular use.
+      const relative = high > low ? (n.tone - low) / (high - low) : 0.5,
+        preferred = Math.min(
+          s.laneCount - 1,
+          Math.floor(relative * s.laneCount),
+        ),
+        minimum = Math.min(...counts);
+      let candidates = counts
+        .map((count, lane) => ({ count, lane }))
+        .filter(
+          ({ count, lane }) =>
+            count <= minimum + 1 && !(lane === lastLane && streak >= 2),
+        );
+      if (!candidates.length)
+        candidates = counts
+          .map((count, lane) => ({ count, lane }))
+          .filter(({ count }) => count === minimum);
+      candidates.sort(
+        (a, b) =>
+          Math.abs(a.lane - preferred) - Math.abs(b.lane - preferred) ||
+          a.count - b.count ||
+          a.lane - b.lane,
+      );
+      const lane = candidates[0].lane;
+      counts[lane]++;
+      streak = lane === lastLane ? streak + 1 : 1;
+      lastLane = lane;
+      return { beat: i, time: clock.origin + n.time, lane, status: "pending" };
+    });
     s.target = s.notes.length;
     s.startedAudio = clock.time;
     s.lastAudio = clock.time;
