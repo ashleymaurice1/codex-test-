@@ -23,7 +23,8 @@
     "test:spanish-browser": "node scripts/spanish-browser-check.cjs",
     "test:maze-endless-browser": "node scripts/maze-endless-browser-check.cjs",
     "test:tap-difficulty-browser": "node scripts/tap-difficulty-browser-check.cjs",
-    "test:la-mesa-browser": "node scripts/la-mesa-browser-check.cjs"
+    "test:la-mesa-browser": "node scripts/la-mesa-browser-check.cjs",
+    "test:multiplayer-sync-browser": "node scripts/multiplayer-sync-browser-check.cjs"
   },
   "dependencies": {
     "ws": "^8.18.0"
