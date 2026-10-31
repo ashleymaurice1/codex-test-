@@ -7,7 +7,7 @@ Midnight Ghost Arcade
 https://codex-test-midnight-zombies.onrender.com
 
 ## Cover
-Download the current landscape PNG from `/assets/social/midnight-ghost-arcade-halloween-muertos-cover.png` on the game website. `/submission.html` provides the cover download, project link and description together.
+Download the current landscape PNG from `/assets/social/midnight-ghost-arcade-cover-3x2.png` on the game website. `/submission.html` provides the cover download, project link and description together.
 
 ## Short description to paste
 Choose a glowing ghost companion and leap through a candlelit graveyard in an arcade inspired by Halloween and Día de Muertos. Hit each note across six original spooky songs I created for the game using Suno AI, explore spooky mazes, and race friends to the Monster Bash. Play in your browser—no login or download required.
