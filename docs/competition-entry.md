@@ -7,9 +7,12 @@ Midnight Ghost Arcade
 https://codex-test-midnight-zombies.onrender.com
 
 ## Cover
-Download the current landscape PNG from `/assets/social/midnight-ghost-arcade-lineup-cover.png` on the game website. `/submission.html` provides the cover download, project link and description together.
+Download the current landscape PNG from `/assets/social/midnight-ghost-arcade-misty-cover.png` on the game website. `/submission.html` provides the cover download, project link and description together.
 
-## Description to paste
+## Short description to paste
+Midnight Ghost Arcade is a magical Halloween arcade starring four glowing ghost companions. Jump through a candlelit graveyard, explore spooky mazes, follow six original songs, and race friends to the Monster Bash. Play solo or together in your browser—no login or download required.
+
+## Extended description
 Midnight Ghost Arcade is a magical Halloween arcade built with OpenAI. Choose Mach the ghost falcon, Slink the ghost serpent, Ember the ghost wolf, or Misty the tiny ghost bat, then explore four game styles: a candlelit Día de los Muertos-inspired jumping course, a six-song arrow-key rhythm game, a candy-collecting maze with spooky pursuers, and a live multiplayer tap race.
 
 Play solo against rivals, challenge friends in a shared room, or take the 20-stop Journey across all four styles. Increasing difficulty, longer and endless jumping runs, personal high scores, earned coins and character accessories give players reasons to return. English and Spanish menus, phone touch controls, clear countdowns, gentle character expressions and an optional soundtrack playlist complete the midnight adventure. No account or installation is required to play.
